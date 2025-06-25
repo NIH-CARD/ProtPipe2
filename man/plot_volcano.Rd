@@ -38,17 +38,3 @@ adjusted p-values from differential expression analysis. It highlights genes
 that pass the specified thresholds for logFC and FDR (false discovery rate).
 Optionally, it can label genes of interest or the top up/downregulated genes.
 }
-\examples{
-# Example data
-dt <- data.frame(
-  Gene = paste("Gene", 1:100),
-  logFC = rnorm(100),
-  adj.P.Val = runif(100)
-)
-
-# Plot volcano plot for the top genes
-plot_volcano(dt, label_col = "Gene", lfc_threshold = 1, fdr_threshold = 0.05)
-
-# Plot with specific gene labels
-plot_volcano(dt, label_col = "Gene", lfc_threshold = 1, fdr_threshold = 0.05, labelgene = c("Gene1", "Gene2"))
-}

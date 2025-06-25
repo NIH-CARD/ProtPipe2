@@ -26,8 +26,8 @@ plot_pg_counts <- function(PD, condition = NULL) {
         ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(angle = 90))
     }
     if (n_samples <= 20) {
-      p=ggplot2::ggplot(pgcounts, ggplot2::aes(x=Sample, y=N,fill=Condition)) +
-        ggplot2::geom_bar(stat="identity")+
+      p=ggplot2::ggplot(pgcounts, ggplot2::aes(x=Sample, y=N)) +
+        ggplot2::geom_bar(stat="identity", fill="#67a9cf")+
         ggplot2::theme_classic()+
         ggplot2::labs(fill = "",x="",y='Number of Protein Groups')+
         ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(angle = 90))+
@@ -90,64 +90,76 @@ plot_pg_intensities <- function(PD) {
   return(g)
 }
 
-#' Title
-#'
-#' @param PD
-#' @param condition
-#' @param min_samples
-#'
-#' @return
 #' @export
-#'
-#' @examples
-plot_CVs <- function(PD, condition, min_samples = 2){
+get_CVs <- function(PD, condition, min_samples = 2) {
   condition_file <- getCondition(PD)
-  if (!condition %in% colnames(condition_file)){
-    stop("the selected condition does not appear in the condition file")
+  if (!condition %in% colnames(condition_file)) {
+    stop("The selected condition does not appear in the condition file.")
   }
 
-  intensities_t <- as.data.frame(t(PD@data))
-  intensities_t[[condition]] <- condition_file[[condition]]
+  intensities <- as.matrix(PD@data)
+  if (!is.numeric(intensities)) {
+    stop("PD@data must contain only numeric values.")
+  }
 
-  # Split by condition
-  groups <- split(intensities_t, intensities_t[[condition]])
+  conds <- condition_file[[condition]]
+  unique_conds <- unique(conds)
 
-  # Compute CVs per protein per group
-  cv_list <- lapply(names(groups), function(cond) {
-    group_data <- groups[[cond]][, !(colnames(groups[[cond]]) %in% condition), drop = FALSE]
-
-    if (nrow(group_data) < min_samples) {
-      return(NULL)  # Not enough samples
+  cv_list <- lapply(unique_conds, function(cond) {
+    idx <- which(conds == cond)
+    if (length(idx) < min_samples) {
+      return(NULL)
     }
 
-    # CV per protein across samples in this group
-    cv_values <- apply(group_data, 2, function(x) {
-      if (all(is.na(x))) return(NA)
-      stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
-    })
+    sub_data <- intensities[, idx, drop = FALSE]
+    means <- matrixStats::rowMeans2(sub_data, na.rm = TRUE)
+    sds <- matrixStats::rowSds(sub_data, na.rm = TRUE)
+    cvs <- sds * 100/ means
 
     data.frame(
-      Protein = names(cv_values),
-      CV = cv_values,
+      Protein = PD@prot_meta[[1]],
+      CV = cvs,
       Condition = cond,
       stringsAsFactors = FALSE
     )
   })
 
-  # Combine and filter
   cv_df <- do.call(rbind, cv_list)
   cv_df <- cv_df[!is.na(cv_df$CV), ]
+  return(cv_df)
+}
 
-  # Plot
+#' Title
+#'
+#' @param PD
+#' @param condition
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plot_CVs <- function(PD, condition, plot_type = "violin") {
+  plot_type <- match.arg(plot_type, choices = c("violin", "jitter"))
+
+  cv_df <- get_CVs(PD, condition)
+
   p <- ggplot2::ggplot(cv_df, ggplot2::aes(x = Condition, y = CV)) +
-    ggplot2::geom_violin(fill = "#67a9cf", color = "black", trim = FALSE) +
-    ggplot2::geom_boxplot(width = 0.1, outlier.shape = NA) +
-    ggplot2::geom_jitter(width = 0.15, alpha = 0.3, size = 0.5) +
     ggplot2::theme_classic() +
-    ggplot2::labs(x = "", y = "Coefficient of Variation (CV)") +
+    ggplot2::labs(x = "", y = "Coefficient of Variation (%)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90)) +
-    ggplot2::geom_hline(ggplot2::aes(yintercept = stats::quantile(cv_df$CV, 0.5, na.rm = TRUE)),
-                        color = "#ef8a62", linetype = "dashed")
+    ggplot2::geom_hline(
+      ggplot2::aes(yintercept = stats::quantile(CV, 0.5, na.rm = TRUE)),
+      color = "#ef8a62", linetype = "dashed"
+    )
+
+  if (plot_type == "violin") {
+    p <- p +
+      ggplot2::geom_violin(fill = "#67a9cf", color = "black", trim = FALSE) +
+      ggplot2::geom_boxplot(width = 0.1, outlier.shape = NA)
+  } else if (plot_type == "jitter") {
+    p <- p +
+      ggplot2::geom_jitter(width = 0.15, alpha = 0.5, size = 0.7)
+  }
 
   return(p)
 }

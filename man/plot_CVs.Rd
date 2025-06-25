@@ -4,10 +4,10 @@
 \alias{plot_CVs}
 \title{Title}
 \usage{
-plot_CVs(PD, condition, min_samples = 2)
+plot_CVs(PD, condition, plot_type = "violin")
 }
 \arguments{
-\item{min_samples}{}
+\item{condition}{}
 }
 \description{
 Title

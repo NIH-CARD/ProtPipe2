@@ -1,6 +1,4 @@
 #' @importFrom magrittr %>%
-
-
 #' ProtData Class
 #'
 #' An S4 class that holds proteomics data and provides methods for processing.
@@ -36,10 +34,13 @@ setClass("ProtData",
 #' @export
 create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method = "Unknown") {
 
+
+
   # Check that data is a data frame
   if (!is.data.frame(dat)) {
     stop("The 'data' argument must be a data frame.")
   }
+
 
   #get the intensity cols
   if (is.null(intensity_cols)){
@@ -77,10 +78,12 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
 
   # Ensure that condition, if provided, has rownames matching the colnames of data
   if (!is.null(condition)) {
+    condition <- as.data.frame(condition)
     # make sample col the rownames if it exists
     if ("sample" %in% colnames(condition)) {
       rownames(condition) <- condition$sample
       condition$sample <- NULL
+      d1 <<- condition
     }
 
     # drop excess rows from the condition file if they exist
@@ -121,6 +124,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
     )
     rownames(condition) <- colnames(data)
   }
+  d2 <<- condition
 
 
   # Create a new ProtData object

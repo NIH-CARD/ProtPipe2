@@ -167,16 +167,26 @@ server <- function(input, output, session) {
     req(intensity_file())
     #req(sample_condition())
     req(input$qc_condition)
-    ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition)
+    ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
   })
 
-  output$download_intensity <- downloadHandler(
+  output$download_cv <- downloadHandler(
     filename = function(){
-      paste("intensities.pdf")
+      paste("cv_plot.pdf")
     },
     content = function(file){
-      p <- ProtPipe::plot_pg_intensities(prot_data())
+      p <- ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
       ggsave(file, plot=p, device = "pdf")
+    }
+  )
+
+  output$download_cv_tsv <- downloadHandler(
+    filename = function(){
+      paste("cv.tsv")
+    },
+    content = function(file){
+      cvs <- ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
+      write.table(cvs, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
 

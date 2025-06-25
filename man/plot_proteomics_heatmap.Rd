@@ -4,7 +4,13 @@
 \alias{plot_proteomics_heatmap}
 \title{Title}
 \usage{
-plot_proteomics_heatmap(PD, protmeta_col = NULL, genes = NULL)
+plot_proteomics_heatmap(
+  PD,
+  protmeta_col = NULL,
+  genes = NULL,
+  title = NULL,
+  condition = NULL
+)
 }
 \arguments{
 \item{genes}{}

@@ -36,8 +36,3 @@ a data frame with metadata, intensities, log fold changes, and p-values.
 \item \code{do_limma_by_condition(ProtData)}: Method for ProtData objects
 
 }}
-\examples{
-\dontrun{
-result <- do_limma(my_protdata, treatment_samples = c("T1", "T2"), control_samples = c("C1", "C2"))
-}
-}

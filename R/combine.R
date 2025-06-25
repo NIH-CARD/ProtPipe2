@@ -32,18 +32,20 @@ combine <- function(PD_list){
   metas <- data.frame()
 
   for (pd in PD_list){
-    cond <- pd@condition
+
     dat <- pd@data
     meta <- pd@prot_meta
+    cond <- pd@condition
+    row.names(cond) <- names(dat)
 
-    dat$Protein.Group <- meta[,1]
+    dat$Protein.Group_xxxx <- meta[,1]
 
     # create df with all experiments
     if (nrow(datas) == 0) {
       datas <- dat
     } else {
       datas <- datas %>%
-        merge(dat, by = "Protein.Group", all = TRUE)
+        merge(dat, by = "Protein.Group_xxxx", all = TRUE)
     }
 
 
@@ -71,14 +73,14 @@ combine <- function(PD_list){
     }
   }
   tasd<<-datas
-  dsfd<<-metas
-  datas <- datas[, c("Protein.Group", setdiff(names(datas), "Protein.Group"))]
+  dsfd<<-conds
+  datas <- datas[, c("Protein.Group_xxxx", setdiff(names(datas), "Protein.Group_xxxx"))]
   #merge metas and datas
   num_metas_cols <- length(names(metas))
-  names(metas)[1] <- "Protein.Group"
-  merged_df <- merge(metas, datas, by = "Protein.Group")
+  names(metas)[1] <- "Protein.Group_xxxx"
+  merged_df <- merge(metas, datas, by = "Protein.Group_xxxx")
   print("hi")
-  names(merged_df)[1] <- names(metas)[1]
+  merged_df$Protein.Group_xxxx <- NULL
 
-  return(create_protdata(merged_df, conds, intensity_cols = (num_metas_cols+1):length(merged_df)))
+  return(create_protdata(merged_df, conds, intensity_cols = (num_metas_cols):length(merged_df)))
 }

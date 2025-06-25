@@ -132,9 +132,6 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' result <- do_limma(my_protdata, treatment_samples = c("T1", "T2"), control_samples = c("C1", "C2"))
-#' }
 setGeneric("do_limma", function(object, treatment_samples, control_samples) standardGeneric("do_limma"))
 
 #' @describeIn do_limma Method for ProtData objects
@@ -246,18 +243,6 @@ setMethod("do_limma_by_condition", "ProtData", function(object, condition, contr
 #' @export
 #'
 #' @examples
-#' # Example data
-#' dt <- data.frame(
-#'   Gene = paste("Gene", 1:100),
-#'   logFC = rnorm(100),
-#'   adj.P.Val = runif(100)
-#' )
-#'
-#' # Plot volcano plot for the top genes
-#' plot_volcano(dt, label_col = "Gene", lfc_threshold = 1, fdr_threshold = 0.05)
-#'
-#' # Plot with specific gene labels
-#' plot_volcano(dt, label_col = "Gene", lfc_threshold = 1, fdr_threshold = 0.05, labelgene = c("Gene1", "Gene2"))
 plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_threshold=0.01, labelgene=NULL) {
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
@@ -328,19 +313,6 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
 #' @export
 #'
 #' @examples
-# add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes"){
-#   DE[[gene_col]] <- sapply(strsplit(DE[[gene_col]], ";"), `[`, 1)
-#   dplyr::left_join(
-#     DE,
-#     clusterProfiler::bitr(
-#       DE$Genes,
-#       fromType = "SYMBOL",
-#       toType = "ENTREZID",
-#       OrgDb = org
-#     ),
-#     by = c("Genes" = "SYMBOL")
-#   )
-# }
 add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes") {
   DE[[gene_col]] <- sapply(strsplit(DE[[gene_col]], ";"), `[`, 1)
 

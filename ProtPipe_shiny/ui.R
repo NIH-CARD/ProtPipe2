@@ -71,8 +71,10 @@ ui <- page_sidebar(
                    fluidPage(
                      uiOutput("quality_control_condition"),
                      card(card_header("Coefficients of Variation (requires condition file)"),
+                          selectInput("cv_plot_type", "Select format:", choices = c("violin", "jitter"), selected = "violin"),
                           plotOutput("cv_graph"),
-                          downloadButton("download_cv", "Download Plot as PDF")
+                          downloadButton("download_cv", "Download Plot as PDF"),
+                          downloadButton("download_cv_tsv", "Download data as tsv")
                      ),
                      card(card_header("Intensities"),
                           plotOutput("intensity_graph"),
