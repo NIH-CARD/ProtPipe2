@@ -615,15 +615,13 @@ server <- function(input, output, session) {
         }
       }
 
-      # # Save plots
-      # for (name in names(enrichment_result()$plots)) {
-      #   p <- enrichment_result()$plots[[name]]
-      #   if (!is.null(p)) {
-      #     pdf(file.path(output_dir, paste0(name, ".pdf")), width = 1, height = 1)
-      #     print(p)
-      #     dev.off()
-      #   }
-      # }
+      # Save plots
+      for (name in names(enrichment_result()$plots[1:2])) {
+        p <- enrichment_result()$plots[[name]]
+        if (!is.null(p)) {
+          ggplot2::ggsave(file.path(output_dir, paste0(name, ".png")), p)
+        }
+      }
 
       zip::zip(
         zipfile = file,

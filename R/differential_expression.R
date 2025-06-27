@@ -264,25 +264,17 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
       dplyr::mutate(labeltext = dplyr::if_else(!!rlang::sym(label_col) %in% labelgene, !!rlang::sym(label_col), labeltext))
   } else{
     # Select top 5 genes for UP and DOWN groups
-    top5_gene <- DT %>%
-      dplyr::filter(Group == 'UP') %>%
-      dplyr::arrange(desc(logFC)) %>%
-      dplyr::slice_head(n = 5) %>%
-      dplyr::bind_rows(
-        DT %>%
-          dplyr::filter(Group == 'DOWN') %>%
-          dplyr::arrange(logFC) %>%
-          dplyr::slice_head(n = 5)
-      )
-
-    # Label top 5 genes using the specified label column
-    DT <- DT %>%
-      dplyr::mutate(labeltext = dplyr::if_else(!!rlang::sym(label_col) %in% top5_gene[[label_col]], !!rlang::sym(label_col), ''))
+    up_rows <- which(DT$Group == "UP")
+    sorted_up_indices <- up_rows[order(DT$logFC[up_rows], decreasing = TRUE)]
+    top_up_indices <- head(sorted_up_indices, 5)
+    down_rows <- which(DT$Group == "DOWN")
+    sorted_down_indices <- down_rows[order(DT$logFC[down_rows], decreasing = FALSE)]
+    top_down_indices <- head(sorted_down_indices, 5)
+    top_indices <- c(top_up_indices, top_down_indices)
+    DT$labeltext[top_indices] <- DT[top_indices, label_col]
   }
 
-
-
-
+  #plot
   g <- ggplot2::ggplot(DT, ggplot2::aes(x = logFC, y = -log10(adj.P.Val))) +
     ggplot2::geom_point(ggplot2::aes(color = Group)) +
     ggplot2::scale_color_manual(breaks = c("DOWN", "Others", "UP"),
@@ -299,7 +291,7 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
     ggplot2::geom_vline(xintercept = lfc_threshold, linetype = "dashed") +
     ggplot2::geom_vline(xintercept = -lfc_threshold, linetype = "dashed") +
     ggplot2::theme_classic()
-
+  print(g)
   return(g)
 }
 
