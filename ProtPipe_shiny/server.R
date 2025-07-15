@@ -33,8 +33,8 @@ server <- function(input, output, session) {
     choices <- names(df)
 
     # get default intensity columns
-    intensity_cols <- detect_intensity_cols(df)
-    intensity_cols <<- intensity_cols
+    intensity_cols <- ProtPipe::detect_intensity_cols(df)
+    #intensity_cols <<- intensity_cols
     first <- intensity_cols[[1]]
     last <- intensity_cols[[length(intensity_cols)]]
 

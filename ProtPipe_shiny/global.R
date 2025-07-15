@@ -1,5 +1,5 @@
-devtools::load_all()
 library(shiny)
+library(ProtPipe)
 library(bslib)
 library(clusterProfiler)
 library(grid)
