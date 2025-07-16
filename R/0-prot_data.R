@@ -50,7 +50,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
 
   #standardize the column names and order
   #dat <- standardize_format(data)
-  colnames(dat) <- trim_colnames(dat)
+  colnames(dat) <- trim_names(colnames(dat))
   # col_order=c(colnames(dat)[1:2],sort(colnames(dat)[3:ncol(dat)]))
   # data.table::setcolorder(dat,col_order)
 
@@ -85,7 +85,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
       condition$sample <- NULL
       d1 <<- condition
     }
-
+    rownames(condition) <- trim_names(rownames(condition))
     # drop excess rows from the condition file if they exist
     if (!all(rownames(condition) %in% colnames(data))) {
       print("Rownames of 'condition' do not match the colnames of 'data'.")
@@ -531,8 +531,8 @@ standardize_format <- function(DT.original) {
   return(DT[])
 }
 
-trim_colnames <- function(DT) {
-  colnames_out <- gsub(pattern="\\[.*\\] ", replacement='', x=colnames(DT))   # trim leading [N]
+trim_names <- function(names) {
+  colnames_out <- gsub(pattern="\\[.*\\] ", replacement='', x=names)   # trim leading [N]
   colnames_out <- gsub(pattern="\\..*\\.PG\\.Quantity|\\.PG\\.Quantity|\\..*Quantity.*", replacement='', x=colnames_out)   # remove suffix
   # Remove everything before the last "/" and remove extensions like .raw or .mzml
   colnames_out <- gsub(pattern=".*/", replacement='', x=colnames_out)
