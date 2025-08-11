@@ -1,3 +1,19 @@
+
+#' Title
+#'
+#' @param PD
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_pg_counts <- function(PD){
+  # get the number of protein groups per sample
+  N_values <- colSums(!is.na(getData(PD)))
+  pgcounts <- data.frame(Sample = names(N_values), N = N_values)
+
+  return(pgcounts)
+}
 #' @importFrom magrittr %>%
 
 #' Title
@@ -11,9 +27,7 @@
 #' @examples
 plot_pg_counts <- function(PD, condition = NULL) {
 
-  # get the number of protein groups per sample
-  N_values <- colSums(!is.na(getData(PD)))
-  pgcounts <- data.frame(Sample = names(N_values), N = N_values)
+  pgcounts <- get_pg_counts(PD)
 
   # Order samples by ascending counts
   n_samples <- nrow(pgcounts)
@@ -103,7 +117,7 @@ get_CVs <- function(PD, condition, min_samples = 2) {
   }
 
   conds <- condition_file[[condition]]
-  unique_conds <- unique(conds)
+  unique_conds <- (unique(conds))
 
   cv_list <- lapply(unique_conds, function(cond) {
     idx <- which(conds == cond)
@@ -142,7 +156,7 @@ plot_CVs <- function(PD, condition, plot_type = "violin") {
   plot_type <- match.arg(plot_type, choices = c("violin", "jitter"))
 
   cv_df <- get_CVs(PD, condition)
-
+  cv_df$Condition <- as.factor(cv_df$Condition)
   p <- ggplot2::ggplot(cv_df, ggplot2::aes(x = Condition, y = CV)) +
     ggplot2::theme_classic() +
     ggplot2::labs(x = "", y = "Coefficient of Variation (%)") +

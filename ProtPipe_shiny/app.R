@@ -1,5 +1,5 @@
 library(shiny)
-
+options(shiny.maxRequestSize=30*1024^2)
 source("global.R")
 source("ui.R")
 source("server.R")

@@ -642,8 +642,8 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
       p=enrichplot::dotplot(gse_go, showCategory=10, split=".sign") + facet_grid(.~.sign)
       plots[["gse_go_dotplot"]] <- p
       x2 <- enrichplot::pairwise_termsim(gse_go)
-      p=enrichplot::emapplot(x2)
-      plots[["gse_go_emapplot"]] <- p
+      # p=enrichplot::emapplot(x2)
+      # plots[["gse_go_emapplot"]] <- p
     }
 
   }
@@ -653,8 +653,8 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
       p=enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + facet_grid(.~.sign)
       plots[["gse_kegg_dotplot"]] <- p
       x2 <- enrichplot::pairwise_termsim(gse_kegg)
-      p=enrichplot::emapplot(x2)
-      plots[["gse_kegg_emapplot"]] <- p
+      # p=enrichplot::emapplot(x2)
+      # plots[["gse_kegg_emapplot"]] <- p
     }
   }
   return(list(results = datas, plots = plots))

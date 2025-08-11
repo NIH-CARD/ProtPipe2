@@ -1,5 +1,6 @@
 library(shiny)
 library(ProtPipe)
+library(shinyjs)
 library(bslib)
 library(clusterProfiler)
 library(grid)

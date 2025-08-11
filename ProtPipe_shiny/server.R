@@ -1,7 +1,65 @@
 
-
-
 server <- function(input, output, session) {
+
+  # Update hidden input$select based on which button was clicked
+  observeEvent(input$view_0, { updateTextInput(session, "select", value = "0") })
+  observeEvent(input$view_1, { updateTextInput(session, "select", value = "1") })
+  observeEvent(input$view_2, { updateTextInput(session, "select", value = "2") })
+  observeEvent(input$view_3, { updateTextInput(session, "select", value = "3") })
+  observeEvent(input$view_4, { updateTextInput(session, "select", value = "4") })
+
+  # Create a temp working directory for this zip session
+  zip_workspace <- file.path(tempdir(), "zip_workspace")
+  dir.create(zip_workspace, showWarnings = FALSE, recursive = TRUE)
+  plot_dirs <- c("quality_control", "clustering", "differential_expression", "pathway_enrichment")
+
+  # Subfolders inside workspace
+  subfolders <- file.path(zip_workspace, plot_dirs)
+
+  # Create the folders (with optional .keep files)
+  observe({
+    unlink(zip_workspace, recursive = TRUE)  # clean old
+    dir.create(zip_workspace, showWarnings = FALSE, recursive = TRUE)
+    for (sub in subfolders) {
+      dir.create(sub, recursive = TRUE)
+      file.create(file.path(sub, ".keep"))
+    }
+
+    # Create the zip with correct folder structure
+    relative_dirs <- plot_dirs  # these are folder names relative to root
+    # zip::zip(
+    #   zipfile = file.path(zip_workspace, "output.zip"),
+    #   files = relative_dirs,
+    #   root = zip_workspace,
+    #   mode = "cherry-pick"
+    # )
+    # zip::zip(
+    #   zipfile = file.path(zip_workspace, "pathways.zip"),
+    #   files = c("pathway_enrichment"),
+    #   root = zip_workspace,
+    #   mode = "cherry-pick")
+  })
+  # Download handler
+  output$downloadZip <- downloadHandler(
+    filename = function() {
+      "output.zip"
+    },
+    content = function(file) {
+      relative_dirs <- plot_dirs  # these are folder names relative to root
+      zip::zip(
+        zipfile = file.path(zip_workspace, "output.zip"),
+        files = relative_dirs,
+        root = zip_workspace,
+        mode = "cherry-pick"
+      )
+      file.copy(
+        from = file.path(zip_workspace, "output.zip"),
+        to = file,
+        overwrite = TRUE
+      )
+    },
+    contentType = "application/zip"
+  )
 
   #read file uploads
   intensity <- fileUploadServer("intensity")
@@ -18,6 +76,8 @@ server <- function(input, output, session) {
     req(input$use_example || !is.null(intensity()))
     if(input$use_example){
       return(data.table::fread("www/iPSC.csv", data.table=FALSE))
+    }else if(grepl("\\.xlsx$", intensity()$datapath, ignore.case = TRUE)){
+      return(OlinkAnalyze::read_NPX(intensity()$datapath))
     }else{
       return(data.table::fread(intensity()$datapath, data.table=FALSE))
     }
@@ -74,7 +134,7 @@ server <- function(input, output, session) {
           "| Count:", ncol(selected))
   })
 
-  prot_data <- reactive({
+  raw_prot_data <- reactive({
     req(intensity_file())
     df <- intensity_file()
 
@@ -85,12 +145,18 @@ server <- function(input, output, session) {
     lower_idx <- match(input$lower_col, cols)
     upper_idx <- match(input$upper_col, cols)
 
-    if (!is.null(sample_condition())) {
-      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
-    }else{
-      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx))
+    if(any(grepl("NPX", intensity_file(), ignore.case = TRUE))){
+      PD <- ProtPipe::create_protdata_from_olink(dat = intensity_file(), condition = condition_file())
+      print("yooooooo")
     }
-    PD0 <<- PD
+    else{
+      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
+    }
+     return(PD)
+  })
+  prot_data <- reactive({
+    req(raw_prot_data())
+    PD <- raw_prot_data()
     #1 outlier removal
     if(input$remove_outliers == TRUE){
       PD <- ProtPipe::remove_outliers(PD, sds = input$outlier_sds)
@@ -143,11 +209,10 @@ server <- function(input, output, session) {
     req(intensity_file())
     req(sample_condition())
 
-    choices <- names(prot_data()@condition)
+    choices <- names(raw_prot_data()@condition)
 
     selectInput("batch_correct_column", "select condition for correction:", choices = choices)
   })
-
 
 
   #### QC ############################################################################################
@@ -167,7 +232,17 @@ server <- function(input, output, session) {
     req(intensity_file())
     #req(sample_condition())
     req(input$qc_condition)
-    ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+
+    #save tabular data
+    cvs <- ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
+    add_zip_tabular(cvs, "CVs.tsv", "quality_control", zip_workspace, "output.zip")
+
+    #save plot
+    p <- ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+    add_zip_plot(p, "CV_plot.pdf", "quality_control", zip_workspace, "output.zip")
+
+    #print
+    print(p)
   })
 
   output$download_cv <- downloadHandler(
@@ -193,7 +268,13 @@ server <- function(input, output, session) {
   # intensity graph
   output$intensity_graph <- renderPlot({
     req(intensity_file())
-    ProtPipe::plot_pg_intensities(prot_data())
+
+    #save plot
+    p <- ProtPipe::plot_pg_intensities(prot_data())
+    add_zip_plot(p, "intensities_plot.pdf", "quality_control", zip_workspace, "output.zip")
+
+    #print
+    print(p)
   })
 
   output$download_intensity <- downloadHandler(
@@ -209,7 +290,15 @@ server <- function(input, output, session) {
   # protein group counts
   output$pgroup_graph <- renderPlot({
     req(intensity_file())
-    ProtPipe::plot_pg_counts(prot_data())
+
+    #save tabular data
+    pgcounts <- get_pg_counts(prot_data())
+    add_zip_tabular(pgcounts, "pg_counts.tsv", "quality_control", zip_workspace, "output.zip")
+
+    #save plot
+    p <- ProtPipe::plot_pg_counts(prot_data())
+    add_zip_plot(p, "pg_groups_plot.pdf", "quality_control", zip_workspace, "output.zip")
+    print(p)
   })
 
   output$download_pg <- downloadHandler(
@@ -227,15 +316,24 @@ server <- function(input, output, session) {
       paste("protein_group_nonzero_counts.tsv")
     },
     content = function(file){
-      pgcounts <- normalized_file()$long[, .N, by=Sample]
-      simplewrite(pgcounts, file)
+      pgcounts <- get_pg_counts(prot_data())
+      write.table(pgcounts, file = file, sep = "\t", row.names = FALSE, quote = FALSE)
     }
   )
 
   #correlation heatmap
   output$correlation_graph <- renderPlot({
     req(intensity_file())
-    ProtPipe::plot_correlation_heatmap(prot_data())
+
+    #save tabular data
+    dat.correlations <- ProtPipe::get_spearman(prot_data())
+    add_zip_tabular(dat.correlations, "sample_correlations.tsv", "quality_control", zip_workspace, "output.zip")
+
+    #save plot
+    p <- ProtPipe::plot_correlation_heatmap(prot_data())
+    add_zip_plot(p, "sample_correlation_heatmap.pdf", "quality_control", zip_workspace, "output.zip")
+
+    print(p)
   })
 
   output$download_cor <- downloadHandler(
@@ -243,7 +341,8 @@ server <- function(input, output, session) {
       paste("sample_correlation.pdf")
     },
     content = function(file){
-      ProtPipe::plot_correlation_heatmap(prot_data())
+      p<-ProtPipe::plot_correlation_heatmap(prot_data())
+      ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -252,14 +351,16 @@ server <- function(input, output, session) {
       paste("sample_correlation.tsv")
     },
     content = function(file){
-      dat.correlations <- get_spearman(normalized_file()$dat)
-      simplewrite(dat.correlations, file)
+      dat.correlations <- ProtPipe::get_spearman(prot_data())
+      write.table(dat.correlations , file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
 
   #### Clustering ############################################################################################
 
   #select condition
+  folder_path <- file.path(zip_workspace, 'clustering') #used to add data to zip
+
   output$clustering_condition <- renderUI({
     req(intensity_file())
     #req(sample_condition())
@@ -272,7 +373,12 @@ server <- function(input, output, session) {
   #hierarchical clustering
   output$hcluster <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    ProtPipe::plot_hierarchical_cluster(prot_data())
+    p <- ProtPipe::plot_hierarchical_cluster(prot_data())
+
+    #save data to zip
+    add_zip_plot(p, "hierarchical_clustering.pdf", "clustering", zip_workspace, "output.zip")
+    #print plot
+    print(p)
   })
 
   output$download_hcluster <- downloadHandler(
@@ -289,8 +395,14 @@ server <- function(input, output, session) {
   #PCA
   output$pca <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    #req(sample_condition())
-    ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
+    p <- ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
+    #save data to zip
+    add_zip_plot(p, "PCA.pdf", "clustering", zip_workspace, "output.zip")
+    add_zip_tabular(get_PCs(prot_data(), condition = input$cluster_condition)$components, "pca_components.tsv", "clustering", zip_workspace, "output.zip")
+    add_zip_tabular(get_PCs(prot_data(), condition = input$cluster_condition)$summary, "pca_summary.tsv", "clustering", zip_workspace, "output.zip")
+    #print plot
+    print(p)
+
   })
 
   output$download_pca <- downloadHandler(
@@ -309,9 +421,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      dat <- clean_dat()$dat
-      pca <- get_PCs(dat)
-      simplewrite(pca$components, file)
+      data.table::fwrite(get_PCs(prot_data(), condition = input$cluster_condition)$components, file, sep = "\t")
     }
   )
   output$download_pca_sum <- downloadHandler(
@@ -320,9 +430,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      dat <- clean_dat()$dat
-      pca <- get_PCs(dat)
-      simplewrite(pca$summary, file)
+      data.table::fwrite(get_PCs(prot_data(), condition = input$cluster_condition)$summary, file, sep = "\t")
     }
   )
 
@@ -330,7 +438,14 @@ server <- function(input, output, session) {
   output$umap <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded'
     #req(sample_condition())
-    ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+    p <- ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+
+    #save data to zip
+    add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
+    add_zip_tabular(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), "umap_summary.tsv", "clustering", zip_workspace, "output.zip")
+
+    #plot data
+    print(p)
   })
 
   output$download_umap <- downloadHandler(
@@ -339,7 +454,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster$condition)
+      p <- ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -350,13 +465,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      dat <- clean_dat()$dat
-      if ((ncol(dat)-3)>input$neighbors) {
-        tryTo('INFO: running UMAP',{
-          umap <- get_umap(dat, input$neighbors)
-          simplewrite(umap, file)
-        }, 'ERROR: failed!')
-      }
+      data.table::fwrite(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), file, sep = "\t")
     }
   )
 
@@ -388,6 +497,10 @@ server <- function(input, output, session) {
   output$h_map <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
     p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+
+    #save to zip
+    add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
+
     print(p)
     # grid::grid.newpage()
     # grid::grid.draw(p$gtable)
@@ -459,7 +572,13 @@ server <- function(input, output, session) {
   #volcano plot
   output$volcano <- renderPlot({
     req(intensity_file())
-    ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+    p <- ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+
+    #save data to zip
+    add_zip_plot(p, "volcano_plot.pdf", "differential_expression", zip_workspace, "output.zip")
+    add_zip_tabular(dea(), "differential_expression.tsv", "differential_expression", zip_workspace, "output.zip")
+
+    print(p)
   })
 
   output$download_volcano <- downloadHandler(
@@ -554,81 +673,51 @@ server <- function(input, output, session) {
     enrichment_result()$plots$gse_kegg_dotplot
   })
 
+  #save all enrichment results to temp zip
+  observe({
+    req(intensity_file())
+    req(enrichment_result())
 
-  output$download_DI <- downloadHandler(
-    filename = function(){
-      "Differential Intensity.zip"
-    },
-    content = function(file){
-
-      req(intensity_file())  # Ensure file is uploaded
-      req(input$design)  # Ensure file is uploaded
-
-      #create a temporary directory to save the volcano plots
-      di_directory <- file.path(tempdir(), as.integer(Sys.time()))
-      dir.create(di_directory)
-
-
-      #need to add enrich pvalue input
-      d <- process_design(input$design$datapath)
-      des <- d$design
-      conditions <- d$conditions
-      control <- d$control
-      des <- exclude_design(des, exclusions())
-      dat <- clean_dat()$dat
-      print(class(dat))
-      differential_analysis(conditions, control, input$de_method, des, dat, di_directory, input$log_base,
-                            input$foldchange, input$fdr, labelgene(), input$enrich_pvalue)
-
-      zip::zip(
-        zipfile = file,
-        files = dir(di_directory),
-        root = di_directory
-      )
+    # Save data frames
+    for (name in names(enrichment_result()$results)) {
+      #df <- enrichment_result()$results[[name]]
+      if (!is.null(df)) {
+        add_zip_tabular(enrichment_result()$results[[name]], paste0(name, ".tsv"), "pathway_enrichment", zip_workspace, "output.zip")
+        #add_zip_tabular(enrichment_result()$results[[name]], paste0(name, ".tsv"), "pathway_enrichment", zip_workspace, "pathways.zip")
+        gc()
+      }
     }
-  )
 
+    # Save plots
+    for (name in names(enrichment_result()$plots)) {
+      #p <- enrichment_result()$plots[[name]]
+      if (!is.null(p)) {
+        add_zip_plot(enrichment_result()$plots[[name]], paste0(name, ".pdf"), "pathway_enrichment", zip_workspace, "output.zip")
+        #add_zip_plot(enrichment_result()$plots[[name]], paste0(name, ".pdf"), "pathway_enrichment", zip_workspace, "pathways.zip")
+        gc()
+      }
+    }
+  })
+
+  # download zip file of all pathway enrichment plots and data
   output$download_enrichment <- downloadHandler(
-    filename = function(){
-      "Enrichement_Analysis.zip"
+    filename = function() {
+      "pathwaysg.zip"
     },
-    content = function(file){
-
-      req(intensity_file())
-      req(enrichment_result())
-
-      #create a temporary directory to save the volcano plots
-      output_dir <- file.path(tempdir(), as.integer(Sys.time()))
-      dir.create(output_dir)
-
-      # Save data frames
-      for (name in names(enrichment_result()$results)) {
-        df <- enrichment_result()$results[[name]]
-        if (!is.null(df)) {
-          write.table(
-            df,
-            file = file.path(output_dir, paste0(name, ".tsv")),
-            sep = "\t",
-            row.names = FALSE,
-            quote = FALSE
-          )
-        }
-      }
-
-      # Save plots
-      for (name in names(enrichment_result()$plots[1:2])) {
-        p <- enrichment_result()$plots[[name]]
-        if (!is.null(p)) {
-          ggplot2::ggsave(file.path(output_dir, paste0(name, ".png")), p)
-        }
-      }
-
+    content = function(file) {
+      relative_dirs <- plot_dirs  # these are folder names relative to root
       zip::zip(
-        zipfile = file,
-        files = dir(output_dir),
-        root = output_dir
+        zipfile = file.path(zip_workspace, "pathways.zip"),
+        files = c("pathway_enrichment"),
+        root = zip_workspace,
+        mode = "cherry-pick")
+      file.copy(
+        from = file.path(zip_workspace, "pathways.zip"),
+        to = file,
+        overwrite = TRUE
       )
-    }
+    },
+    contentType = "application/zip"
   )
 
 

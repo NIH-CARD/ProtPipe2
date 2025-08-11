@@ -2,20 +2,40 @@ source("helpers.R")
 
 
 ui <- page_sidebar(
-  title = tagList(h1("ProtPipe", style = "margin-bottom: 0;"),
-  tags$div("Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")),
-  sidebar = sidebar(
-    fluidPage(
-      card(
-        card_header("Select plots to view"),
-        selectInput("select", label = h3("View"),
-                    choices = list("Input parameters" = 0, "Quality Control" = 1, "Clustering" = 2,
-                                   "Differential Intensity" = 3, "Heatmap" = 4),
-                    selected = 0),
-        hr(),
-        fluidRow(column(3, verbatimTextOutput("value")))
-      )
-    )
+  useShinyjs(),
+
+  # Title and subtitle
+  title = tagList(
+    h1("ProtPipe", style = "margin-bottom: 0;"),
+    tags$div("Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")
+  ),
+
+  # SIDEBAR CONTENT GOES HERE
+  sidebar = tagList(
+    h3("Select view"),
+
+    # Hidden textInput used for conditionalPanel control
+    tags$div(style = "display:none;", textInput("select", label = NULL, value = "0")),
+
+    # Block-style buttons
+    actionButton("view_0", "Input parameters", class = "btn-block btn-primary mb-2"),
+    actionButton("view_1", "Quality Control", class = "btn-block btn-primary mb-2"),
+    actionButton("view_2", "Clustering", class = "btn-block btn-primary mb-2"),
+    actionButton("view_3", "Differential Intensity", class = "btn-block btn-primary mb-2"),
+    actionButton("view_4", "Heatmap", class = "btn-block btn-primary mb-2"),
+
+    hr(),
+    verbatimTextOutput("value"),
+    downloadButton("downloadZip", "Download All Plots")
+  ),
+
+  # MAIN PANEL CONTENT
+  main = tagList(
+    conditionalPanel("input.select == '0'", h4("Input parameters content")),
+    conditionalPanel("input.select == '1'", h4("Quality Control content")),
+    conditionalPanel("input.select == '2'", h4("Clustering content")),
+    conditionalPanel("input.select == '3'", h4("Differential Intensity content")),
+    conditionalPanel("input.select == '4'", h4("Heatmap content"))
   ),
 
   ### Parameter input screen ############################################################################################
@@ -101,7 +121,6 @@ ui <- page_sidebar(
                      card(card_header("heirarchial clustering"),
                           plotOutput("hcluster"),
                           downloadButton("download_hcluster", "Download Plot as PDF")
-                     ),card(uiOutput("cluster_groups")
                      ),card(card_header("PCA (requires condition file)"),
                             plotOutput("pca"),
                             downloadButton("download_pca", "Download Plot as PDF"),
@@ -117,7 +136,7 @@ ui <- page_sidebar(
                               )
                             ),
                             downloadButton("download_umap", "Download Plot as PDF"),
-                            downloadButton("download_umap_tsv", "Download PCA as tsv")
+                            downloadButton("download_umap_tsv", "Download UMAP as tsv")
                      )
                    )
   ),
@@ -174,7 +193,7 @@ ui <- page_sidebar(
                         ),
                         fluidRow(
                           column(width=6 ,card(card_header("GO Gene Set Enrichment"),plotOutput("go_gsea"))),
-                          column(width=6 ,card(card_header("Pathway Enrichment"),plotOutput("kegg_gsea")))
+                          column(width=6 ,card(card_header("KEGG Gene Set Enrichment"),plotOutput("kegg_gsea")))
                         ),
                         downloadButton("download_enrichment", "Download pathway enrichment results")
                    )
