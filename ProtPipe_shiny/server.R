@@ -76,15 +76,16 @@ server <- function(input, output, session) {
     req(input$use_example || !is.null(intensity()))
     if(input$use_example){
       return(data.table::fread("www/iPSC.csv", data.table=FALSE))
-    }else if(grepl("\\.xlsx$", intensity()$datapath, ignore.case = TRUE)){
-      return(OlinkAnalyze::read_NPX(intensity()$datapath))
     }else{
       return(data.table::fread(intensity()$datapath, data.table=FALSE))
     }
   })
   condition_file <- reactive({
-    req(sample_condition())
-    return(data.table::fread(sample_condition()$datapath, data.table=FALSE))
+    if (!is.null(sample_condition())) {
+      return(data.table::fread(sample_condition()$datapath, data.table=FALSE))
+    } else {
+      return(NULL)
+    }
   })
   # Dynamically generate dropdowns for column range selection
   output$column_range_ui <- renderUI({
@@ -145,14 +146,13 @@ server <- function(input, output, session) {
     lower_idx <- match(input$lower_col, cols)
     upper_idx <- match(input$upper_col, cols)
 
-    if(any(grepl("NPX", intensity_file(), ignore.case = TRUE))){
-      PD <- ProtPipe::create_protdata_from_olink(dat = intensity_file(), condition = condition_file())
-      print("yooooooo")
-    }
-    else{
-      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
-    }
-     return(PD)
+    # if(any(grepl("NPX", intensity_file(), ignore.case = TRUE))){
+    #   PD <- ProtPipe::create_protdata_from_olink(dat = intensity_file(), condition = condition_file())
+    #   print("yooooooo")
+    # }
+
+    PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
+    return(PD)
   })
   prot_data <- reactive({
     req(raw_prot_data())
@@ -193,7 +193,7 @@ server <- function(input, output, session) {
     if(!is.null(input$batch_correct_column) && input$batch_correct == TRUE){
       PD <- ProtPipe::batch_correct(PD, input$batch_correct_column)
     }
-    PD2 <<- PD
+    #PD2 <<- PD
     return(PD)
 
   })
@@ -722,8 +722,3 @@ server <- function(input, output, session) {
 
 
 }
-
-
-
-
-
