@@ -73,11 +73,60 @@ server <- function(input, output, session) {
   #match the condition rows
 
   intensity_file <- reactive({
+    # This part is unchanged. It requires either the example checkbox
+    # to be checked or a file to be uploaded.
     req(input$use_example || !is.null(intensity()))
+
+    # This logic for loading the example data is also unchanged.
     if(input$use_example){
       return(data.table::fread("www/iPSC.csv", data.table=FALSE))
-    }else{
-      return(data.table::fread(intensity()$datapath, data.table=FALSE))
+    } else {
+      # --- START OF EDITED SECTION ---
+
+      # Get information about the uploaded file
+      file_info <- intensity() # Avoid calling the reactive multiple times
+
+      # Extract the file extension and convert to lowercase for matching
+      ext <- tolower(tools::file_ext(file_info$datapath))
+
+      # Use validate() to stop execution and show a user-friendly message
+      # if the file extension is not one of the allowed types.
+      validate(
+        need(ext %in% c("csv", "tsv", "xlsx", "adat"), "Invalid file format. Please upload a .csv, .tsv, or .xlsx file.")
+      )
+
+      # Use the correct function based on the file extension
+      tryCatch({
+
+        # First, validate the inputs to make sure the combination is valid
+        # This provides specific feedback to the user.
+        if (input$data_type == 1 && !(ext %in% c("csv", "tsv", "xlsx"))) {
+          validate(need(FALSE, "For Mass Spec, please upload a .csv, .tsv, or .xlsx file."))
+        } else if (input$data_type == 2 && ext != "adat") { # Assuming 2 is SomaScan
+          validate(need(FALSE, "For SomaScan, please upload an .adat file."))
+        } else if (input$data_type == 3 && !(ext %in% c("csv", "tsv", "xlsx"))) {
+          validate(need(FALSE, "For Olink, please upload a .csv, .tsv, or .xlsx file."))
+        }
+
+        # If validation passes, proceed to read the file
+        if (input$data_type == 1) { # Mass Spec
+          if (ext %in% c("csv", "tsv")) {
+            data.table::fread(file_info$datapath, data.table = FALSE)
+          } else { # ext is "xlsx"
+            readxl::read_excel(file_info$datapath)
+          }
+        } else if (input$data_type == 2) { # SomaScan
+          SomaDataIO::read_adat(file_info$datapath)
+        } else if (input$data_type == 3) { # Olink
+          OlinkAnalyze::read_NPX(file_info$datapath)
+        }
+
+        # This 'error' function is the key to preventing crashes.
+        # It catches any error from the reading functions (e.g., read_NPX)
+        # and displays it as a safe validation message instead of crashing.
+      }, error = function(e) {
+        validate(need(FALSE, paste("File processing error:", e$message)))
+      })
     }
   })
   condition_file <- reactive({
@@ -150,8 +199,19 @@ server <- function(input, output, session) {
     #   PD <- ProtPipe::create_protdata_from_olink(dat = intensity_file(), condition = condition_file())
     #   print("yooooooo")
     # }
+    data_type <- input$data_type
+    if(input$use_example){
+      data_type <- 1
+    }
 
-    PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
+
+    if (data_type == 1) {
+      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
+    } else if(data_type == 2){
+      PD <- ProtPipe::create_protdata_from_soma(adat = intensity_file(), condition = condition_file())
+    } else if(data_type == 3){
+      PD <- ProtPipe::create_protdata_from_olink(npx = intensity_file(), condition = condition_file())
+    }
     return(PD)
   })
   prot_data <- reactive({

@@ -8,14 +8,22 @@
 #' @export
 #'
 #' @examples
-create_protdata_from_soma <- function(adat, condition = NULL, filter = TRUE) {
+create_protdata_from_soma <- function(adat, condition = NULL, filter = FALSE) {
   if(filter){
-    dat <- soma_all_output(adat)
+    soma_out <- soma_all_output(adat)
+    dat <- soma_out$data
+    soma_condition <- soma_out$condition
     dat <- Buffer_filter(dat)
   }else{
-    dat <- soma_sample_out(adat)
+    soma_out <- soma_sample_out(adat)
+    dat <- soma_out$data
+    soma_condition <- soma_out$condition
   }
-  return(create_protdata(dat, intensity_cols = c(7:length(colnames(dat))), condition, method = "SomaScan"))
+  if(!is.null(condition)){
+    soma_condition <- soma_condition %>%
+      left_join(condition, by = "SampleId")
+  }
+  return(create_protdata(dat, intensity_cols = c(5:length(colnames(dat))), soma_condition, method = "SomaScan"))
 }
 
 
@@ -36,6 +44,8 @@ soma_sample_out=function(DT){
 
 
   rownames(DT_dat)=DT_dat$SampleId
+  condition=DT_dat %>%
+    dplyr::select(-matches("seq\\.", ignore.case = TRUE))
   DT_dat=DT_dat%>%
     dplyr::select(matches("seq\\.", ignore.case = TRUE))%>%
     t()
@@ -45,7 +55,7 @@ soma_sample_out=function(DT){
     dplyr::filter(EntrezGeneSymbol != "") %>%
     dplyr::rename(Protein_Group= UniProt)%>%
     dplyr::rename(Genes= EntrezGeneSymbol)
-  return(DT_dat)
+  return(list(data = DT_dat, condition = condition))
 }
 
 ##format data
@@ -63,6 +73,8 @@ soma_all_output=function(DT){
   }
 
   rownames(DT_dat)=DT_dat$SampleId
+  condition=DT_dat %>%
+    dplyr::select(-matches("seq\\.", ignore.case = TRUE))
   DT_dat = DT_dat[, grep('seq\\.', colnames(DT_dat))] %>%
     t() %>%
     as.data.frame()
@@ -88,7 +100,7 @@ soma_all_output=function(DT){
   DT_out=DT_out%>%
     dplyr::rename(Protein_Group= UniProt)%>%
     dplyr::rename(Genes= EntrezGeneSymbol)
-  return(DT_out)
+  return(list(data = DT_out, condition = condition))
 }
 
 Buffer_filter=function(DT){
@@ -100,3 +112,4 @@ Buffer_filter=function(DT){
     ))
   return(DT_filter)
 }
+

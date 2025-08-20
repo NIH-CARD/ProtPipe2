@@ -44,9 +44,18 @@ ui <- page_sidebar(
                      fluidRow(
                        column(width = 6,
                               card(
-                                card_header("Upload protein intensity estimates csv file"),
-                                fileUploadUI("intensity", label = NULL),
-                                checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),
+                                fluidRow(
+                                  column(width = 7,
+                                         card_header(h3("Upload protein intensity file")),
+                                         fileUploadUI("intensity", label = NULL),
+                                         checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE)
+                                         ),
+                                  column(width = 5,
+                                         radioButtons("data_type", label = h5("select data type"),
+                                                      choices = list("standard quantification (.csv, .tsv, or .xlsx)" = 1, "somascan (.adat)" = 2, "olink (.csv, .tsv, or .xlsx)" = 3),
+                                                      selected = 1))
+                                ),
+
                                 uiOutput("column_range_ui"),
                                 verbatimTextOutput("range_result")
 

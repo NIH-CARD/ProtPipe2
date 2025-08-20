@@ -2,6 +2,8 @@ library(testthat)
 setwd("../../..")
 
 dat <- SomaDataIO::read_adat("EXAMPLES/soma/example_data_v5.0_plasma.adat")
+data1 <- soma_all_output(dat)
+
 
 test_that("create protdata object from somascan data without filtering", {
   soma_pro <- create_protdata_from_soma(dat, filter = FALSE)
