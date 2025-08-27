@@ -1,4 +1,4 @@
-# README
+# ProtPipe2
 
 ![workflow-image](src/ProtPipe.png)
 
