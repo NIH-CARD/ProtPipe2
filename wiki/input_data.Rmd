@@ -1,0 +1,62 @@
+---
+title: "Input Data Format"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This page details the required format for the input data used in this R package. The package requires one primary data file (for protein/analyte values) and can optionally accept a second file containing experimental conditions or metadata.
+
+## 1. Protein Data File
+
+The main input is a dataframe containing your protein expression data. The structure must follow these rules:
+
+* **Rows**: Each row should represent a single protein or analyte.
+* **Columns**: The columns should contain both metadata about the proteins (e.g., Protein ID, Gene Name, UniProt Accession) and the quantitative values for each sample. The column headers for your samples will be used to link to the condition data.
+
+### Example Protein Data Table
+
+Here is a small example of a correctly formatted protein data dataframe. Columns `ProteinID` and `Gene.Name` are metadata, while `Sample_A`, `Sample_B`, `Sample_C`, and `Sample_D` contain the measurements for each sample.
+
+```{r protein_df}
+protein_df <- data.frame(
+  ProteinID = c("P12345", "P67890", "Q54321", "Q09876"),
+  Gene.Name = c("GENEA", "GENEB", "GENEC", "GENED"),
+  Description = c("Protein A Description", "Protein B Description", "Protein C Description", "Protein D Description"),
+  Sample_A = c(1.2, 2.5, 3.1, 4.0),
+  Sample_B = c(1.5, 2.8, 3.3, 4.2),
+  Sample_C = c(5.5, 6.2, 7.8, 8.1),
+  Sample_D = c(5.9, 6.5, 7.5, 8.3)
+)
+
+knitr::kable(protein_df, caption = "Example Protein Data Structure")
+```
+
+---
+
+## 2. Condition Metadata File (Optional)
+
+You can provide an optional second dataframe that describes the experimental conditions for each sample. This file is highly recommended for downstream analysis.
+
+* **Crucial Requirement**: This dataframe **MUST** contain a column named `SampleID`.
+* The values in the `SampleID` column **MUST** exactly match the column names of the samples in your protein data file (e.g., `Sample_A`, `Sample_B`, etc.).
+* Other columns can contain any metadata you wish to associate with your samples, such as treatment group, time point, batch, etc.
+
+### Example Condition Data Table
+
+This is an example of a correctly formatted condition dataframe that corresponds to the protein data example above.
+
+```{r condition_df}
+condition_df <- data.frame(
+  SampleID = c("Sample_A", "Sample_B", "Sample_C", "Sample_D"),
+  Condition = c("Control", "Control", "Treated", "Treated"),
+  Timepoint = c("24h", "24h", "24h", "24h"),
+  Batch = c(1, 1, 2, 2)
+)
+
+knitr::kable(condition_df, caption = "Example Condition/Metadata Structure")
+```
+
+**Important**: A mismatch in sample names between the protein data columns and the `SampleID` column in the condition file will result in an error. Please ensure they are identical.

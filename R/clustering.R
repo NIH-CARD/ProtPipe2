@@ -10,13 +10,21 @@
 #'
 #' @examples
 get_PCs <- function(PD, condition = NA) {
+  PD <- ProtPipe::impute(PD, 0) %>% ProtPipe::log2_transform()
   log2_cluster_data <- getData(PD) %>%
-    dplyr::filter(rowSums(.) > 0)
+    dplyr::filter(rowSums(abs(.), na.rm = TRUE) > 0)
+  log2_cluster_data <<- log2_cluster_data
   out <- list()
 
   ##PCA and plot
   pca_data <- t(log2_cluster_data)
-  pca=stats::prcomp(pca_data, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
+
+  # remove zero variance columns
+  variances <- apply(pca_data, 2, var)
+  pca_data_filtered <- pca_data[, variances > 0]
+
+  pca_data <<- pca_data
+  pca=stats::prcomp(pca_data_filtered, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
   out$summary <- data.table::as.data.table(t(summary(pca)$importance), keep.rownames=T)
   data.table::setnames(out$summary, c('component','stdv','percent','cumulative'))
   out$summary$percent=round(out$summary$percent*100, digits = 2)
@@ -129,3 +137,74 @@ plot_umap <- function(PD, neighbors = 15, condition = NA) {
     ggplot2::theme_classic()
   return(g)
 }
+
+# --- 1. Installation of the mixOmics package ---
+# mixOmics is a Bioconductor package.
+if (!requireNamespace("mixOmics", quietly = TRUE)) {
+  if(!require("BiocManager")){
+    install.packages("BiocManager")
+  }
+  BiocManager::install("mixOmics")
+}
+
+
+# --- 2. Generic Function Definition ---
+#' Generate a PLS-DA scores plot for a ProtData object
+#'
+#' @param object The ProtData object.
+#' @param group_variable A string naming the column in the condition slot that contains the group labels.
+#' @param n_components The number of components for the PLS-DA model.
+#' @export
+setGeneric("plot_plsda",
+           def = function(object, group_variable, n_components = 2) {
+             standardGeneric("plot_plsda")
+           }
+)
+
+
+# --- 3. S4 Method Implementation ---
+#' @describeIn plot_plsda PLS-DA method for ProtData class.
+setMethod("plot_plsda",
+          signature(object = "ProtData", group_variable = "character"),
+          function(object, group_variable, n_components = 2) {
+
+            # --- Input Validation ---
+            if (!group_variable %in% names(object@condition)) {
+              stop("'", group_variable, "' not found in the condition slot of the object.")
+            }
+            if (any(is.na(object@data))) {
+              stop("Missing values (NA) detected in the data slot. Please impute or filter data before running PLS-DA.")
+            }
+
+            groups <- as.factor(object@condition[[group_variable]])
+            if (length(levels(groups)) < 2) {
+              stop("PLS-DA requires at least two groups in your '", group_variable, "' column.")
+            }
+
+            cat("Running PLS-DA for group variable:", group_variable, "\n")
+
+            # --- Prepare Data for mixOmics ---
+            # mixOmics requires samples as rows and features (proteins) as columns.
+            # We must transpose the data matrix.
+            X <- t(object@data)
+            Y <- groups
+
+            # --- Run PLS-DA ---
+            plsda_result <- mixOmics::plsda(X, Y, ncomp = n_components)
+
+            # --- Generate the Plot ---
+            # plotIndiv is mixOmics's powerful plotting function.
+            # We use style='ggplot2' to get a customizable ggplot object back.
+            scores_plot <- mixOmics::plotIndiv(
+              plsda_result,
+              group = Y,
+              ind.names = FALSE, # We don't need sample names on the plot
+              legend = TRUE,
+              ellipse = TRUE,    # Draw confidence ellipses around the groups
+              style = 'ggplot2',
+              title = paste("PLS-DA Scores Plot -", Sys.Date())
+            )
+
+            return(scores_plot)
+          }
+)

@@ -37,6 +37,7 @@ Imports:
 	matrixStats,
 	stats,
 	rlang,
-	SomaDataIO
+	SomaDataIO,
+	mixOmics
 	
 	

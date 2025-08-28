@@ -2,15 +2,15 @@ library(testthat)
 setwd("../../..")
 
 load("EXAMPLES/olink/npx_data1.rda")
-file = "EXAMPLES/olink/npx_data1.xlsx"
-metafile <- "EXAMPLES/olink/npx_data1_meta_original.csv"
+file = "EXAMPLES/olink/npx_data1.csv"
+metafile <- "EXAMPLES/olink/manifest.csv"
 
 npx <- OlinkAnalyze::read_NPX(file)
 
-meta <- read.delim(metafile, sep = ";")
+meta <- read.delim(metafile, sep = ",")
 
 test_that("correctly make a prot_data object from Olink without LOD filtering", {
-  dat_pro <- create_protdata_from_olink(npx, filter = F)
+  dat_pro <- create_protdata_from_olink(npx, meta, filter = F)
   expect_s4_class(dat_pro, "ProtData")
   cols = ncol(dat_pro@data)
   expect_equal(cols, 158)

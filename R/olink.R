@@ -9,9 +9,15 @@
 #' @export
 #'
 #' @examples
-create_protdata_from_olink <- function(npx, condition = NULL, filter = FALSE) {
+create_protdata_from_olink <- function(npx, condition = NULL, filter = TRUE) {
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)
+  if(!is.null(condition)){
+    if (!"SampleID" %in% colnames(condition)) {
+      stop("Error: The uploaded file must contain a column named 'SampleID'.")
+    }
+    condition <- dplyr::select(condition, SampleID, dplyr::everything())
+  }
   return(create_protdata(dat, intensity_cols = c(4:length(colnames(dat))), condition, method = "Olink"))
 }
 

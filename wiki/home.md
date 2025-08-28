@@ -1,0 +1,59 @@
+Home
+================
+
+# Welcome to \[Your Package Name\]
+
+Welcome to the official documentation for `[Your Package Name]`. This
+project provides a powerful suite of tools for analyzing proteomics
+data.
+
+To accommodate different user needs, this documentation is split into
+two main paths: one for using the no-code **Shiny Web Application**, and
+another for developers using the **R Package** directly.
+
+------------------------------------------------------------------------
+
+## Choose Your Path
+
+Please select the guide that best fits your needs.
+
+<br>
+
+<table style="width:100%; border: none;">
+<tr style="border: none;">
+<td style="width:50%; padding:15px; text-align:center; border: 1px solid #ddd; border-radius: 8px;">
+<h3>
+<a href="./User-Guide-(Shiny-App)">User Guide (No-Code Shiny App)</a>
+</h3>
+<p>
+For biologists, researchers, and anyone who wants to analyze their data
+through an easy-to-use graphical interface without writing any code.
+</p>
+</td>
+<td style="width:50%; padding:15px; text-align:center; border: 1px solid #ddd; border-radius: 8px;">
+<h3>
+<a href="./Developer-Guide-(R-Package)">Developer Guide (R Package)</a>
+</h3>
+<p>
+For bioinformaticians, data scientists, and R users who want to
+integrate these tools into their own scripts and analysis pipelines.
+</p>
+</td>
+</tr>
+</table>
+
+<br>
+
+------------------------------------------------------------------------
+
+## Shared Resources
+
+The following pages contain information relevant for **all users**:
+
+- **[Input Data Format](./Input-Data-Format)**: **(Start Here!)** This
+  page explains the required file formats for your data. Please read
+  this carefully before using the app or package.
+- **[Frequently Asked Questions (FAQ)](./FAQ)**: Find answers to common
+  questions and troubleshooting tips.
+- **How to Cite**: Instructions on how to properly cite this work in
+  your publications.

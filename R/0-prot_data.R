@@ -80,16 +80,19 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
   if (!is.null(condition)) {
     condition <- as.data.frame(condition)
     # make sample col the rownames if it exists
-    if ("sample" %in% colnames(condition)) {
-      rownames(condition) <- condition$sample
-      condition$sample <- NULL
-      d1 <<- condition
-    }
+    rownames(condition) <- condition[[1]]
+    condition <- condition[, -1]
+    # if ("sample" %in% colnames(condition)) {
+    #   rownames(condition) <- condition$sample
+    #   condition$sample <- NULL
+    #   d1 <<- condition
+    # }
     rownames(condition) <- trim_names(rownames(condition))
     # drop excess rows from the condition file if they exist
     if (!all(rownames(condition) %in% colnames(data))) {
       print("Rownames of 'condition' do not match the colnames of 'data'.")
-
+      d1 <<- condition
+      d2 <<- data
       # Drop rows of condition that are not in data
       matching_rows <- intersect(rownames(condition), colnames(data))
       condition <- condition[matching_rows, ]
@@ -124,7 +127,6 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
     )
     rownames(condition) <- colnames(data)
   }
-  d2 <<- condition
 
 
   # Create a new ProtData object
@@ -410,22 +412,71 @@ setMethod("impute_minimal", "ProtData", function(object, shift = 1.8, scale = 0.
 
 # batch correct
 
-#' Title
-#'
-#' @param object
-#' @param col
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setGeneric("batch_correct", function(object, col) standardGeneric("batch_correct"))
-setMethod("batch_correct", "ProtData", function(object, col) {
-  object@data <- object@data %>%
-    limma::removeBatchEffect(batch = object@condition[[col]]) %>%
-    as.data.frame()
-  return(object)
-})
+# (Generic function definition remains the same)
+setGeneric("batch_correct",
+           def = function(object, batch_variable, bio_variables = NULL) {
+             standardGeneric("batch_correct")
+           }
+)
+
+# --- Method 1: WHEN bio_variables ARE PROVIDED (No change) ---
+setMethod("batch_correct",
+          # The "ANY" signature allows this method to handle all cases.
+          signature(object = "ProtData", batch_variable = "character", bio_variables = "ANY"),
+          function(object, batch_variable, bio_variables) {
+          ff<<-"kkas"
+            # --- Input Validation for required arguments ---
+            if (!requireNamespace("limma", quietly = TRUE)) stop("Please install the 'limma' package from Bioconductor.")
+            if (length(batch_variable) != 1) stop("'batch_variable' must be a single column name.")
+            if (!batch_variable %in% names(object@condition)) stop("'", batch_variable, "' not found in the condition slot.")
+            if (!is.numeric(as.matrix(object@data))) stop("The data slot must be entirely numeric.")
+
+            data_matrix <- as.matrix(object@data)
+            batch_vector <- object@condition[[batch_variable]]
+
+            # --- Use if/else to handle the optional 'bio_variables' ---
+
+            # CASE 1: bio_variables WERE provided.
+            if (!is.null(bio_variables)) {
+
+              cat("Saatarting batch correction...\n")
+              cat("  - Preserving biological variables:", paste(bio_variables, collapse=", "), "\n")
+
+              # Validate the provided bio_variables
+              if (!all(bio_variables %in% names(object@condition))) {
+                stop("One or more 'bio_variables' not found in the condition slot.")
+              }
+
+              # Build the biological design matrix
+              formula_str <- paste("~", paste(bio_variables, collapse = " + "))
+              design_matrix <- model.matrix(as.formula(formula_str), data = object@condition)
+
+              # Call limma WITH the design matrix
+              corrected_data <- limma::removeBatchEffect(
+                x = data_matrix,
+                batch = batch_vector,
+                design = design_matrix
+              )
+
+              # CASE 2: bio_variables were NOT provided (it is NULL).
+            } else {
+
+              cat("Starting batch correction...\n")
+              cat("  - No biological variables provided. Relying on limma's default (intercept-only) design.\n")
+
+              # Call limma WITHOUT the design matrix, relying on its default
+              corrected_data <- limma::removeBatchEffect(
+                x = data_matrix,
+                batch = batch_vector
+              )
+            }
+
+            # --- Update and Return the Object (same for both cases) ---
+            object@data <- as.data.frame(corrected_data)
+            cat("Batch correction complete. The data slot has been updated.\n")
+            return(object)
+          }
+)
 
 #' Title
 #'

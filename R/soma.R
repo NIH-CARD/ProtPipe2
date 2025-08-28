@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-create_protdata_from_soma <- function(adat, condition = NULL, filter = FALSE) {
+create_protdata_from_soma <- function(adat, condition = NULL, filter = TRUE) {
   if(filter){
     soma_out <- soma_all_output(adat)
     dat <- soma_out$data
