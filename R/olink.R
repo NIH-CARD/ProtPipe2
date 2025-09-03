@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-create_protdata_from_olink <- function(npx, condition = NULL, filter = TRUE) {
+create_protdata_from_olink <- function(npx, condition = NULL, filter = F) {
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)
   if(!is.null(condition)){

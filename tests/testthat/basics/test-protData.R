@@ -5,8 +5,10 @@ setwd("../../..")
 test_that("correctly make a prot_data object", {
   # Print the current working directory
   print(getwd())
-  dat <- data.table::fread("EXAMPLES/DIFF_ABUNDANCE/iPSC.csv")
+  dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
   dat_pro <- create_protdata(dat, intensity_cols = c(3:44))
+  compare_protein(dat_pro, "A0A3F2YNY5")
+  compare_protein(dat_pro, "A0A3F2YNY5", condition = "base_condition")
   expect_s4_class(dat_pro, "ProtData")
 })
 

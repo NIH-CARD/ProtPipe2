@@ -41,6 +41,8 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
     stop("The 'data' argument must be a data frame.")
   }
 
+  # convert cols to numeric
+  dat <- convert_numeric_cols(dat)
 
   #get the intensity cols
   if (is.null(intensity_cols)){
@@ -76,17 +78,21 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
 
   ## CONDITION FILE ###################
 
-  # Ensure that condition, if provided, has rownames matching the colnames of data
+  # Ensure that condition, if provided, has SampleID matching the colnames of data
   if (!is.null(condition)) {
     condition <- as.data.frame(condition)
+
     # make sample col the rownames if it exists
-    rownames(condition) <- condition[[1]]
-    condition <- condition[, -1]
-    # if ("sample" %in% colnames(condition)) {
-    #   rownames(condition) <- condition$sample
-    #   condition$sample <- NULL
-    #   d1 <<- condition
-    # }
+    if (!"SampleID" %in% colnames(condition)) {
+      stop("Error: The condition file is missing the required 'SampleID' column.")
+    }
+    if (any(duplicated(condition$SampleID))) {
+      stop("Error: The 'SampleID' column contains duplicate values. All sample IDs must be unique.")
+    }
+    rownames(condition) <- condition$SampleID
+    condition$SampleID <- NULL
+
+    # trim the names
     rownames(condition) <- trim_names(rownames(condition))
     # drop excess rows from the condition file if they exist
     if (!all(rownames(condition) %in% colnames(data))) {
@@ -123,6 +129,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
   # sample name if present
   else {
     condition <- data.frame(
+      SampleID = colnames(data),
       base_condition = gsub("_\\d+$", "", colnames(data))  # Remove _ followed by digits at the end of the column names
     )
     rownames(condition) <- colnames(data)
@@ -589,6 +596,51 @@ trim_names <- function(names) {
   colnames_out <- gsub(pattern=".*/", replacement='', x=colnames_out)
   colnames_out <- gsub(pattern="\\.(raw|mzML)$", replacement='', x=colnames_out)
   return(colnames_out)
+}
+
+#' Title
+#'
+#' @param df
+#'
+#' @return
+#' @export
+#'
+#' @examples
+convert_numeric_cols <- function(df) {
+
+  # Regex for a valid number string (handles integers, decimals, scientific notation)
+  numeric_regex <- "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$"
+
+  df[] <- lapply(df, function(col) {
+    # Only consider non-numeric (character) columns for conversion
+    if (is.character(col)) {
+
+      # Remove true R NA values and empty strings for the check.
+      # We want to evaluate the actual character strings present.
+      values_to_check <- col[!is.na(col) & col != ""]
+
+      # If there are no actual strings to check, no need to convert
+      if (length(values_to_check) == 0) {
+        return(col)
+      }
+
+      # THE CRUCIAL CHECK:
+      # Every string must either match the numeric regex OR be "NA" or "NaN".
+      # We use toupper() to make the NA/NaN check case-insensitive.
+      is_valid_entry <- grepl(numeric_regex, values_to_check) | toupper(values_to_check) %in% c("NA", "NAN")
+
+      if (all(is_valid_entry)) {
+        # If all entries are valid, it's safe to convert the entire column.
+        # as.numeric() correctly handles the strings "NA" and "NaN".
+        return(as.numeric(col))
+      }
+    }
+
+    # If the column is not character or fails the check, return it unmodified.
+    return(col)
+  })
+
+  return(df)
 }
 
 #create long data table

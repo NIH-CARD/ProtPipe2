@@ -2,13 +2,59 @@
 % Please edit documentation in R/quality_control.R
 \name{plot_correlation_heatmap}
 \alias{plot_correlation_heatmap}
-\title{Title}
+\title{\subsection{correlation}{
+
+#' Title
+#'
+#' @param DT.corrs
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plot_correlation_heatmap <- function(PD, condition = NULL) {
+DT.corrs <- get_spearman(PD)
+n_samples <- length(unique(DT.corrs\link{,'SampleA'}))
+max_limit <- max(DT.corrs$Spearman)
+min_limit <- min(DT.corrs$Spearman)
+mid_limit <- as.numeric(format(((max_limit + min_limit) / 2), digits=3))
+if (is.null(condition)){
+g <- ggplot2::ggplot(DT.corrs, ggplot2::aes(x=SampleA, y=SampleB, fill=Spearman, label = NA)) +
+ggplot2::geom_tile() +
+ggplot2::geom_text(color='gray10') +
+ggplot2::theme_classic() +
+ggplot2::scale_fill_gradient2(low = "skyblue", high = "tomato1", mid = "white",
+midpoint = mid_limit, limit = c(min_limit,max_limit),
+space = "Lab", breaks=c(min_limit, mid_limit, max_limit),
+name="Spearman\nCorrelation\n") +
+ggplot2::theme(axis.text.x=ggplot2::element_text(angle=45, hjust=1)) +
+ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank())
+}else{
+condition_file <- getCondition(PD)
+if (condition \%in\% colnames(condition_file)){
+condition_map <- setNames(condition_file[\link{condition}], rownames(condition_file))
+}}
 \usage{
-plot_correlation_heatmap(PD, condition = NULL)
+plot_correlation_heatmap(PD, order_by = NULL, label_by = NULL)
 }
 \arguments{
-\item{DT.corrs}{}
+\item{PD}{A ProtData object.}
+
+\item{order_by}{A single character string specifying a column in the condition
+slot by which to order the samples on the heatmap axes. Handles numeric sorting for labels like 'Day14'.}
+
+\item{label_by}{A single character string specifying a column in the condition
+slot to use for axis annotations. Default is NULL.}
+}
+\value{
+A ggplot object representing the heatmap.
 }
 \description{
-Title
+\if{html}{\out{<div class="sourceCode">}}\preformatted{  #Reorder the levels of SampleA and SampleB so that samples with the same condition appear together
+  DT.corrs$SampleA <- factor(DT.corrs$SampleA, levels = names(condition_map)[order(condition_map[DT.corrs$SampleA])])
+  DT.corrs$SampleB <- factor(DT.corrs$SampleB, levels = names(condition_map)[order(condition_map[DT.corrs$SampleB])])
+}\if{html}{\out{</div>}}
+}
+\details{
+
 }

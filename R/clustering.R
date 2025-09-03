@@ -10,7 +10,7 @@
 #'
 #' @examples
 get_PCs <- function(PD, condition = NA) {
-  PD <- ProtPipe::impute(PD, 0) %>% ProtPipe::log2_transform()
+  PD <- ProtPipe::impute(PD, 0) #%>% ProtPipe::log2_transform()
   log2_cluster_data <- getData(PD) %>%
     dplyr::filter(rowSums(abs(.), na.rm = TRUE) > 0)
   log2_cluster_data <<- log2_cluster_data

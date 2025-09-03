@@ -23,6 +23,7 @@ ui <- page_sidebar(
     actionButton("view_2", "Clustering", class = "btn-block btn-primary mb-2"),
     actionButton("view_3", "Differential Intensity", class = "btn-block btn-primary mb-2"),
     actionButton("view_4", "Heatmap", class = "btn-block btn-primary mb-2"),
+    actionButton("view_5", "Single Protein", class = "btn-block btn-primary mb-2"),
 
     hr(),
     verbatimTextOutput("value"),
@@ -35,7 +36,8 @@ ui <- page_sidebar(
     conditionalPanel("input.select == '1'", h4("Quality Control content")),
     conditionalPanel("input.select == '2'", h4("Clustering content")),
     conditionalPanel("input.select == '3'", h4("Differential Intensity content")),
-    conditionalPanel("input.select == '4'", h4("Heatmap content"))
+    conditionalPanel("input.select == '4'", h4("Heatmap content")),
+    conditionalPanel("input.select == '5'", h4("Single protein content"))
   ),
 
   ### Parameter input screen ############################################################################################
@@ -220,6 +222,19 @@ ui <- page_sidebar(
                      card(card_header("Heatmap"),
                           plotOutput("h_map"),
                           downloadButton("download_hmap", "Download Plot as PDF")
+                     )
+                   )
+  ),
+  ### Single Protein view ############################################################################################
+  conditionalPanel(condition = "input.select == 5",
+                   h2("View single protein"),
+                   fluidPage(
+                     uiOutput("pv_prot_meta"),
+                     uiOutput("pv_protein"),
+                     uiOutput("pv_condition"),
+                     card(card_header("protein barchart"),
+                          plotOutput("protein_barchart"),
+                          downloadButton("download_protein_barchart", "Download Plot as PDF")
                      )
                    )
   )

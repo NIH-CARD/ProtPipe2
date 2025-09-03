@@ -7,6 +7,7 @@ server <- function(input, output, session) {
   observeEvent(input$view_2, { updateTextInput(session, "select", value = "2") })
   observeEvent(input$view_3, { updateTextInput(session, "select", value = "3") })
   observeEvent(input$view_4, { updateTextInput(session, "select", value = "4") })
+  observeEvent(input$view_5, { updateTextInput(session, "select", value = "5") })
 
   # Create a temp working directory for this zip session
   zip_workspace <- file.path(tempdir(), "zip_workspace")
@@ -92,7 +93,7 @@ server <- function(input, output, session) {
       # Use validate() to stop execution and show a user-friendly message
       # if the file extension is not one of the allowed types.
       validate(
-        need(ext %in% c("csv", "tsv", "xlsx", "adat"), "Invalid file format. Please upload a .csv, .tsv, or .xlsx file.")
+        need(ext %in% c("csv", "tsv", "xlsx", "xls", "adat"), "Invalid file format. Please upload a .csv, .tsv, or .xlsx file.")
       )
 
       # Use the correct function based on the file extension
@@ -100,11 +101,11 @@ server <- function(input, output, session) {
 
         # First, validate the inputs to make sure the combination is valid
         # This provides specific feedback to the user.
-        if (input$data_type == 1 && !(ext %in% c("csv", "tsv", "xlsx"))) {
+        if (input$data_type == 1 && !(ext %in% c("csv", "tsv", "xlsx", "xls"))) {
           validate(need(FALSE, "For Mass Spec, please upload a .csv, .tsv, or .xlsx file."))
         } else if (input$data_type == 2 && ext != "adat") { # Assuming 2 is SomaScan
           validate(need(FALSE, "For SomaScan, please upload an .adat file."))
-        } else if (input$data_type == 3 && !(ext %in% c("csv", "tsv", "xlsx"))) {
+        } else if (input$data_type == 3 && !(ext %in% c("csv", "tsv", "xlsx", "xls"))) {
           validate(need(FALSE, "For Olink, please upload a .csv, .tsv, or .xlsx file."))
         }
 
@@ -131,7 +132,16 @@ server <- function(input, output, session) {
   })
   condition_file <- reactive({
     if (!is.null(sample_condition())) {
-      return(data.table::fread(sample_condition()$datapath, data.table=FALSE))
+      # Extract the file extension and convert to lowercase for matching
+      ext <- tolower(tools::file_ext(sample_condition()$datapath))
+      validate(
+        need(ext %in% c("csv", "tsv", "xlsx", "xls"), "Invalid file format. Please upload a .csv, .tsv, or .xlsx file.")
+      )
+      if (ext %in% c("csv", "tsv")) {
+        data.table::fread(sample_condition()$datapath, data.table = FALSE)
+      } else { # ext is "xlsx"
+        readxl::read_excel(sample_condition()$datapath)
+      }
     } else {
       return(NULL)
     }
@@ -139,7 +149,9 @@ server <- function(input, output, session) {
   # Dynamically generate dropdowns for column range selection
   output$column_range_ui <- renderUI({
     req(intensity_file())
-    df <- intensity_file()
+    req(input$data_type == 1)
+    df <- intensity_file() %>%
+      ProtPipe::convert_numeric_cols()
     choices <- names(df)
 
     # get default intensity columns
@@ -156,7 +168,9 @@ server <- function(input, output, session) {
 
   # Validate and report selection
   output$range_result <- renderPrint({
-    df <- intensity_file()
+    req(input$data_type == 1)
+    df <- intensity_file() %>% ProtPipe::convert_numeric_cols()
+    dfff<<- df
 
     # Ensure both selections are made
     req(input$lower_col, input$upper_col)
@@ -189,21 +203,16 @@ server <- function(input, output, session) {
     df <- intensity_file()
 
     # Ensure both selections are made
-    req(input$lower_col, input$upper_col)
+    #req(input$lower_col, input$upper_col)
 
     cols <- names(df)
     lower_idx <- match(input$lower_col, cols)
     upper_idx <- match(input$upper_col, cols)
 
-    # if(any(grepl("NPX", intensity_file(), ignore.case = TRUE))){
-    #   PD <- ProtPipe::create_protdata_from_olink(dat = intensity_file(), condition = condition_file())
-    #   print("yooooooo")
-    # }
     data_type <- input$data_type
     if(input$use_example){
       data_type <- 1
     }
-
 
     if (data_type == 1) {
       PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
@@ -393,6 +402,9 @@ server <- function(input, output, session) {
     p <- ProtPipe::plot_correlation_heatmap(prot_data())
     add_zip_plot(p, "sample_correlation_heatmap.pdf", "quality_control", zip_workspace, "output.zip")
 
+
+    protd<<- prot_data()
+    heatd <<- p
     print(p)
   })
 
@@ -573,6 +585,61 @@ server <- function(input, output, session) {
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
       p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+      ggsave(file, plot=p, device = "pdf")
+    }
+  )
+
+  #### Protein Barchart ############################################################################################
+
+
+  #select condition
+  output$pv_prot_meta <- renderUI({
+    req(intensity_file())
+    choices <- names(prot_data()@prot_meta)
+    selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
+  })
+
+  #select condition
+  output$pv_protein <- renderUI({
+    req(intensity_file())
+    req(input$pv_prot_meta)
+    choices <- prot_data()@prot_meta[[input$pv_prot_meta]]
+    selectInput("pv_protein", "select a protein:", choices = choices)
+  })
+
+  #select condition
+  output$pv_condition <- renderUI({
+    req(intensity_file())
+    choices <- c("No grouping", names(prot_data()@condition))
+    selectInput("pv_condition", "select the column used to group samples:", choices = choices)
+  })
+
+  pv_condition <-reactive({
+    if(input$pv_condition == "No grouping"){
+      NULL
+    }else{
+      input$pv_condition
+    }
+  })
+
+  #complete barchart
+  output$protein_barchart <- renderPlot({
+    req(intensity_file())  # Ensure file is uploaded
+    p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
+
+    #save to zip
+    add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
+
+    print(p)
+  })
+
+  output$download_protein_barchart <- downloadHandler(
+    filename = function(){
+      paste(input$pv_protein, "_levels.pdf")
+    },
+    content = function(file){
+      req(intensity_file())  # Ensure file is uploaded
+      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
       ggsave(file, plot=p, device = "pdf")
     }
   )
