@@ -70,10 +70,9 @@ combine <- function(PD_list){
       common_cols <- intersect(colnames(conds), colnames(cond))
       # Subset both 'conds' and 'cond' to keep only the common columns
       conds <- dplyr::bind_rows(conds[, common_cols, drop = FALSE], cond[, common_cols, drop = FALSE])
+      conds$SampleID <- rownames(conds)
     }
   }
-  tasd<<-datas
-  dsfd<<-conds
   datas <- datas[, c("Protein.Group_xxxx", setdiff(names(datas), "Protein.Group_xxxx"))]
   #merge metas and datas
   num_metas_cols <- length(names(metas))

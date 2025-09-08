@@ -85,8 +85,11 @@ setMethod("compare_protein",
               # Case 2: Condition provided, plot grouped means with stats
             }else{
               if (!condition %in% names(PD@condition)) { stop("'", condition, "' not found in condition slot.") }
-              sample_id_col <- names(PD@condition)[1]
-              plotting_df <- dplyr::left_join(plotting_df, PD@condition, by = setNames(sample_id_col, "SampleID"))
+
+              condition_df <- PD@condition %>%
+                dplyr::mutate(SampleID = as.character(rownames(.)))
+
+              plotting_df <- dplyr::left_join(plotting_df, condition_df, by = "SampleID")
 
               groups <- unique(na.omit(plotting_df[[condition]]))
 
@@ -110,12 +113,22 @@ setMethod("compare_protein",
                 ggplot2::theme_classic() +
                 ggplot2::theme(legend.position = "none")
 
-              # --- START: THE FIX FOR SIGNIFICANCE BRACKETS ---
-
               # Pre-calculate stats and filter for ONLY significant pairs
               if (length(groups) >= 2) {
-                stat_test <- ggpubr::compare_means(as.formula(paste("Intensity ~", condition)), data = plotting_df) %>%
-                  dplyr::filter(p.signif != "ns")
+                stat_test <- tryCatch({
+
+                  # --- This is the code that might fail ---
+                  ggpubr::compare_means(as.formula(paste("Intensity ~", condition)), data = plotting_df) %>%
+                    dplyr::filter(p.signif != "ns")
+                  # ----------------------------------------
+
+                }, error = function(e) {
+
+                  # If an error occurs, stop the execution and provide a clear message.
+                  # We also print the original error ('e$message') for easier debugging if needed.
+                  stop(paste("Statistical comparison failed. This can happen if a group has too few non-missing observations to perform the test.\nOriginal error:", e$message))
+
+                })
 
                 # Only add the layer if there are significant results to show
                 if (nrow(stat_test) > 0) {
@@ -130,74 +143,7 @@ setMethod("compare_protein",
                   )
                 }
               }
-              # --- END: THE FIX FOR SIGNIFICANCE BRACKETS ---
             }
 
             return(g)
           })
-
-#               if (!condition %in% names(PD@condition)) { stop("'", condition, "' not found in condition slot.") }
-#               plotting_df <- dplyr::left_join(plotting_df, PD@condition, by ="SampleID")
-#
-#               significant_groups <- c()
-#               groups <- unique(na.omit(plotting_df[[condition]]))
-#
-#               # --- START: PRE-CALCULATE STATS (Used for BOTH error bars and brackets) ---
-#               stat_test <- NULL
-#               if (length(groups) >= 2) {
-#                 # Perform all pairwise tests and filter for significance
-#                 stat_test <- ggpubr::compare_means(as.formula(paste("Intensity ~", condition)), method = 't.test', data = plotting_df) %>%
-#                   dplyr::filter(p.signif != "ns")
-#               stat_test <<- stat_test
-#                 if (nrow(stat_test) > 0) {
-#                   significant_groups <- unique(c(stat_test$group1, stat_test$group2))
-#                 }
-#               }
-#               significant_groups <<- significant_groups
-#               plotting_df$is_significant <- plotting_df[[condition]] %in% significant_groups
-#
-#               plotting_df <<- plotting_df
-#               --- END: PRE-CALCULATE STATS ---
-#
-#               g <- ggplot2::ggplot(plotting_df,
-#                                    ggplot2::aes(x = !!rlang::sym(condition), y = Intensity, fill = !!rlang::sym(condition))
-#               ) +
-#                 ggplot2::stat_summary(fun = mean, geom = "bar", color = "black") +
-#                 ggplot2::stat_summary(
-#                   fun.data = ggplot2::mean_sdl, fun.args = list(mult = 1),
-#                   geom = "errorbar", width = 0.2, color = "black",
-#                   ggplot2::aes(alpha = is_significant)
-#                 ) +
-#                 ggplot2::scale_alpha_manual(values = c("TRUE" = 1, "FALSE" = 0), guide = "none") +
-#                 ggplot2::labs(
-#                   title = paste("Mean Intensity for Protein:", prot),
-#                   subtitle = paste("Grouped by:", condition),
-#                   x = condition,
-#                   y = "Mean Intensity (+/- SD)"
-#                 ) +
-#                 ggplot2::theme_classic() +
-#                 ggplot2::theme(legend.position = "none")
-#
-#               # --- START: THE FINAL FIX FOR PAIRWISE BRACKETS ---
-#               # Only add the layer if there are significant results to show
-#               if (!is.null(stat_test) && nrow(stat_test) > 0) {
-#                 # Convert the significant pairs from the stat_test data.frame into the
-#                 # list format that stat_compare_means requires.
-#                 significant_comparisons <- lapply(1:nrow(stat_test), function(i) {
-#                   c(stat_test$group1[i], stat_test$group2[i])
-#                 })
-#                 significant_comparisons <<- significant_comparisons
-#
-#                 g <- g + ggpubr::stat_compare_means(
-#                   method = 't.test',
-#                   # Only pass the significant pairs to the function
-#                   comparisons = significant_comparisons,
-#                   label = "p.signif"
-#                 )
-#               }
-#               # --- END: THE FINAL FIX ---
-#             }
-#
-#             return(g)
-#           }
-# )

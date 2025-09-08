@@ -22,11 +22,11 @@ create_protdata_from_soma <- function(adat, condition = NULL, filter = TRUE) {
   }
   soma_condition <- soma_condition %>%
     dplyr::rename(SampleID = SampleId)
-  if(!is.null(condition)){
-    soma_condition <- soma_condition %>%
-      left_join(condition, by = "SampleId")
-  }
-  return(create_protdata(dat, intensity_cols = c(5:length(colnames(dat))), soma_condition, method = "SomaScan"))
+  # if(!is.null(condition)){
+  #   soma_condition <- soma_condition %>%
+  #     dplyr::left_join(condition, by = "SampleID")
+  # }
+  return(create_protdata(dat, condition = condition, method = "SomaScan"))
 }
 
 

@@ -89,7 +89,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
     if (any(duplicated(condition$SampleID))) {
       stop("Error: The 'SampleID' column contains duplicate values. All sample IDs must be unique.")
     }
-    rownames(condition) <- condition$SampleID
+    rownames(condition) <- as.character(condition$SampleID)
     condition$SampleID <- NULL
 
     # trim the names
@@ -97,8 +97,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
     # drop excess rows from the condition file if they exist
     if (!all(rownames(condition) %in% colnames(data))) {
       print("Rownames of 'condition' do not match the colnames of 'data'.")
-      d1 <<- condition
-      d2 <<- data
+
       # Drop rows of condition that are not in data
       matching_rows <- intersect(rownames(condition), colnames(data))
       condition <- condition[matching_rows, ]
@@ -129,7 +128,6 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
   # sample name if present
   else {
     condition <- data.frame(
-      SampleID = colnames(data),
       base_condition = gsub("_\\d+$", "", colnames(data))  # Remove _ followed by digits at the end of the column names
     )
     rownames(condition) <- colnames(data)

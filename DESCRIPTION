@@ -30,7 +30,6 @@ Imports:
 	org.Hs.eg.db,
 	DOSE,
 	enrichplot,
-	pheatmap,
 	limma,
 	dplyr,
 	DescTools,
@@ -38,6 +37,7 @@ Imports:
 	stats,
 	rlang,
 	SomaDataIO,
-	mixOmics
+	mixOmics,
+	Hmisc
 	
 	

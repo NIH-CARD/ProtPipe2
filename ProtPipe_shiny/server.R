@@ -1,4 +1,4 @@
-
+options(shiny.maxRequestSize=5000 * 1024^2)
 server <- function(input, output, session) {
 
   # Update hidden input$select based on which button was clicked

@@ -1,3 +1,5 @@
+
+options(shiny.maxRequestSize=5000 * 1024^2)
 source("helpers.R")
 
 
