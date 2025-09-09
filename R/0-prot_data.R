@@ -142,7 +142,7 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
       method = method)
 }
 
-#' Detect_intensity_cols
+#' Returns column indices that are numeric in a df
 #'
 #' @param df
 #'
@@ -248,11 +248,11 @@ setMethod("setProtMethod",
 
 ####### Some Class Methods ###############################################################
 
-#' Title
+#' Number of samples
 #'
-#' @param object
+#' @param PD A ProtData object.
 #'
-#' @return
+#' @return number of samples
 #' @export
 #'
 #' @examples
@@ -261,11 +261,11 @@ setMethod("num_samples", "ProtData", function(object) {
   return(as.numeric(ncol(object@data)))
 })
 
-#' Title
+#' Performs a log2 transform of protein intensity values
 #'
-#' @param object
+#' @param PD A ProtData object.
 #'
-#' @return
+#' @return A ProtData object.
 #' @export
 #'
 #' @examples
@@ -276,11 +276,11 @@ setMethod("log2_transform", "ProtData", function(object) {
   return(object)
 })
 
-#' Title
+#' Performs a log10 transform of protein intensity values
 #'
-#' @param object
+#' @param PD A ProtData object.
 #'
-#' @return
+#' @return A ProtData object.
 #' @export
 #'
 #' @examples
@@ -291,11 +291,11 @@ setMethod("log_transform", "ProtData", function(object) {
   return(object)
 })
 
-#' Title
+#' scales the protein intensities
 #'
-#' @param object
+#' @param PD A ProtData object.
 #'
-#' @return
+#' @return A ProtData object.
 #' @export
 #'
 #' @examples
@@ -483,10 +483,13 @@ setMethod("batch_correct",
           }
 )
 
-#' Title
+#' Removes duplicate analytes
 #'
-#' @param object
-#' @param col
+#' Given a prot_meta column name, it will remove rows so that each value in the column is unique.
+#' For each row the analyte with 1) the lowest missing values and 2) the greatest median intensity will be kept.
+#'
+#' @param PD A ProtData object.
+#' @param col a column name of the prot_meta slot
 #'
 #' @return
 #' @export

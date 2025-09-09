@@ -2,13 +2,16 @@
 % Please edit documentation in R/0-prot_data.R
 \name{num_samples}
 \alias{num_samples}
-\title{Title}
+\title{Number of samples}
 \usage{
 num_samples(object)
 }
 \arguments{
-\item{object}{}
+\item{PD}{A ProtData object.}
+}
+\value{
+number of samples
 }
 \description{
-Title
+Number of samples
 }

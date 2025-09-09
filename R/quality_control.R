@@ -204,75 +204,7 @@ get_spearman <- function(PD, method = 'spearman') {
   return(dt.corrs[])
 }
 
-#' ## correlation
-#' #' Title
-#' #'
-#' #' @param DT.corrs
-#' #'
-#' #' @return
-#' #' @export
-#' #'
-#' #' @examples
-#' plot_correlation_heatmap <- function(PD, condition = NULL) {
-#'   DT.corrs <- get_spearman(PD)
-#'   n_samples <- length(unique(DT.corrs[,'SampleA']))
-#'   max_limit <- max(DT.corrs$Spearman)
-#'   min_limit <- min(DT.corrs$Spearman)
-#'   mid_limit <- as.numeric(format(((max_limit + min_limit) / 2), digits=3))
-#'   if (is.null(condition)){
-#'     g <- ggplot2::ggplot(DT.corrs, ggplot2::aes(x=SampleA, y=SampleB, fill=Spearman, label = NA)) +
-#'       ggplot2::geom_tile() +
-#'       ggplot2::geom_text(color='gray10') +
-#'       ggplot2::theme_classic() +
-#'       ggplot2::scale_fill_gradient2(low = "skyblue", high = "tomato1", mid = "white",
-#'                                     midpoint = mid_limit, limit = c(min_limit,max_limit),
-#'                                     space = "Lab", breaks=c(min_limit, mid_limit, max_limit),
-#'                                     name="Spearman\nCorrelation\n") +
-#'       ggplot2::theme(axis.text.x=ggplot2::element_text(angle=45, hjust=1)) +
-#'       ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank())
-#'   }else{
-#'     condition_file <- getCondition(PD)
-#'     if (condition %in% colnames(condition_file)){
-#'       condition_map <- setNames(condition_file[[condition]], rownames(condition_file))
-#'
-#'       #Reorder the levels of SampleA and SampleB so that samples with the same condition appear together
-#'       DT.corrs$SampleA <- factor(DT.corrs$SampleA, levels = names(condition_map)[order(condition_map[DT.corrs$SampleA])])
-#'       DT.corrs$SampleB <- factor(DT.corrs$SampleB, levels = names(condition_map)[order(condition_map[DT.corrs$SampleB])])
-#'
-#'       DT.corrs <- DT.corrs
-#'       g <- ggplot2::ggplot(DT.corrs, ggplot2::aes(x=SampleA, y=SampleB, fill=Spearman, label = NA)) +
-#'         ggplot2::geom_tile() +
-#'         ggplot2::geom_text(color='gray10') +
-#'         ggplot2::theme_classic() +
-#'         ggplot2::scale_fill_gradient2(low = "skyblue", high = "tomato1", mid = "white",
-#'                                       midpoint = mid_limit, limit = c(min_limit,max_limit),
-#'                                       space = "Lab", breaks=c(min_limit, mid_limit, max_limit),
-#'                                       name="Spearman\nCorrelation\n") +
-#'         ggplot2::theme(axis.text.x=ggplot2::element_text(angle=45, hjust=1)) +
-#'         ggplot2::theme(axis.title.x=ggplot2::element_blank(), axis.title.y=ggplot2::element_blank())+
-#'
-#'         # Update x and y axis labels with conditions
-#'         ggplot2::scale_x_discrete(labels = function(x) {
-#'           # Show the condition only for the first sample in each group of same-condition samples
-#'           labels <- condition_map[x]
-#'           labels[duplicated(labels)] <- ""  # Blank out duplicates
-#'           return(labels)
-#'         }) +
-#'         ggplot2::scale_y_discrete(labels = function(x) {
-#'           # Show the condition only for the first sample in each group of same-condition samples
-#'           labels <- condition_map[x]
-#'           labels[duplicated(labels)] <- ""  # Blank out duplicates
-#'           return(labels)
-#'         })
-#'     }else{
-#'       stop("the selected condition does not appear in the condition file")
-#'     }
-#'   }
-#'   return (g)
-#'
-#' }
-#'
-#'#' Plot a sample correlation heatmap with smart sorting
+#' Plot a sample correlation heatmap with smart sorting
 #'
 #' @param PD A ProtData object.
 #' @param order_by A single character string specifying a column in the condition

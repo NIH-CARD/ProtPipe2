@@ -2,13 +2,16 @@
 % Please edit documentation in R/0-prot_data.R
 \name{scale}
 \alias{scale}
-\title{Title}
+\title{scales the protein intensities}
 \usage{
 scale(object)
 }
 \arguments{
-\item{object}{}
+\item{PD}{A ProtData object.}
+}
+\value{
+A ProtData object.
 }
 \description{
-Title
+scales the protein intensities
 }

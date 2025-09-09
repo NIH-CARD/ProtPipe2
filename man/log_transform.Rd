@@ -2,13 +2,16 @@
 % Please edit documentation in R/0-prot_data.R
 \name{log_transform}
 \alias{log_transform}
-\title{Title}
+\title{Performs a log10 transform of protein intensity values}
 \usage{
 log_transform(object)
 }
 \arguments{
-\item{object}{}
+\item{PD}{A ProtData object.}
+}
+\value{
+A ProtData object.
 }
 \description{
-Title
+Performs a log10 transform of protein intensity values
 }

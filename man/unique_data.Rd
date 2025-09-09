@@ -2,13 +2,16 @@
 % Please edit documentation in R/0-prot_data.R
 \name{unique_data}
 \alias{unique_data}
-\title{Title}
+\title{Removes duplicate analytes}
 \usage{
 unique_data(object, col = NULL)
 }
 \arguments{
-\item{col}{}
+\item{col}{a column name of the prot_meta slot}
+
+\item{PD}{A ProtData object.}
 }
 \description{
-Title
+Given a prot_meta column name, it will remove rows so that each value in the column is unique.
+For each row the analyte with 1) the lowest missing values and 2) the greatest median intensity will be kept.
 }
