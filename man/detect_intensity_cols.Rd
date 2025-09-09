@@ -2,7 +2,7 @@
 % Please edit documentation in R/0-prot_data.R
 \name{detect_intensity_cols}
 \alias{detect_intensity_cols}
-\title{Detect_intensity_cols}
+\title{Returns column indices that are numeric in a df}
 \usage{
 detect_intensity_cols(df)
 }
@@ -13,5 +13,5 @@ detect_intensity_cols(df)
 list of column numbers that re numeric (intensity)
 }
 \description{
-Detect_intensity_cols
+Returns column indices that are numeric in a df
 }

@@ -418,6 +418,16 @@ setMethod("impute_minimal", "ProtData", function(object, shift = 1.8, scale = 0.
 # batch correct
 
 # (Generic function definition remains the same)
+#' Title
+#'
+#' @param object
+#' @param batch_variable
+#' @param bio_variables
+#'
+#' @return
+#' @export
+#'
+#' @examples
 setGeneric("batch_correct",
            def = function(object, batch_variable, bio_variables = NULL) {
              standardGeneric("batch_correct")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/quality_control.R
 \name{plot_correlation_heatmap}
 \alias{plot_correlation_heatmap}
-\title{#' Plot a sample correlation heatmap with smart sorting}
+\title{Plot a sample correlation heatmap with smart sorting}
 \usage{
 plot_correlation_heatmap(PD, order_by = NULL, label_by = NULL)
 }
@@ -19,5 +19,5 @@ slot to use for axis annotations. Default is NULL.}
 A ggplot object representing the heatmap.
 }
 \description{
-#' Plot a sample correlation heatmap with smart sorting
+Plot a sample correlation heatmap with smart sorting
 }
