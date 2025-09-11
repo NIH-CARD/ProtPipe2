@@ -361,6 +361,8 @@ setMethod("impute", "ProtData", function(object, value) {
 
 #' Title
 #'
+#'Imputes missing values as alpha * minimum values per protein
+#'
 #' @param object
 #' @param value
 #'
@@ -368,8 +370,8 @@ setMethod("impute", "ProtData", function(object, value) {
 #' @export
 #'
 #' @examples
-setGeneric("impute_min", function(object, alpha) standardGeneric("impute_min"))
-setMethod("impute_min", "ProtData", function(object, alpha) {
+setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min"))
+setMethod("impute_min", "ProtData", function(object, alpha=1) {
   object@data <- t(apply(object@data, 1, function(x) {
     min_val <- min(x[!is.na(x) & !is.nan(x)], na.rm = TRUE) * alpha  # find the minimum value excluding NA and NaN
     x[is.na(x) | is.nan(x)] <- min_val  # replace NA and NaN with the minimum value
