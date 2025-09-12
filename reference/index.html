@@ -72,12 +72,6 @@
         <dd>Create a ProtData Object</dd>
       </dl><dl><dt>
 
-          <code><a href="detect_intensity_cols.html">detect_intensity_cols()</a></code>
-
-        </dt>
-        <dd>Returns column indices that are numeric in a df</dd>
-      </dl><dl><dt>
-
           <code><a href="do_limma.html">do_limma()</a></code> <code><a href="do_limma.html">do_limma_by_condition(<i>&lt;ProtData&gt;</i>)</a></code>
 
         </dt>
@@ -120,6 +114,18 @@
         <dd>Helper function to filter out sparse proteins</dd>
       </dl><dl><dt>
 
+          <code><a href="get_CVs.html">get_CVs()</a></code>
+
+        </dt>
+        <dd>Calculate Coefficient of Variation (CV) for Protein Groups</dd>
+      </dl><dl><dt>
+
+          <code><a href="get_PCs.html">get_PCs()</a></code>
+
+        </dt>
+        <dd>Calculate Principal Components Analysis (PCA)</dd>
+      </dl><dl><dt>
+
           <code><a href="get_overlap-protdata-character-method.html">get_overlap(<i>&lt;ProtData&gt;</i>,<i>&lt;character&gt;</i>)</a></code>
 
         </dt>
@@ -135,19 +141,19 @@
           <code><a href="get_pg_counts.html">get_pg_counts()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Get Protein Group Counts Per Sample</dd>
       </dl><dl><dt>
 
           <code><a href="get_spearman.html">get_spearman()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Calculate Pairwise Sample Correlations</dd>
       </dl><dl><dt>
 
           <code><a href="get_umap.html">get_umap()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Calculate UMAP Dimensionality Reduction</dd>
       </dl><dl><dt>
 
           <code><a href="gse_go.html">gse_go()</a></code>
@@ -162,22 +168,22 @@
         <dd>Title</dd>
       </dl><dl><dt>
 
-          <code><a href="impute.html">impute()</a></code>
+          <code><a href="impute-ProtData.html">impute()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Impute Missing Values with a Constant</dd>
       </dl><dl><dt>
 
-          <code><a href="impute_min.html">impute_min()</a></code>
+          <code><a href="impute_left_dist-ProtData.html">impute_left_dist()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Impute from a Down-Shifted Normal Distribution</dd>
       </dl><dl><dt>
 
-          <code><a href="impute_minimal.html">impute_minimal()</a></code>
+          <code><a href="impute_min-ProtData.html">impute_min()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Impute Missing Values with the Row Minimum</dd>
       </dl><dl><dt>
 
           <code><a href="log2_transform.html">log2_transform()</a></code>
@@ -192,16 +198,16 @@
         <dd>Performs a log10 transform of protein intensity values</dd>
       </dl><dl><dt>
 
-          <code><a href="mean_normalize.html">mean_normalize()</a></code>
+          <code><a href="mean_normalize-ProtData.html">mean_normalize()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Mean Normalization of Proteomics Data</dd>
       </dl><dl><dt>
 
-          <code><a href="median_normalize.html">median_normalize()</a></code>
+          <code><a href="median_normalize-ProtData.html">median_normalize()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Median Normalization of Proteomics Data</dd>
       </dl><dl><dt>
 
           <code><a href="num_samples.html">num_samples()</a></code>
@@ -213,31 +219,37 @@
           <code><a href="plot_CVs.html">plot_CVs()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Plot Coefficient of Variation (CV) Distributions</dd>
       </dl><dl><dt>
 
           <code><a href="plot_PCs.html">plot_PCs()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Plot Principal Component Analysis Results</dd>
       </dl><dl><dt>
 
           <code><a href="plot_correlation_heatmap.html">plot_correlation_heatmap()</a></code>
 
         </dt>
-        <dd>Plot a sample correlation heatmap with smart sorting</dd>
+        <dd>Plot a Sample Correlation Heatmap</dd>
       </dl><dl><dt>
 
           <code><a href="plot_hierarchical_cluster.html">plot_hierarchical_cluster()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Plot a Hierarchical Clustering Dendrogram of Samples</dd>
+      </dl><dl><dt>
+
+          <code><a href="plot_pg_counts.html">plot_pg_counts()</a></code>
+
+        </dt>
+        <dd>Plot Protein Group Counts</dd>
       </dl><dl><dt>
 
           <code><a href="plot_pg_intensities.html">plot_pg_intensities()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Plot Boxplots of Sample Intensity Distributions</dd>
       </dl><dl><dt>
 
           <code><a href="plot_plsda.html">plot_plsda()</a></code>
@@ -255,7 +267,7 @@
           <code><a href="plot_umap.html">plot_umap()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Plot UMAP Dimensionality Reduction Results</dd>
       </dl><dl><dt>
 
           <code><a href="plot_volcano.html">plot_volcano()</a></code>
@@ -264,22 +276,16 @@
         <dd>Plot a Volcano Plot for Differential Expression Results</dd>
       </dl><dl><dt>
 
-          <code><a href="remove_outliers-ProtData-method.html">remove_outliers(<i>&lt;ProtData&gt;</i>)</a></code>
+          <code><a href="remove_outliers.html">remove_outliers()</a></code>
 
         </dt>
-        <dd>Title</dd>
+        <dd>Filter Outlier Samples Based on Protein Counts</dd>
       </dl><dl><dt>
 
-          <code><a href="remove_sample-ProtData-method.html">remove_sample(<i>&lt;ProtData&gt;</i>)</a></code>
+          <code><a href="scale-ProtData.html">scale()</a></code>
 
         </dt>
-        <dd>Title</dd>
-      </dl><dl><dt>
-
-          <code><a href="scale.html">scale()</a></code>
-
-        </dt>
-        <dd>scales the protein intensities</dd>
+        <dd>Z-Score Transformation for Proteins Across Samples</dd>
       </dl><dl><dt>
 
           <code><a href="unique_data.html">unique_data()</a></code>
