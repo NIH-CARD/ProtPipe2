@@ -2,13 +2,50 @@
 % Please edit documentation in R/quality_control.R
 \name{plot_CVs}
 \alias{plot_CVs}
-\title{Title}
+\title{Plot Coefficient of Variation (CV) Distributions}
 \usage{
 plot_CVs(PD, condition, plot_type = "violin")
 }
 \arguments{
-\item{condition}{}
+\item{PD}{A \code{ProtData} object.}
+
+\item{condition}{A character string specifying the column name in the
+\code{condition} slot which defines the replicate groups.}
+
+\item{plot_type}{The type of plot to generate. Must be either \code{"violin"}
+(the default, which also includes a narrow boxplot) or \code{"jitter"}.}
+}
+\value{
+A \code{ggplot} object.
 }
 \description{
-Title
+Generates a violin or jitter plot to visualize the distribution of protein
+CVs for each experimental condition. This plot is useful for comparing the
+reproducibility and technical variance across different sample groups.
+}
+\examples{
+# Create sample data with two conditions, each with 3 replicates
+raw_data <- data.frame(
+  Protein.ID = paste0("Prot", 1:10),
+  Ctrl_1 = rnorm(10, 10, 1), Ctrl_2 = rnorm(10, 10, 1.5), Ctrl_3 = rnorm(10, 10, 1.2),
+  Treat_1 = rnorm(10, 15, 3), Treat_2 = rnorm(10, 15, 3.5), Treat_3 = rnorm(10, 15, 3.2)
+)
+cond_df <- data.frame(
+   SampleID = c("Ctrl_1", "Ctrl_2", "Ctrl_3", "Treat_1", "Treat_2", "Treat_3"),
+   group = c("Control", "Control", "Control", "Treatment", "Treatment", "Treatment")
+)
+pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+
+# Generate the default violin plot
+p_violin <- plot_CVs(pd_obj, condition = "group")
+if (interactive()) {
+  print(p_violin)
+}
+
+# Generate the jitter plot instead
+p_jitter <- plot_CVs(pd_obj, condition = "group", plot_type = "jitter")
+if (interactive()) {
+  print(p_jitter)
+}
+
 }

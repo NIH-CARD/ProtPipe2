@@ -2,16 +2,37 @@
 % Please edit documentation in R/0-prot_data.R
 \name{detect_intensity_cols}
 \alias{detect_intensity_cols}
-\title{Returns column indices that are numeric in a df}
+\title{Identify Numeric Columns by Index}
 \usage{
 detect_intensity_cols(df)
 }
 \arguments{
-\item{df}{}
+\item{df}{A \code{data.frame} to be scanned.}
 }
 \value{
-list of column numbers that re numeric (intensity)
+An integer vector containing the column indices of all numeric
+columns found in the input \code{data.frame}.
 }
 \description{
-Returns column indices that are numeric in a df
+A helper function that scans a data frame and returns the integer indices
+of the columns that contain numeric data.
+
+This is primarily used internally by data loading functions to automatically
+distinguish quantitative intensity columns from metadata columns.
 }
+\examples{
+# Create a sample data frame with mixed data types
+sample_df <- data.frame(
+  Protein = c("P02768", "P01023", "P10636"),
+  Gene = c("ALB", "A2M", "ACTB"),
+  Sample.1 = c(25.1, 22.4, 30.1),
+  Sample.2 = c(26.2, 21.9, 31.5),
+  IsContaminant = c(FALSE, FALSE, FALSE)
+)
+
+# Use the function to find the numeric columns
+# In this case, it should identify columns 3 and 4
+ProtPipe:::detect_intensity_cols(sample_df)
+
+}
+\keyword{internal}

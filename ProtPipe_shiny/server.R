@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize=5000 * 1024^2)
+#options(shiny.maxRequestSize=5000 * 1024^2)
 server <- function(input, output, session) {
 
   # Update hidden input$select based on which button was clicked
@@ -262,10 +262,25 @@ server <- function(input, output, session) {
     if(!is.null(input$batch_correct_column) && input$batch_correct == TRUE){
       PD <- ProtPipe::batch_correct(PD, input$batch_correct_column)
     }
-    #PD2 <<- PD
+
+    pdata <- base::cbind(PD@prot_meta, PD@data)
+    add_zip_tabular(pdata, "processed_data.tsv", "quality_control", zip_workspace, "output.zip")
+
     return(PD)
 
   })
+
+  output$download_data <- downloadHandler(
+    filename = function(){
+      paste("processed_data.tsv")
+    },
+    content = function(file){
+      data <- base::cbind(prot_data()@prot_meta, prot_data()@data)
+      write.table(data, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
+    }
+  )
+
+
 
 
 

@@ -2,16 +2,36 @@
 % Please edit documentation in R/quality_control.R
 \name{plot_pg_intensities}
 \alias{plot_pg_intensities}
-\title{Title}
+\title{Plot Boxplots of Sample Intensity Distributions}
 \usage{
 plot_pg_intensities(PD)
 }
 \arguments{
-\item{PD}{prot_data object}
+\item{PD}{A \code{ProtData} object.}
 }
 \value{
-ggplot boxplot of intensities for each sample
+A \code{ggplot} object showing a boxplot for each sample's
+log10-transformed intensity distribution.
 }
 \description{
-Title
+Generates boxplots to visualize and compare the distribution of protein
+intensities for each sample. This is a common quality control plot to check
+for normalization issues or identify potential outlier samples.
+}
+\examples{
+# Create sample data
+raw_data <- data.frame(
+  Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
+  SampleA = c(100, 200, 150, 120),
+  SampleB = c(110, 210, 160, 130), # Slightly higher than A
+  SampleC = c(250, 500, 400, 300)   # Higher median and spread
+)
+pd_obj <- create_protdata(dat = raw_data)
+
+# Generate the boxplot of intensities
+p <- plot_pg_intensities(pd_obj)
+if (interactive()) {
+  print(p)
+}
+
 }

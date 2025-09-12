@@ -7,7 +7,6 @@
 #' @return
 #' @export
 #'
-#' @examples
 setGeneric("do_t_test", function(object, treatment_samples, control_samples, meta_col) standardGeneric("do_t_test"))
 
 
@@ -18,7 +17,6 @@ setGeneric("do_t_test", function(object, treatment_samples, control_samples, met
 #' @return
 #' @export
 #'
-#' @examples
 setMethod("do_t_test", "ProtData", function(object, treatment_samples, control_samples) {
 
   col <- names(object@prot_meta)
@@ -131,7 +129,6 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 #' p-value, and adjusted p-value.
 #' @export
 #'
-#' @examples
 setGeneric("do_limma", function(object, treatment_samples, control_samples) standardGeneric("do_limma"))
 
 #' @describeIn do_limma Method for ProtData objects
@@ -186,7 +183,6 @@ setMethod("do_limma", "ProtData", function(object, treatment_samples, control_sa
 #' @return
 #' @export
 #'
-#' @examples
 setGeneric("do_limma_by_condition", function(object, condition, control_group, treatment_group) standardGeneric("do_limma_by_condition"))
 
 #' @describeIn do_limma Method for ProtData objects

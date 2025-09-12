@@ -2,13 +2,58 @@
 % Please edit documentation in R/clustering.R
 \name{plot_hierarchical_cluster}
 \alias{plot_hierarchical_cluster}
-\title{Title}
+\title{Plot a Hierarchical Clustering Dendrogram of Samples}
 \usage{
-plot_hierarchical_cluster(PD)
+plot_hierarchical_cluster(
+  object,
+  dist_method = "euclidean",
+  hclust_method = "complete"
+)
 }
 \arguments{
-\item{PD}{}
+\item{object}{A \code{ProtData} object. The data should be imputed.}
+
+\item{dist_method}{The distance measure to be used by \code{stats::dist}. Common
+options include \code{"euclidean"}, \code{"maximum"}, \code{"manhattan"}. Defaults to \code{"euclidean"}.}
+
+\item{hclust_method}{The agglomeration method to be used by \code{stats::hclust}.
+Common options include \code{"complete"}, \code{"ward.D2"}, \code{"average"}. Defaults to \code{"complete"}.}
+}
+\value{
+A \code{ggplot} object representing the dendrogram, which can be further
+customized.
 }
 \description{
-Title
+Performs hierarchical clustering on the samples based on their protein
+abundance profiles and generates a dendrogram plot using the \code{ggdendro}
+package.
+}
+\details{
+This function expects clean, imputed data. Missing values (\code{NA}) will cause
+an error. For meaningful biological results, it is highly recommended to use
+data that has been log-transformed and normalized before clustering.
+}
+\examples{
+# Create a sample ProtData object
+raw_data <- data.frame(
+  Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
+  SampleA = c(10, 20, 15, 12),
+  SampleB = c(11, 21, 16, 13), # Similar to A
+  SampleC = c(25, 10, 30, 5),
+  SampleD = c(26, 11, 31, 6)  # Similar to C
+)
+pd_obj <- create_protdata(dat = raw_data)
+
+# Run with default methods. We expect A/B and C/D to cluster together.
+p1 <- plot_hierarchical_cluster(pd_obj)
+if (interactive()) {
+  print(p1)
+}
+
+# Run with different methods
+p2 <- plot_hierarchical_cluster(pd_obj, dist_method = "manhattan", hclust_method = "ward.D2")
+if (interactive()) {
+  print(p2)
+}
+
 }

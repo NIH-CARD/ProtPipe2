@@ -25,9 +25,9 @@ setClass("ProtData",
 #'
 #' This function creates an instance of the ProtData class.
 #'
-#' @param data A data frame containing proteomics data (proteins are rows, samples are columns).
+#' @param dat A data frame containing proteomics data (proteins are rows, samples are columns).
+#' @intensity_cols vector of column indices corresponding to protein intensities. This will default to numeric columns.Optional.
 #' @param condition A data frame containing conditions of the samples. Rownames should match colnames of data. Optional.
-#' @param prot_meta A data frame containing metadata for the proteins (rows). Optional.
 #' @param method A character string describing the method used for generating the data. Optional.
 #'
 #' @return An instance of the ProtData class.
@@ -142,14 +142,37 @@ create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method
       method = method)
 }
 
-#' Returns column indices that are numeric in a df
+#' Identify Numeric Columns by Index
 #'
-#' @param df
+#' @description
+#' A helper function that scans a data frame and returns the integer indices
+#' of the columns that contain numeric data.
 #'
-#' @return list of column numbers that re numeric (intensity)
-#' @export
+#' This is primarily used internally by data loading functions to automatically
+#' distinguish quantitative intensity columns from metadata columns.
+#'
+#' @param df A `data.frame` to be scanned.
+#'
+#' @return An integer vector containing the column indices of all numeric
+#'   columns found in the input `data.frame`.
+#'
+#' @keywords internal
 #'
 #' @examples
+#' # Create a sample data frame with mixed data types
+#' sample_df <- data.frame(
+#'   Protein = c("P02768", "P01023", "P10636"),
+#'   Gene = c("ALB", "A2M", "ACTB"),
+#'   Sample.1 = c(25.1, 22.4, 30.1),
+#'   Sample.2 = c(26.2, 21.9, 31.5),
+#'   IsContaminant = c(FALSE, FALSE, FALSE)
+#' )
+#'
+#' # Use the function to find the numeric columns
+#' # In this case, it should identify columns 3 and 4
+#' ProtPipe:::detect_intensity_cols(sample_df)
+#'
+#' @export
 detect_intensity_cols <- function(df) {
   which(sapply(df, is.numeric))
 }
@@ -255,7 +278,6 @@ setMethod("setProtMethod",
 #' @return number of samples
 #' @export
 #'
-#' @examples
 setGeneric("num_samples", function(object) standardGeneric("num_samples"))
 setMethod("num_samples", "ProtData", function(object) {
   return(as.numeric(ncol(object@data)))
@@ -268,7 +290,6 @@ setMethod("num_samples", "ProtData", function(object) {
 #' @return A ProtData object.
 #' @export
 #'
-#' @examples
 setGeneric("log2_transform", function(object) standardGeneric("log2_transform"))
 setMethod("log2_transform", "ProtData", function(object) {
   object@data <- object@data %>%
@@ -283,7 +304,6 @@ setMethod("log2_transform", "ProtData", function(object) {
 #' @return A ProtData object.
 #' @export
 #'
-#' @examples
 setGeneric("log_transform", function(object) standardGeneric("log_transform"))
 setMethod("log_transform", "ProtData", function(object) {
   object@data <- object@data %>%
@@ -291,31 +311,100 @@ setMethod("log_transform", "ProtData", function(object) {
   return(object)
 })
 
-#' scales the protein intensities
+#' Z-Score Transformation for Proteins Across Samples
 #'
-#' @param PD A ProtData object.
+#' @description
+#' This method performs a Z-score transformation on a protein-wise (row-wise)
+#' basis. For each protein, it calculates the mean and standard deviation of its
+#' abundance across all samples and then scales the values accordingly.
 #'
-#' @return A ProtData object.
+#' This is a standard transformation for visualizing expression patterns in a
+#' heatmap, as it highlights the relative change of each protein across samples,
+#' independent of its absolute abundance.
+#'
+#' @param object A `ProtData` object.
+#'
+#' @return A `ProtData` object where the abundance values in the `@data` slot
+#'   have been replaced by their row-wise Z-scores.
+#'
 #' @export
+#' @rdname scale-ProtData
+#' @aliases scale,ProtData-method
+#'
+#' @seealso [base::scale()]
 #'
 #' @examples
+#' # Create sample data with proteins as rows
+#' df <- data.frame(
+#'   SampleA = c(100, 250, 50),
+#'   SampleB = c(120, 200, 100),
+#'   SampleC = c(110, 225, 75),
+#'   row.names = c("Protein1", "Protein2", "Protein3")
+#' )
+#'
+#' conditions <- data.frame(
+#'   row.names = colnames(df),
+#'   group = c("Control", "Treatment", "Control")
+#' )
+#'
+#' prot_obj <- new("ProtData",
+#'                 data = df,
+#'                 condition = conditions,
+#'                 method = "MS")
+#'
+#' # Check the means of each protein (row) before scaling
+#' rowMeans(prot_obj@data)
+#'
+#' # Apply the scaling method
+#' scaled_prot_obj <- scale(prot_obj)
+#'
+#' # The new data has row means near zero and row standard deviations of one
+#' print(scaled_prot_obj@data)
+#' cat("Row means after scaling:\n")
+#' print(rowMeans(scaled_prot_obj@data))
+#' cat("\nRow standard deviations after scaling:\n")
+#' print(apply(scaled_prot_obj@data, 1, sd))
+#'
 setGeneric("scale", function(object) standardGeneric("scale"))
+
 setMethod("scale", "ProtData", function(object) {
-  object@data <- t(base::scale(t(object@data)))%>%
+  # Transpose, scale columns (which are now proteins), and transpose back
+  object@data <- t(base::scale(t(object@data))) %>%
     as.data.frame()
   return(object)
 })
 
 # normalization methods
 
-#' Title
+#' Median Normalization of Proteomics Data
 #'
-#' @param object
+#' @description
+#' Performs median normalization on the quantitative data within a `ProtData`
+#' object. This method corrects for systematic, sample-specific biases (e.g.,
+#' differences in sample loading or instrument sensitivity) to make the samples
+#' more comparable.
 #'
-#' @return
+#' The function operates by first calculating the median intensity for each
+#' sample (column). It then calculates the median of these medians (the "global
+#' median"). Finally, it scales the intensities in each sample by a
+#' multiplicative factor so that every sample has the same median abundance,
+#' equal to the global median.
+#'
+#' @details
+#' This type of multiplicative adjustment is typically appropriate for raw,
+#' non-log-transformed intensity data.
+#'
+#' @param object A `ProtData` object containing the abundance data to be
+#'   normalized.
+#'
+#' @return A `ProtData` object with the abundance data in the `@data` slot
+#'   normalized by the median-centering method.
+#'
 #' @export
+#' @rdname median_normalize-ProtData
+#' @aliases median_normalize,ProtData-method
 #'
-#' @examples
+#'
 setGeneric("median_normalize", function(object) standardGeneric("median_normalize"))
 setMethod("median_normalize", "ProtData", function(object) {
   medians <- apply(object@data, 2, median, na.rm = TRUE) # per-sample medians
@@ -324,14 +413,29 @@ setMethod("median_normalize", "ProtData", function(object) {
   return(object)
 })
 
-#' Title
+#' Mean Normalization of Proteomics Data
 #'
-#' @param object
+#' @description
+#' Corrects for sample-specific biases by scaling each sample (column) to have
+#' the same mean abundance.
 #'
-#' @return
+#' This method adjusts each sample's intensities by a multiplicative factor,
+#' aligning the mean of every sample to a global mean calculated from the
+#' entire dataset.
+#'
+#' @details
+#' This multiplicative adjustment is typically used for raw, non-log-transformed
+#' intensity data.
+#'
+#' @param object A `ProtData` object containing abundance data.
+#'
+#' @return A `ProtData` object with its data normalized by the mean-centering
+#'   method.
+#'
 #' @export
+#' @rdname mean_normalize-ProtData
+#' @aliases mean_normalize,ProtData-method
 #'
-#' @examples
 setGeneric("mean_normalize", function(object) standardGeneric("mean_normalize"))
 setMethod("mean_normalize", "ProtData", function(object) {
   means <- apply(object@data, 2, mean, na.rm = TRUE)  # per-sample means
@@ -342,15 +446,40 @@ setMethod("mean_normalize", "ProtData", function(object) {
 
 # imputation methods
 
-#' Title
+#' Impute Missing Values with a Constant
 #'
-#' @param object
-#' @param value
+#' @description
+#' Replaces all missing values (`NA` and `NaN`) in the numeric columns of the
+#' data with a single, user-specified constant.
 #'
-#' @return
+#' @param object A `ProtData` object containing data with missing values.
+#' @param value The numeric constant to use for replacing `NA` and `NaN` values.
+#'
+#' @return A `ProtData` object with missing values imputed.
+#'
 #' @export
+#' @rdname impute-ProtData
+#' @aliases impute,ProtData-method
 #'
 #' @examples
+#' # Create a sample data frame with metadata and a missing numeric value
+#' raw_data <- data.frame(
+#'   Protein.ID = c("P02768", "P01023", "P60709"),
+#'   Gene.Name = c("ALB", "A2M", "ACTB"),
+#'   Sample_A = c(1.2e6, 2.3e6, NA),
+#'   Sample_B = c(1.4e6, 2.6e6, 4.8e6)
+#' )
+#'
+#' # Use the constructor to create a ProtData object.
+#' # The constructor will automatically separate metadata from numeric data.
+#' pd_obj <- create_protdata(dat = raw_data)
+#'
+#' # Impute the NA with 0
+#' imputed_obj <- impute(pd_obj, value = 0)
+#'
+#' # View the imputed data slot
+#' print(imputed_obj@data)
+#'
 setGeneric("impute", function(object, value) standardGeneric("impute"))
 setMethod("impute", "ProtData", function(object, value) {
   object@data <- object@data %>%
@@ -359,17 +488,49 @@ setMethod("impute", "ProtData", function(object, value) {
 })
 
 
-#' Title
+#' Impute Missing Values with the Row Minimum
 #'
-#'Imputes missing values as alpha * minimum values per protein
+#' @description
+#' Performs row-wise minimum imputation. For each protein (row), it replaces
+#' missing values (`NA`, `NaN`) with the minimum observed value found in that
+#' same row.
 #'
-#' @param object
-#' @param value
+#' The imputation value can be scaled by a multiplicative factor `alpha`.
 #'
-#' @return
+#' @param object A `ProtData` object containing data with missing values.
+#' @param alpha A numeric scaling factor to multiply the row minimum by before
+#'   imputation. Defaults to 1 (no scaling).
+#'
+#' @return A `ProtData` object with missing values imputed on a per-protein basis.
+#'
 #' @export
+#' @rdname impute_min-ProtData
+#' @aliases impute_min,ProtData-method
 #'
 #' @examples
+#' # Create data with different minimums and NAs in each row
+#' raw_data <- data.frame(
+#'   Gene = c("GENEA", "GENEB"),
+#'   SampleA = c(100, 500),
+#'   SampleB = c(200, 600),
+#'   SampleC = c(NA, NA)
+#' )
+#'
+#' pd_obj <- create_protdata(dat = raw_data)
+#' cat("Original Data:\n")
+#' print(pd_obj@data)
+#'
+#' # Impute using the row minimum (alpha = 1)
+#' # Row 1's NA becomes 100; Row 2's NA becomes 500.
+#' imputed_obj <- impute_min(pd_obj)
+#' cat("\nImputed with alpha = 1:\n")
+#' print(imputed_obj@data)
+#'
+#' # Impute using 90% of the row minimum
+#' imputed_scaled <- impute_min(pd_obj, alpha = 0.9)
+#' cat("\nImputed with alpha = 0.9:\n")
+#' print(imputed_scaled@data)
+#'
 setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min"))
 setMethod("impute_min", "ProtData", function(object, alpha=1) {
   object@data <- t(apply(object@data, 1, function(x) {
@@ -381,17 +542,54 @@ setMethod("impute_min", "ProtData", function(object, alpha=1) {
 })
 
 
-#' Title
+#' Impute from a Down-Shifted Normal Distribution
 #'
-#' @param object
-#' @param value
+#' @description
+#' Performs row-wise imputation by drawing random values from a normal
+#' distribution that is shifted to the left and narrower than the distribution of
+#' observed values.
 #'
-#' @return
+#' This method assumes that missing values are primarily from proteins with low
+#' abundance (i.e., below the detection limit). The default `shift` and `scale`
+#' values are based on those used in the Perseus analysis platform.
+#'
+#' @details
+#' This imputation method should be applied to log-transformed data, as the
+#' underlying assumption of a normal distribution is more appropriate in log space.
+#'
+#' @param object A `ProtData` object containing data with missing values.
+#' @param shift A numeric value specifying how many standard deviations to shift
+#'   the mean of the distribution for imputed values. Default is 1.8.
+#' @param scale A numeric value to scale the standard deviation of the
+#'   distribution for imputed values. Default is 0.3.
+#'
+#' @return A `ProtData` object with missing values imputed from a simulated
+#'   low-abundance distribution.
+#'
 #' @export
+#' @rdname impute_left_dist-ProtData
+#' @aliases impute_left_dist,ProtData-method
 #'
 #' @examples
-setGeneric("impute_minimal", function(object, shift = 1.8, scale = 0.3) standardGeneric("impute_minimal"))
-setMethod("impute_minimal", "ProtData", function(object, shift = 1.8, scale = 0.3) {
+#' # Create data with NAs, typically representing log-transformed values
+#' raw_data <- data.frame(
+#'   Gene = c("GENEA", "GENEB"),
+#'   SampleA = c(25.1, 28.5),
+#'   SampleB = c(25.5, 28.9),
+#'   SampleC = c(NA, NA)
+#' )
+#'
+#' pd_obj <- create_protdata(dat = raw_data)
+#'
+#' # For reproducibility of the random imputation
+#' set.seed(123)
+#'
+#' imputed_obj <- impute_left_dist(pd_obj)
+#' cat("Data after imputation:\n")
+#' print(imputed_obj@data)
+#'
+setGeneric("impute_left_dist", function(object, shift = 1.8, scale = 0.3) standardGeneric("impute_left_dist"))
+setMethod("impute_left_dist", "ProtData", function(object, shift = 1.8, scale = 0.3) {
   imputed_data <- t(apply(object@data, 1, function(x) {
     mu <- mean(x, na.rm = TRUE)
     sigma <- sd(x, na.rm = TRUE)
@@ -429,7 +627,6 @@ setMethod("impute_minimal", "ProtData", function(object, shift = 1.8, scale = 0.
 #' @return
 #' @export
 #'
-#' @examples
 setGeneric("batch_correct",
            def = function(object, batch_variable, bio_variables = NULL) {
              standardGeneric("batch_correct")
@@ -506,7 +703,6 @@ setMethod("batch_correct",
 #' @return
 #' @export
 #'
-#' @examples
 setGeneric("unique_data", function(object, col = NULL) standardGeneric("unique_data"))
 setMethod("unique_data", "ProtData", function(object, col = NULL) {
   if (is.null(col)) {
@@ -618,7 +814,6 @@ trim_names <- function(names) {
 #' @return
 #' @export
 #'
-#' @examples
 convert_numeric_cols <- function(df) {
 
   # Regex for a valid number string (handles integers, decimals, scientific notation)

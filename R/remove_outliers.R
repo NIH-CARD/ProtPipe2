@@ -1,24 +1,43 @@
-#' @importFrom magrittr %>%
-
-#' Title
+#' Filter Outlier Samples Based on Protein Counts
 #'
-#' @param object
-#' @param sds
+#' @description
+#' This function identifies and removes entire samples that are considered outliers
+#' based on the total number of non-missing proteins identified within them.
 #'
-#' @return
+#' The method calculates the mean and standard deviation of protein counts across
+#' all samples. A sample is flagged as an outlier if its total protein count
+#' falls outside the range defined by a specified number of standard deviations
+#' (`sds`) from the mean.
+#'
+#' @param object A `ProtData` object.
+#' @param sds The number of standard deviations from the mean protein count to use
+#'   as the outlier threshold. Defaults to 3.
+#'
+#' @return A `ProtData` object with the outlier samples removed from the `data`
+#'   and `condition` slots.
+#'
 #' @export
 #'
 #' @examples
+#' # Create data where one sample has a very low number of identified proteins
+#' raw_data <- data.frame(
+#'   Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
+#'   SampleA = c(10, 11, 12, 13),
+#'   SampleB = c(12, 13, 14, 15),
+#'   SampleC = c(11, 12, 13, 14),
+#'   SampleD_outlier = c(NA, NA, NA, 5) # Only one protein found
+#' )
+#'
+#' pd_obj <- create_protdata(dat = raw_data)
+#' cat("Dimensions before removing outliers:", dim(pd_obj@data), "\n")
+#'
+#' # With sds=1, the outlier sample should be identified and removed.
+#' filtered_obj <- remove_outliers(pd_obj, sds = 1)
+#' cat("Dimensions after removing outliers:", dim(filtered_obj@data), "\n")
+#' print(colnames(filtered_obj@data))
+#'
 setGeneric("remove_outliers", function(object, sds = 3) standardGeneric("remove_outliers"))
 
-#' Title
-#'
-#' @param ProtData
-#'
-#' @return
-#' @export
-#'
-#' @examples
 setMethod("remove_outliers",
           "ProtData",
           function(object, sds = 3){

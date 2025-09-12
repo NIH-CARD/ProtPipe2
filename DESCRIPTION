@@ -9,34 +9,35 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports:
-  ggplot2,
-	data.table,
-	corrplot,
-	umap,
-	magick,
-	ggdendro,
-	ecodist,
-	ggbeeswarm,
-	ggrepel,
-	ggthemes,
-	foreach,
-	reshape2,
-	clusterProfiler,
-	org.Hs.eg.db,
-	DOSE,
-	enrichplot,
-	limma,
-	dplyr,
-	DescTools,
-	matrixStats,
-	stats,
-	rlang,
-	SomaDataIO,
-	mixOmics,
-	Hmisc
+    ggplot2,
+    data.table,
+    corrplot,
+    umap,
+    magick,
+    ggdendro,
+    ecodist,
+    ggbeeswarm,
+    ggrepel,
+    ggthemes,
+    foreach,
+    reshape2,
+    clusterProfiler,
+    org.Hs.eg.db,
+    DOSE,
+    enrichplot,
+    limma,
+    dplyr,
+    DescTools,
+    matrixStats,
+    stats,
+    rlang,
+    SomaDataIO,
+    mixOmics,
+    Hmisc,
+    magrittr
 URL: https://nih-card.github.io/ProtPipe2/

@@ -2,13 +2,41 @@
 % Please edit documentation in R/quality_control.R
 \name{get_spearman}
 \alias{get_spearman}
-\title{Title}
+\title{Calculate Pairwise Sample Correlations}
 \usage{
 get_spearman(PD, method = "spearman")
 }
 \arguments{
-\item{method}{}
+\item{PD}{A \code{ProtData} object.}
+
+\item{method}{The correlation method to use. Can be one of \code{"spearman"} (the
+default), \code{"pearson"}, or \code{"kendall"}.}
+}
+\value{
+A \code{data.table} with three columns: \code{SampleA}, \code{SampleB}, and a third
+column named for the method used (e.g., \code{Spearman}), containing the
+pairwise correlation coefficients.
 }
 \description{
-Title
+Computes a pairwise correlation matrix for all samples based on their protein
+intensity profiles. The result is returned in a long "tidy" format data table.
+}
+\details{
+The function name is \code{get_spearman}, but it can compute other correlation
+coefficients by changing the \code{method} argument.
+}
+\examples{
+# Create sample data
+raw_data <- data.frame(
+  Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
+  SampleA = c(10, 20, 15, 12),
+  SampleB = c(11, 21, 16, 13), # Correlated with A
+  SampleC = c(25, 10, 30, 5)   # Not correlated with A/B
+)
+pd_obj <- create_protdata(dat = raw_data)
+
+# Get the spearman correlation table
+corr_table <- get_spearman(pd_obj)
+print(corr_table)
+
 }

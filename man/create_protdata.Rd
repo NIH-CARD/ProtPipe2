@@ -12,13 +12,11 @@ create_protdata(
 )
 }
 \arguments{
+\item{dat}{A data frame containing proteomics data (proteins are rows, samples are columns).}
+
 \item{condition}{A data frame containing conditions of the samples. Rownames should match colnames of data. Optional.}
 
 \item{method}{A character string describing the method used for generating the data. Optional.}
-
-\item{data}{A data frame containing proteomics data (proteins are rows, samples are columns).}
-
-\item{prot_meta}{A data frame containing metadata for the proteins (rows). Optional.}
 }
 \value{
 An instance of the ProtData class.

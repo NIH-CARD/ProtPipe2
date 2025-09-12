@@ -5,4 +5,6 @@ source("ui.R")
 source("server.R")
 source("helpers.R")
 
+set.seed(100)
+
 shinyApp(ui = ui, server = server)

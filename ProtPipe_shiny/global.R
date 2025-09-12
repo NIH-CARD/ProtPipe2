@@ -11,6 +11,7 @@ library(org.Rn.eg.db)
 library(org.Dm.eg.db)
 library(org.Ce.eg.db)
 
+
 # Define static organism mapping to use throughout the app
 organism_map <- list(
   "Human"     = list(OrgDb = org.Hs.eg.db, kegg = "hsa"),
@@ -19,9 +20,6 @@ organism_map <- list(
   "Fly"       = list(OrgDb = org.Dm.eg.db, kegg = "dme"),
   "Nematode"  = list(OrgDb = org.Ce.eg.db, kegg = "cel")
 )
-
-# increase file size limit
-options(shiny.maxRequestSize = 30*1024^2)
 
 package_list = c('ggplot2', 'data.table', 'corrplot', 'umap', 'magick', 'ggdendro', 'ecodist','ggbeeswarm',
                  'ggrepel', 'ggthemes', 'foreach','reshape2','org.Hs.eg.db','clusterProfiler','pheatmap')

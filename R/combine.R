@@ -7,7 +7,6 @@
 #' @return
 #' @export
 #'
-#' @examples
 combine <- function(PD_list){
   #make sure each element in PD_list is of class ProtData
   # Ensure each element in PD_list is of class ProtData

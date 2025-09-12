@@ -2,13 +2,41 @@
 % Please edit documentation in R/clustering.R
 \name{get_umap}
 \alias{get_umap}
-\title{Title}
+\title{Calculate UMAP Dimensionality Reduction}
 \usage{
-get_umap(PD, neighbors = 15, condition = NA)
+get_umap(object, condition = NA, neighbors = 15, ...)
 }
 \arguments{
-\item{neighbors}{}
+\item{object}{A \code{ProtData} object. The data should be imputed.}
+
+\item{condition}{A character string specifying the column name in the
+\code{condition} slot to use for labeling points. If \code{NULL} (the default), it
+will attempt to guess groups from sample names.}
+
+\item{neighbors}{The size of the local neighborhood UMAP will look at. This is a
+key hyperparameter affecting the balance between local and global structure.
+Defaults to 15.}
+
+\item{...}{Additional arguments passed on to the \code{umap::umap} function (e.g.,
+\code{min_dist}, \code{n_epochs}, \code{metric}).}
+}
+\value{
+A \code{data.table} with columns for \code{Sample}, \code{UMAP1}, \code{UMAP2}, and \code{Condition}.
 }
 \description{
-Title
+Performs Uniform Manifold Approximation and Projection (UMAP) on the samples
+to generate a 2D embedding. This is a powerful non-linear method for
+visualizing sample relationships. This function serves as a wrapper for the
+\code{umap::umap} function.
+}
+\details{
+This function expects clean, imputed data. Missing values (\code{NA}) will cause
+an error. For meaningful results, it is highly recommended to use data that has
+been log-transformed and normalized.
+
+\strong{Important:} UMAP is a stochastic algorithm, meaning it will produce slightly
+different results each time it is run. For reproducible results, you \strong{must set
+a seed} (e.g., \code{set.seed(123)}) before calling this function.
+
+This function requires the \code{umap} package to be installed from CRAN.
 }

@@ -1,5 +1,5 @@
 
-options(shiny.maxRequestSize=5000 * 1024^2)
+#options(shiny.maxRequestSize=5000 * 1024^2)
 source("helpers.R")
 
 
@@ -71,7 +71,7 @@ ui <- page_sidebar(
                                          ),
                               )),
                      card(
-                       h3("Parameters"),
+                       h3("Pre-processing"),
                        fluidRow(
                          column(width = 6,
                          card(h4("Normalization"),
@@ -92,7 +92,7 @@ ui <- page_sidebar(
                               checkboxInput("impute", label = "impute", value = FALSE),
                               selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimun", "left-shifted distribution"), selected = "zero")))
                        ),
-                       downloadButton("download_data", "Download processed data")
+                       downloadButton("download_data", "Download pre-processed data")
                      )
                    )
   ),

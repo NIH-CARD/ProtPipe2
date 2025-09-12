@@ -2,13 +2,38 @@
 % Please edit documentation in R/quality_control.R
 \name{get_pg_counts}
 \alias{get_pg_counts}
-\title{Title}
+\title{Get Protein Group Counts Per Sample}
 \usage{
 get_pg_counts(PD)
 }
 \arguments{
-\item{PD}{}
+\item{PD}{A \code{ProtData} object.}
+}
+\value{
+A data frame with two columns: \code{Sample} (the sample names) and \code{N}
+(the count of non-NA proteins for that sample).
 }
 \description{
-Title
+Calculates the number of non-missing protein groups (or features) for each
+sample in a ProtData object.
+}
+\examples{
+# Create a sample ProtData object with some missing values
+raw_data <- data.frame(
+  Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
+  SampleA = c(10, 11, NA, 13),
+  SampleB = c(12, 13, 14, 15),
+  SampleC = c(NA, NA, 13, 14)
+)
+pd_obj <- create_protdata(dat = raw_data)
+
+# Get the protein counts for each sample
+counts <- get_pg_counts(pd_obj)
+print(counts)
+# Expected output:
+#   Sample N
+# 1 SampleA 3
+# 2 SampleB 4
+# 3 SampleC 2
+
 }

@@ -2,13 +2,61 @@
 % Please edit documentation in R/clustering.R
 \name{plot_umap}
 \alias{plot_umap}
-\title{Title}
+\title{Plot UMAP Dimensionality Reduction Results}
 \usage{
-plot_umap(PD, neighbors = 15, condition = NA)
+plot_umap(object, condition = NA, neighbors = 15, ...)
 }
 \arguments{
-\item{PD}{}
+\item{object}{A \code{ProtData} object. The data should be imputed.}
+
+\item{condition}{A character string specifying the column name in the
+\code{condition} slot to use for coloring the points. If \code{NULL} (the default),
+\code{get_umap} will attempt to guess groups from sample names.}
+
+\item{neighbors}{The size of the local neighborhood for the UMAP calculation.}
+
+\item{...}{Additional arguments passed on to \code{get_umap}, and in turn to
+the \code{umap::umap} function (e.g., \code{min_dist}, \code{metric}).}
+}
+\value{
+A \code{ggplot} object, which can be further customized or printed.
 }
 \description{
-Title
+Generates a 2D scatter plot of UMAP results to visualize sample relationships.
+This is a convenient wrapper function that first calls \code{get_umap} to calculate
+the coordinates and then plots them using \code{ggplot2}.
+}
+\details{
+This function requires imputed, log-transformed, and normalized data for the
+best results, as these are the best inputs for the wrapped \code{get_umap} function.
+
+\strong{Important:} UMAP is a stochastic algorithm. For a reproducible plot, you
+\strong{must set a seed} (e.g., \code{set.seed(123)}) \emph{before} calling this function.
+
+This function requires the \code{umap} and \code{ggplot2} packages.
+}
+\examples{
+# This example requires the 'umap' package
+if (requireNamespace("umap", quietly = TRUE)) {
+  # Create a sample ProtData object
+  raw_data <- data.frame(
+    Gene = paste0("GENE", 1:10),
+    Control_1 = rnorm(10, 10), Control_2 = rnorm(10, 10),
+    Treat_A_1 = rnorm(10, 12), Treat_A_2 = rnorm(10, 12),
+    Treat_B_1 = rnorm(10, 15), Treat_B_2 = rnorm(10, 15)
+  )
+  pd_obj <- create_protdata(dat = raw_data)
+
+  # For reproducible UMAP results, set a seed!
+  set.seed(42)
+
+  # Generate the UMAP plot
+  p <- plot_umap(pd_obj, n_neighbors = 3)
+
+  # The plot can be printed in an interactive session
+  if (interactive()) {
+    print(p)
+  }
+}
+
 }

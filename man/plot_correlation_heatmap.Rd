@@ -2,22 +2,53 @@
 % Please edit documentation in R/quality_control.R
 \name{plot_correlation_heatmap}
 \alias{plot_correlation_heatmap}
-\title{Plot a sample correlation heatmap with smart sorting}
+\title{Plot a Sample Correlation Heatmap}
 \usage{
 plot_correlation_heatmap(PD, order_by = NULL, label_by = NULL)
 }
 \arguments{
-\item{PD}{A ProtData object.}
+\item{PD}{A \code{ProtData} object.}
 
-\item{order_by}{A single character string specifying a column in the condition
-slot by which to order the samples on the heatmap axes. Handles numeric sorting for labels like 'Day14'.}
+\item{order_by}{Optional. A character string specifying a column in the
+condition slot by which to order the samples on the heatmap axes. If the
+column contains numeric parts, a natural sort is applied.}
 
-\item{label_by}{A single character string specifying a column in the condition
-slot to use for axis annotations. Default is NULL.}
+\item{label_by}{Optional. A character string specifying a column in the
+condition slot to use for relabeling the heatmap axes.}
 }
 \value{
-A ggplot object representing the heatmap.
+A \code{ggplot} object representing the heatmap.
 }
 \description{
-Plot a sample correlation heatmap with smart sorting
+Creates a heatmap of pairwise sample correlations, calculated via the Spearman
+method. The function includes a "smart sorting" feature to correctly order
+axes based on numeric parts of labels (e.g., "Day1", "Day2", "Day10").
+}
+\examples{
+# Create sample data with timepoints for sorting
+raw_data <- data.frame(
+  Gene = paste0("G", 1:5),
+  Sample_D10 = rnorm(5, 15), # Treatment
+  Sample_D1 = rnorm(5, 10),  # Control
+  Sample_D2 = rnorm(5, 10)   # Control
+)
+cond_df <- data.frame(
+  SampleID = c("Sample_D1", "Sample_D2", "Sample_D10"),
+  Timepoint = c("Day1", "Day2", "Day10"),
+  Group = c("Control", "Control", "Treatment")
+)
+pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+
+# Example 1: Default alphanumeric sorting (D1, D10, D2)
+p1 <- plot_correlation_heatmap(pd_obj)
+if (interactive()) print(p1)
+
+# Example 2: Smart sorting by 'Timepoint' (D1, D2, D10)
+p2 <- plot_correlation_heatmap(pd_obj, order_by = "Timepoint")
+if (interactive()) print(p2)
+
+# Example 3: Smart sorting and relabeling by 'Group'
+p3 <- plot_correlation_heatmap(pd_obj, order_by = "Timepoint", label_by = "Group")
+if (interactive()) print(p3)
+
 }
