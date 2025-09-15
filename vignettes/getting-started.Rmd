@@ -32,17 +32,51 @@ Our analysis begins with two primary data frames:
 
 ```{r create-data}
 # 1. Create a sample raw data frame
-raw_data <- data.frame(
-  ProteinID = paste0("P", 1:10),
-  Gene = paste0("GENE", LETTERS[1:10]),
-  Ctrl_1 = rnorm(10, 25, 2), Ctrl_2 = rnorm(10, 25, 2.5), Ctrl_3 = rnorm(10, 25, 2.2),
-  Treat_1 = rnorm(10, 28, 3), Treat_2 = rnorm(10, 28, 3.5), Treat_3 = rnorm(10, 28, 3.2)
-)
-# Introduce some missing values, common in proteomics
-raw_data$Ctrl_1[c(2, 5)] <- NA
-raw_data$Treat_1[8] <- NA
+# 1. Create a more realistic sample raw data frame
+# We will simulate 50 genes in total:
+# - 40 genes that are stable (no change between conditions)
+# - 5 genes that are up-regulated in the Treatment group
+# - 5 genes that are down-regulated in the Treatment group
+n_stable <- 40
+n_up <- 5
+n_down <- 5
+n_total <- n_stable + n_up + n_down
 
-# 2. Create a sample condition data frame
+# Set means for each group for log2-scale data
+mean_stable <- 25
+mean_up <- 28  # Higher expression
+mean_down <- 22 # Lower expression
+
+# Note: set.seed() makes the random data reproducible
+set.seed(123) 
+
+# Simulate data for each sample group
+data <- data.frame(
+  Ctrl_1 = rnorm(n_total, mean = mean_stable, sd = 2),
+  Ctrl_2 = rnorm(n_total, mean = mean_stable, sd = 2.5),
+  Ctrl_3 = rnorm(n_total, mean = mean_stable, sd = 2.2),
+  Treat_1 = c(rnorm(n_stable, mean_stable, 2), rnorm(n_up, mean_up, 2), rnorm(n_down, mean_down, 2)),
+  Treat_2 = c(rnorm(n_stable, mean_stable, 2.5), rnorm(n_up, mean_up, 2.5), rnorm(n_down, mean_down, 2.5)),
+  Treat_3 = c(rnorm(n_stable, mean_stable, 2.2), rnorm(n_up, mean_up, 2.2), rnorm(n_down, mean_down, 2.2))
+)
+
+# Introduce some missing values (NAs) to make it more realistic
+# Set ~5% of the intensity values to NA
+num_cells <- ncol(data) * n_total
+na_indices <- sample(num_cells, size = round(0.05 * num_cells))
+data <- as.matrix(data)
+data[na_indices] <- NA
+data <- as.data.frame(data)
+
+# Combine into a single data frame with protein metadata
+raw_data <- data.frame(
+  ProteinID = paste0("P", 1:n_total),
+  Gene = paste0("GENE", 1:n_total),
+  Status = c(rep("Stable", n_stable), rep("Upregulated", n_up), rep("Downregulated", n_down)),
+  data
+)
+
+# 2. Create the corresponding condition data frame
 cond_df <- data.frame(
    SampleID = c("Ctrl_1", "Ctrl_2", "Ctrl_3", "Treat_1", "Treat_2", "Treat_3"),
    group = c("Control", "Control", "Control", "Treatment", "Treatment", "Treatment"),
@@ -50,7 +84,7 @@ cond_df <- data.frame(
 )
 
 # 3. Use the constructor to create the ProtData object
-pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+pd_obj <- ProtPipe::create_protdata(dat = raw_data, condition = cond_df)
 
 # We can inspect the created object
 print(pd_obj)
@@ -66,13 +100,13 @@ We can check the number of proteins identified in each sample and visualize the 
 
 ```{r qc-plots}
 # Get the number of identified proteins per sample
-get_pg_counts(pd_obj)
+ProtPipe::get_pg_counts(pd_obj)
 
 # Plot the counts for each sample
-plot_pg_counts(pd_obj)
+ProtPipe::plot_pg_counts(pd_obj)
 
 # Plot the intensity distributions for each sample
-plot_pg_intensities(pd_obj)
+ProtPipe::plot_pg_intensities(pd_obj)
 ```
 These plots help us identify any samples that behave as strong outliers.
 
@@ -81,7 +115,7 @@ These plots help us identify any samples that behave as strong outliers.
 Next, we can assess the reproducibility between replicates by plotting a correlation heatmap. Samples from the same condition should generally cluster together.
 
 ```{r correlation-heatmap}
-plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group")
+ProtPipe::plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group")
 ```
 
 ## Data Pre-processing
@@ -91,10 +125,10 @@ plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group")
 ### Normalization
 Here, we apply median normalization to align the intensity distributions across all samples.
 ```{r normalization}
-pd_obj_normalized <- median_normalize(pd_obj)
+pd_obj_normalized <- ProtPipe::median_normalize(pd_obj)
 
 # We can re-plot the intensities to see the effect of normalization
-plot_pg_intensities(pd_obj_normalized)
+ProtPipe::plot_pg_intensities(pd_obj_normalized)
 ```
 
 ### Imputation
@@ -118,7 +152,7 @@ PCA is a powerful tool for visualizing the primary sources of variation in the d
 
 ```{r pca-plot}
 # The plot_pca function is a convenient wrapper that calculates and plots the results
-plot_pca(pd_obj_imputed, condition = "group") +
+ProtPipe::plot_PCs(pd_obj_imputed, condition = "group") +
   labs(title = "PCA of Samples by Group")
 ```
 
@@ -128,13 +162,13 @@ Finally, we can visualize the expression patterns of the proteins across our sam
 
 ```{r final-heatmap}
 # Plot a heatmap of all proteins, with columns ordered by clustering
-plot_proteomics_heatmap(pd_obj_imputed, protmeta_col = "Gene")
+ProtPipe::plot_proteomics_heatmap(pd_obj_imputed, protmeta_col = "Gene")
 
 # Or, filter to a specific subset of genes of interest
-plot_proteomics_heatmap(
+ProtPipe::plot_proteomics_heatmap(
   pd_obj_imputed, 
   protmeta_col = "Gene", 
-  genes = c("GENEA", "GENEB", "GENEC", "GENEH")
+  genes = c("GENE1", "GENE2", "GENE3", "GENE4")
 )
 ```
 
