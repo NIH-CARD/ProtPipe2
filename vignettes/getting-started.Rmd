@@ -13,11 +13,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
-```{r setup}
-library(ProtPipe)
-```
-
 ## Introduction
 
 The `ProtPipe` package provides a streamlined, start-to-finish workflow for common proteomics data analysis tasks. It is built around a central `ProtData` object, which stores quantitative data, protein metadata, and sample metadata in a single, cohesive unit. This vignette will walk you through a typical analysis, from data loading to quality control and visualization.
@@ -107,7 +102,7 @@ Missing values must be handled before many downstream analyses. We will use the 
 
 ```{r imputation}
 set.seed(123) # Set a seed for reproducible imputation
-pd_obj_imputed <- impute_left_dist(pd_obj_normalized)
+pd_obj_imputed <- ProtPipe::impute_left_dist(pd_obj_normalized)
 
 # The object should no longer have missing values
 any(is.na(pd_obj_imputed@data))
