@@ -2,7 +2,7 @@
 % Please edit documentation in R/heatmap.R
 \name{plot_proteomics_heatmap}
 \alias{plot_proteomics_heatmap}
-\title{Title}
+\title{Plot a Proteomics Heatmap}
 \usage{
 plot_proteomics_heatmap(
   PD,
@@ -13,8 +13,57 @@ plot_proteomics_heatmap(
 )
 }
 \arguments{
-\item{genes}{}
+\item{PD}{A \code{ProtData} object. It is recommended to use data that has been
+log-transformed and imputed.}
+
+\item{protmeta_col}{A character string specifying the name of the column in
+the \verb{@prot_meta} slot to use for protein labels on the heatmap rows.
+Defaults to the first column of \verb{@prot_meta}.}
+
+\item{genes}{Optional. A character vector of gene or protein names to subset
+the data to. Only these proteins will be included in the heatmap. The match
+is case-insensitive.}
+
+\item{title}{Optional. A character string for the plot title.}
+
+\item{condition}{Optional. A character string specifying a column name in the
+\verb{@condition} slot. If provided, triggers the summarized heatmap mode.}
+}
+\value{
+A \code{ggplot} object representing the heatmap.
 }
 \description{
-Title
+Generates a heatmap of protein expression. The function can operate in two modes
+depending on the \code{condition} argument.
+\enumerate{
+\item \strong{Individual Samples (default):} If \code{condition} is \code{NULL}, a heatmap of
+all individual samples is generated, with samples clustered by similarity.
+\item \strong{Summarized Conditions:} If a \code{condition} is provided, the function first
+calculates the mean expression for each protein across the replicates
+within each condition group, then generates a heatmap of these mean values.
+}
+
+In both modes, the data is row-wise Z-scored before plotting.
+}
+\examples{
+# Create sample data for the constructor
+raw_data <- data.frame(
+  ProteinID = paste0("P", 1:3), Gene = c("GENEA", "GENEB", "GENEC"),
+  Ctrl_1 = c(10, 20, 15), Ctrl_2 = c(12, 22, 14),
+  Treat_1 = c(25, 10, 5), Treat_2 = c(27, 12, 6)
+)
+cond_df <- data.frame(
+   SampleID = c("Ctrl_1", "Ctrl_2", "Treat_1", "Treat_2"),
+   group = c("Control", "Control", "Treatment", "Treatment")
+)
+pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+
+# Example 1: Default mode (heatmap of individual samples)
+p1 <- plot_proteomics_heatmap(pd_obj)
+if (interactive()) print(p1)
+
+# Example 2: Summarized mode (heatmap of condition means)
+p2 <- plot_proteomics_heatmap(pd_obj, condition = "group")
+if (interactive()) print(p2)
+
 }

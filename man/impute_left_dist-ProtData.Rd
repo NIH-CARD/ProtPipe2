@@ -32,6 +32,8 @@ values are based on those used in the Perseus analysis platform.
 \details{
 This imputation method should be applied to log-transformed data, as the
 underlying assumption of a normal distribution is more appropriate in log space.
+An exception is made for rows with only one or zero observed values, where missing
+values are imputed with 0.
 }
 \examples{
 # Create data with NAs, typically representing log-transformed values

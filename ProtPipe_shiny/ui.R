@@ -90,7 +90,7 @@ ui <- page_sidebar(
                          column(width = 6,
                          card(h4("Imputation"),
                               checkboxInput("impute", label = "impute", value = FALSE),
-                              selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimun", "left-shifted distribution"), selected = "zero")))
+                              selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimum", "left-shifted distribution"), selected = "zero")))
                        ),
                        downloadButton("download_data", "Download pre-processed data")
                      )

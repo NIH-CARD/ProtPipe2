@@ -1,0 +1,148 @@
+---
+title: "getting-started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting-started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ProtPipe)
+```
+
+## Introduction
+
+The `ProtPipe` package provides a streamlined, start-to-finish workflow for common proteomics data analysis tasks. It is built around a central `ProtData` object, which stores quantitative data, protein metadata, and sample metadata in a single, cohesive unit. This vignette will walk you through a typical analysis, from data loading to quality control and visualization.
+
+## Setup and Data Loading
+
+First, we load the `ProtPipe` package.
+```{r setup}
+library(ProtPipe)
+library(ggplot2) # For plot customization
+```
+
+Our analysis begins with two primary data frames:
+
+1.  A `data.frame` containing protein metadata and quantitative intensity data for each sample.
+2.  A `data.frame` containing the experimental design, mapping each sample to its condition.
+
+```{r create-data}
+# 1. Create a sample raw data frame
+raw_data <- data.frame(
+  ProteinID = paste0("P", 1:10),
+  Gene = paste0("GENE", LETTERS[1:10]),
+  Ctrl_1 = rnorm(10, 25, 2), Ctrl_2 = rnorm(10, 25, 2.5), Ctrl_3 = rnorm(10, 25, 2.2),
+  Treat_1 = rnorm(10, 28, 3), Treat_2 = rnorm(10, 28, 3.5), Treat_3 = rnorm(10, 28, 3.2)
+)
+# Introduce some missing values, common in proteomics
+raw_data$Ctrl_1[c(2, 5)] <- NA
+raw_data$Treat_1[8] <- NA
+
+# 2. Create a sample condition data frame
+cond_df <- data.frame(
+   SampleID = c("Ctrl_1", "Ctrl_2", "Ctrl_3", "Treat_1", "Treat_2", "Treat_3"),
+   group = c("Control", "Control", "Control", "Treatment", "Treatment", "Treatment"),
+   batch = c("A", "B", "A", "B", "A", "B")
+)
+
+# 3. Use the constructor to create the ProtData object
+pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+
+# We can inspect the created object
+print(pd_obj)
+```
+
+## Initial Quality Control (QC)
+
+Before normalization and analysis, we should assess the quality of our data.
+
+### Protein Counts and Intensity Distributions
+
+We can check the number of proteins identified in each sample and visualize the intensity distributions with boxplots.
+
+```{r qc-plots}
+# Get the number of identified proteins per sample
+get_pg_counts(pd_obj)
+
+# Plot the counts for each sample
+plot_pg_counts(pd_obj)
+
+# Plot the intensity distributions for each sample
+plot_pg_intensities(pd_obj)
+```
+These plots help us identify any samples that behave as strong outliers.
+
+### Sample Correlation
+
+Next, we can assess the reproducibility between replicates by plotting a correlation heatmap. Samples from the same condition should generally cluster together.
+
+```{r correlation-heatmap}
+plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group")
+```
+
+## Data Pre-processing
+
+`ProtPipe` includes functions for common pre-processing steps like normalization and imputation.
+
+### Normalization
+Here, we apply median normalization to align the intensity distributions across all samples.
+```{r normalization}
+pd_obj_normalized <- median_normalize(pd_obj)
+
+# We can re-plot the intensities to see the effect of normalization
+plot_pg_intensities(pd_obj_normalized)
+```
+
+### Imputation
+Missing values must be handled before many downstream analyses. We will use the "down-shifted normal" (Perseus-like) imputation method. As this is a stochastic method, we set a seed for reproducibility.
+
+```{r imputation}
+set.seed(123) # Set a seed for reproducible imputation
+pd_obj_imputed <- impute_left_dist(pd_obj_normalized)
+
+# The object should no longer have missing values
+any(is.na(pd_obj_imputed@data))
+```
+
+## Downstream Analysis and Visualization
+
+With a clean, complete dataset, we can now explore the relationships between samples and proteins.
+
+### Principal Component Analysis (PCA)
+
+PCA is a powerful tool for visualizing the primary sources of variation in the data and assessing sample clustering.
+
+```{r pca-plot}
+# The plot_pca function is a convenient wrapper that calculates and plots the results
+plot_pca(pd_obj_imputed, condition = "group") +
+  labs(title = "PCA of Samples by Group")
+```
+
+### Protein Expression Heatmap
+
+Finally, we can visualize the expression patterns of the proteins across our samples using a heatmap. The data is automatically Z-scored by row to highlight relative expression changes.
+
+```{r final-heatmap}
+# Plot a heatmap of all proteins, with columns ordered by clustering
+plot_proteomics_heatmap(pd_obj_imputed, protmeta_col = "Gene")
+
+# Or, filter to a specific subset of genes of interest
+plot_proteomics_heatmap(
+  pd_obj_imputed, 
+  protmeta_col = "Gene", 
+  genes = c("GENEA", "GENEB", "GENEC", "GENEH")
+)
+```
+
+## Conclusion
+
+This vignette demonstrated a complete analysis workflow using the `ProtPipe` package. By combining data and metadata into a `ProtData` object, we can apply a series of QC, pre-processing, and visualization steps in a clear and reproducible pipeline.

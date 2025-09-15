@@ -556,6 +556,8 @@ setMethod("impute_min", "ProtData", function(object, alpha=1) {
 #' @details
 #' This imputation method should be applied to log-transformed data, as the
 #' underlying assumption of a normal distribution is more appropriate in log space.
+#' An exception is made for rows with only one or zero observed values, where missing
+#' values are imputed with 0.
 #'
 #' @param object A `ProtData` object containing data with missing values.
 #' @param shift A numeric value specifying how many standard deviations to shift
@@ -595,7 +597,11 @@ setMethod("impute_left_dist", "ProtData", function(object, shift = 1.8, scale = 
     sigma <- sd(x, na.rm = TRUE)
     n_missing <- sum(is.na(x) | is.nan(x))
 
-    if (is.na(mu) || is.na(sigma) || n_missing == 0) {
+    if (n_missing == 0) {
+      return(x)
+    }
+    else if (is.na(mu) || is.na(sigma)){
+      x[is.na(x) | is.nan(x)] <- 0
       return(x)
     }
 

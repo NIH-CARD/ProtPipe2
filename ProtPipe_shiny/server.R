@@ -240,7 +240,6 @@ server <- function(input, output, session) {
         } else if (input$normalize_method == "median") {
           PD <- ProtPipe::median_normalize(PD)
         }
-        PD1 <<- PD
       }, error = function(e) {
         print("Normalization failed")
         print(e)
@@ -253,8 +252,10 @@ server <- function(input, output, session) {
         PD <- ProtPipe::impute(PD, 0)
       }else if(input$imputation_method == "minimum"){
         PD <- ProtPipe::impute_min(PD, 1)
+        minaa <<- PD
       }else if(input$imputation_method == "left-shifted distribution"){
-        PD <- ProtPipe::impute_minimal(PD)
+        PD <- ProtPipe::impute_left_dist(PD)
+        left_dist <<- PD
       }
     }
 
