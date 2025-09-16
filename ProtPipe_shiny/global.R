@@ -1,3 +1,4 @@
+options(shiny.sanitize.errors = TRUE)
 library(shiny)
 library(ProtPipe)
 library(shinyjs)
@@ -10,6 +11,7 @@ library(org.Mm.eg.db)
 library(org.Rn.eg.db)
 library(org.Dm.eg.db)
 library(org.Ce.eg.db)
+
 
 
 # Define static organism mapping to use throughout the app

@@ -2,13 +2,22 @@
 % Please edit documentation in R/0-prot_data.R
 \name{convert_numeric_cols}
 \alias{convert_numeric_cols}
-\title{Title}
+\title{Safely Convert Character Columns to Numeric Type}
 \usage{
 convert_numeric_cols(df)
 }
 \arguments{
-\item{df}{}
+\item{df}{A data frame whose character columns will be checked for potential
+conversion to numeric.}
+}
+\value{
+The input data frame, with any eligible character columns converted
+to the numeric class.
 }
 \description{
-Title
+This function inspects each column of a data frame. If a character column
+contains only values that can be interpreted as numbers (including integers,
+decimals, scientific notation, and the strings "NA" or "NaN"), it converts
+that entire column to the numeric type. Columns containing non-numeric
+text are left unchanged.
 }

@@ -1,13 +1,23 @@
-#' @importFrom magrittr %>%
-
-#' A protData contructor for SomaScan Data
+#' Create a ProtData Object from SomaScan Data
 #'
-#' @param adat
+#' @description
+#' Processes SomaScan data from an ADAT object, optionally performs filtering
+#' (e.g., on buffer controls), and formats the result into a ProtData object
+#' for downstream analysis.
 #'
-#' @return
+#' @param adat A SomaScan ADAT object, typically loaded using the SomaDataIO package.
+#' @param condition An optional data frame containing sample metadata. This is passed to
+#'   the downstream create_protdata function for integration.
+#' @param filter A logical value (TRUE/FALSE) indicating whether to perform
+#'   filtering on the data, including for buffer controls. Defaults to TRUE.
+#'
+#' @return A ProtData object formatted for use with other package functions.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom dplyr rename
+#' @importFrom magrittr %>%
+#'
 create_protdata_from_soma <- function(adat, condition = NULL, filter = TRUE) {
 
   if(filter){

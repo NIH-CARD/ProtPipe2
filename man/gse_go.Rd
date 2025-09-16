@@ -2,13 +2,23 @@
 % Please edit documentation in R/differential_expression.R
 \name{gse_go}
 \alias{gse_go}
-\title{Title}
+\title{Perform Gene Ontology (GO) Gene Set Enrichment Analysis (GSEA)}
 \usage{
 gse_go(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db)
 }
 \arguments{
-\item{org}{}
+\item{gene_list}{A named numeric vector of genes. Names should be Entrez IDs
+and values should be the ranking metric (e.g., log2 fold change).}
+
+\item{enrich_pvalue}{The p-value cutoff for enrichment. Defaults to 1 (no cutoff).}
+
+\item{org}{An organism annotation database (e.g., org.Hs.eg.db).}
+}
+\value{
+A gseResult object if the analysis is successful and finds
+enriched terms, otherwise NULL.
 }
 \description{
-Title
+A wrapper around clusterProfiler::gseGO to perform GSEA for
+Gene Ontology terms on a ranked list of genes.
 }

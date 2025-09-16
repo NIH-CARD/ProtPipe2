@@ -2,13 +2,30 @@
 % Please edit documentation in R/0-prot_data.R
 \name{batch_correct}
 \alias{batch_correct}
-\title{Title}
+\title{Perform Batch Correction on a ProtData Object}
 \usage{
 batch_correct(object, batch_variable, bio_variables = NULL)
 }
 \arguments{
-\item{bio_variables}{}
+\item{object}{An S4 object of class ProtData. The object must contain a
+@data slot with numeric data and a @condition slot with sample metadata.}
+
+\item{batch_variable}{A single character string specifying the column name in
+the object's @condition slot that identifies the batch for each sample.}
+
+\item{bio_variables}{An optional character vector of column names in the
+@condition slot that represent biological variables of interest. The
+variation from these variables will be preserved during the correction.
+If NULL (the default), a simpler correction is performed assuming a common
+mean across all samples.}
+}
+\value{
+The input ProtData object with its @data slot updated with the
+batch-corrected values.
 }
 \description{
-Title
+This function adjusts for batch effects in the @data slot of a ProtData
+object using the removeBatchEffect function from the limma package. It can
+optionally preserve specified biological variation while removing the unwanted
+technical variation associated with the batch variable.
 }

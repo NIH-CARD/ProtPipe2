@@ -2,13 +2,24 @@
 % Please edit documentation in R/differential_expression.R
 \name{add_entrez}
 \alias{add_entrez}
-\title{Title}
+\title{Add Entrez Gene IDs to a Data Frame}
 \usage{
 add_entrez(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes")
 }
 \arguments{
-\item{org}{}
+\item{DE}{A data frame, such as one containing differential expression results.}
+
+\item{org}{An organism annotation database object (e.g., org.Hs.eg.db).}
+
+\item{gene_col}{A character string specifying the name of the column in DE
+that contains the gene symbols.}
+}
+\value{
+A data frame with an appended ENTREZID column containing the mapped
+IDs. Returns NULL if no genes can be successfully mapped.
 }
 \description{
-Title
+Maps gene symbols from a specified column to Entrez IDs using
+clusterProfiler::bitr and joins them back to the original data frame. It also
+cleans gene symbols that may contain multiple entries separated by semicolons.
 }

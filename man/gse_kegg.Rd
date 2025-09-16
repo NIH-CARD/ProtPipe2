@@ -2,7 +2,7 @@
 % Please edit documentation in R/differential_expression.R
 \name{gse_kegg}
 \alias{gse_kegg}
-\title{Title}
+\title{Perform KEGG Gene Set Enrichment Analysis (GSEA)}
 \usage{
 gse_kegg(
   gene_list,
@@ -12,8 +12,21 @@ gse_kegg(
 )
 }
 \arguments{
-\item{organism}{}
+\item{gene_list}{A named numeric vector of genes. Names should be Entrez IDs
+and values should be the ranking metric (e.g., log2 fold change).}
+
+\item{enrich_pvalue}{The p-value cutoff for enrichment. Defaults to 1 (no cutoff).}
+
+\item{org}{An organism annotation database (e.g., org.Hs.eg.db) used to
+map Entrez IDs to gene symbols.}
+
+\item{organism}{A character string for the KEGG organism code (e.g., 'hsa' for human).}
+}
+\value{
+A gseKEGGResult object if the analysis is successful and finds
+enriched pathways, otherwise NULL.
 }
 \description{
-Title
+A wrapper around clusterProfiler::gseKEGG to perform GSEA on a
+ranked list of genes and convert IDs to readable gene symbols.
 }

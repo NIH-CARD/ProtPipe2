@@ -1,5 +1,3 @@
-#' @importFrom magrittr %>%
-
 #' Title
 #'
 #' @param object
@@ -131,7 +129,6 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 #'
 setGeneric("do_limma", function(object, treatment_samples, control_samples) standardGeneric("do_limma"))
 
-#' @describeIn do_limma Method for ProtData objects
 setMethod("do_limma", "ProtData", function(object, treatment_samples, control_samples) {
   #data
   meta_cols <- names(object@prot_meta)
@@ -176,9 +173,9 @@ setMethod("do_limma", "ProtData", function(object, treatment_samples, control_sa
 #' Perform DEA using the condition labels of the protdata object
 #'
 #' @param object
-#' @param condition
-#' @param control_grouop
-#' @param treatment_group
+#' @param condition the name of a column in the condition slot that contains the comparison group names.
+#' @param control_group the name of the control group
+#' @param treatment_group the name of the treatment group
 #'
 #' @return
 #' @export
@@ -238,7 +235,6 @@ setMethod("do_limma_by_condition", "ProtData", function(object, condition, contr
 #' @return A `ggplot2` object representing the volcano plot.
 #' @export
 #'
-#' @examples
 plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_threshold=0.01, labelgene=NULL) {
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
@@ -291,16 +287,25 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
   return(g)
 }
 
-# Enrichment Functions
-#' Title
+#' Add Entrez Gene IDs to a Data Frame
 #'
-#' @param DE
-#' @param org
+#' @description Maps gene symbols from a specified column to Entrez IDs using
+#' clusterProfiler::bitr and joins them back to the original data frame. It also
+#' cleans gene symbols that may contain multiple entries separated by semicolons.
 #'
-#' @return
+#' @param DE A data frame, such as one containing differential expression results.
+#' @param org An organism annotation database object (e.g., org.Hs.eg.db).
+#' @param gene_col A character string specifying the name of the column in DE
+#'   that contains the gene symbols.
+#'
+#' @return A data frame with an appended ENTREZID column containing the mapped
+#'   IDs. Returns NULL if no genes can be successfully mapped.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom clusterProfiler bitr
+#' @importFrom dplyr inner_join
+#'
 add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes") {
   DE[[gene_col]] <- sapply(strsplit(DE[[gene_col]], ";"), `[`, 1)
 
@@ -339,16 +344,24 @@ add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes")
 }
 
 
-#' Title
+#' Perform Gene Ontology (GO) Over-Representation Analysis (ORA)
 #'
-#' @param gene_id
-#' @param all_gene_vector
-#' @param enrich_pvalue
+#' @description A wrapper around clusterProfiler::enrichGO to perform ORA to
+#' find enriched GO terms (Biological Process, Molecular Function, Cellular Component).
 #'
-#' @return
+#' @param gene_id A character vector of significant Entrez gene IDs to test.
+#' @param all_gene_vector A character vector of all background (universe) Entrez
+#'   gene IDs against which to test.
+#' @param enrich_pvalue The p-value and q-value cutoff for enrichment. Defaults to 1.
+#' @param org An organism annotation database (e.g., org.Hs.eg.db).
+#'
+#' @return An enrichResult object if the analysis is successful and finds
+#'   enriched terms, otherwise NULL.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom clusterProfiler enrichGO
+#'
 enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db) {
   cat("Processing GO\n")
 
@@ -376,16 +389,27 @@ enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.
 }
 
 
-#' Title
+#' Perform KEGG Over-Representation Analysis (ORA)
 #'
-#' @param gene_id
-#' @param all_gene_vector
-#' @param enrich_pvalue
+#' @description A wrapper around clusterProfiler::enrichKEGG to perform ORA
+#' to find enriched KEGG pathways from a list of significant genes.
 #'
-#' @return
+#' @param gene_id A character vector of significant Entrez gene IDs to test for enrichment.
+#' @param all_gene_vector A character vector of all background (universe) Entrez
+#'   gene IDs against which to test.
+#' @param enrich_pvalue The p-value and q-value cutoff for enrichment. Defaults to 1.
+#' @param org An organism annotation database (e.g., org.Hs.eg.db) used to
+#'   map Entrez IDs to gene symbols.
+#' @param organism A character string for the KEGG organism code (e.g., 'hsa' for human).
+#'
+#' @return An enrichResult object if the analysis is successful and finds
+#'   enriched pathways, otherwise NULL.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom clusterProfiler enrichKEGG
+#' @importFrom DOSE setReadable
+#'
 enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, organism = 'hsa') {
   cat("Processing KEGG\n")
 
@@ -412,16 +436,24 @@ enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.H
   return(NULL)
 }
 
-#' Title
+#' Perform Gene Ontology (GO) Gene Set Enrichment Analysis (GSEA)
 #'
-#' @param gene_list
-#' @param enrich_pvalue
-#' @param org
+#' @description A wrapper around clusterProfiler::gseGO to perform GSEA for
+#' Gene Ontology terms on a ranked list of genes.
 #'
-#' @return
+#' @param gene_list A named numeric vector of genes. Names should be Entrez IDs
+#'   and values should be the ranking metric (e.g., log2 fold change).
+#' @param enrich_pvalue The p-value cutoff for enrichment. Defaults to 1 (no cutoff).
+#' @param org An organism annotation database (e.g., org.Hs.eg.db).
+#'
+#' @return A gseResult object if the analysis is successful and finds
+#'   enriched terms, otherwise NULL.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom clusterProfiler gseGO
+#' @importFrom DOSE setReadable
+#'
 gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db) {
   cat("Processing GSEA GO\n")
 
@@ -449,17 +481,26 @@ gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.d
   return(NULL)
 }
 
-#' Title
+#' Perform KEGG Gene Set Enrichment Analysis (GSEA)
 #'
-#' @param gene_list
-#' @param enrich_pvalue
-#' @param org
-#' @param organism
+#' @description A wrapper around clusterProfiler::gseKEGG to perform GSEA on a
+#' ranked list of genes and convert IDs to readable gene symbols.
 #'
-#' @return
+#' @param gene_list A named numeric vector of genes. Names should be Entrez IDs
+#'   and values should be the ranking metric (e.g., log2 fold change).
+#' @param enrich_pvalue The p-value cutoff for enrichment. Defaults to 1 (no cutoff).
+#' @param org An organism annotation database (e.g., org.Hs.eg.db) used to
+#'   map Entrez IDs to gene symbols.
+#' @param organism A character string for the KEGG organism code (e.g., 'hsa' for human).
+#'
+#' @return A gseKEGGResult object if the analysis is successful and finds
+#'   enriched pathways, otherwise NULL.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom clusterProfiler gseKEGG
+#' @importFrom DOSE setReadable
+#'
 gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, organism = 'hsa') {
   cat("Processing GSEA KEGG\n")
 
@@ -485,21 +526,77 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
   return(NULL)
 }
 
-do_enrichment <- function(DE, lfc_threshold, fdr_threshold, enrich_pvalue){
-
-}
 ###pathway analysis
-#' Title
+#' Perform Comprehensive GO and KEGG Pathway Enrichment Analysis
 #'
-#' @param DE
-#' @param lfc_threshold
-#' @param fdr_threshold
-#' @param enrich_pvalue
+#' @description
+#' This function conducts a full suite of pathway enrichment analyses on a given
+#' differential expression (DE) result set. It performs Over-Representation
+#' Analysis (ORA) for significantly up- and down-regulated genes, as well as
+#' Gene Set Enrichment Analysis (GSEA) on the complete ranked list of genes.
+#' It analyzes both Gene Ontology (GO) terms and KEGG pathways.
+#'
+#' @param DE A data frame containing differential expression results. Must include
+#'   columns for gene identifiers, log fold change, and adjusted p-values.
+#' @param lfc_threshold A numeric value for the absolute log2 fold change
+#'   threshold to define significant genes for ORA. Defaults to `1`.
+#' @param fdr_threshold A numeric value for the adjusted p-value (FDR) threshold
+#'   to define significant genes for ORA. Defaults to `0.01`.
+#' @param enrich_pvalue A numeric value for the p-value cutoff used to determine
+#'   significant enrichment for pathways/terms. Defaults to `0.05`.
+#' @param go_org An annotation database object (e.g., `org.Hs.eg.db` for human)
+#'   used for GO analysis and mapping gene IDs.
+#' @param kegg_org A character string specifying the KEGG organism code (e.g.,
+#'   `'hsa'` for Homo sapiens).
+#' @param gene_col A character string indicating the name of the column in the `DE`
+#'   data frame that contains the gene symbols/identifiers. Defaults to `"Genes"`.
 #'
 #' @return
+#' A list containing two named elements:
+#' \describe{
+#'   \item{`results`}{A list of data frames with the detailed enrichment statistics for each analysis type (e.g., `go_up`, `kegg_down`, `gse_go`).}
+#'   \item{`plots`}{A list of `ggplot` objects for visualizing the enrichment results (e.g., dot plots, bar plots).}
+#' }
+#' The function returns `NULL` if the initial mapping of gene identifiers to
+#' Entrez IDs fails.
+#'
 #' @export
 #'
+#' @importFrom enrichplot dotplot pairwise_termsim
+#' @importFrom ggplot2 facet_grid ggtitle
+#' @importFrom clusterProfiler filter
+#'
 #' @examples
+#' # Create a sample DE results dataframe
+#' de_results <- data.frame(
+#'   Genes = c("TP53", "EGFR", "BRCA1", "TNF", "MMP9", "IL6", "VEGFA", "JUN"),
+#'   logFC = c(2.5, -1.8, 2.1, 1.6, -2.2, 3.0, -1.7, 2.2),
+#'   adj.P.Val = c(0.001, 0.005, 0.002, 0.009, 0.003, 0.0001, 0.008, 0.001)
+#' )
+#'
+#' # This example requires an internet connection and the org.Hs.eg.db package.
+#' \dontrun{
+#' if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
+#'   enrichment_output <- enrich_pathways(
+#'     DE = de_results,
+#'     lfc_threshold = 1.5,
+#'     fdr_threshold = 0.01,
+#'     go_org = org.Hs.eg.db,
+#'     kegg_org = 'hsa'
+#'   )
+#'
+#'   # Check if the analysis produced results
+#'   if (!is.null(enrichment_output)) {
+#'     # View the head of the GO results for upregulated genes
+#'     print(head(enrichment_output$results$go_up))
+#'
+#'     # Display one of the generated plots
+#'     if (!is.null(enrichment_output$plots$go_up_dotplot)) {
+#'       print(enrichment_output$plots$go_up_dotplot)
+#'     }
+#'   }
+#' }
+#' }
 enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalue=0.05, go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes"){
   datas <- list()
   plots <- list()

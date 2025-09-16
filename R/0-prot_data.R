@@ -623,15 +623,30 @@ setMethod("impute_left_dist", "ProtData", function(object, shift = 1.8, scale = 
 
 # batch correct
 
-# (Generic function definition remains the same)
-#' Title
+#' Perform Batch Correction on a ProtData Object
 #'
-#' @param object
-#' @param batch_variable
-#' @param bio_variables
+#' @description
+#' This function adjusts for batch effects in the @data slot of a ProtData
+#' object using the removeBatchEffect function from the limma package. It can
+#' optionally preserve specified biological variation while removing the unwanted
+#' technical variation associated with the batch variable.
 #'
-#' @return
+#' @param object An S4 object of class ProtData. The object must contain a
+#'   @data slot with numeric data and a @condition slot with sample metadata.
+#' @param batch_variable A single character string specifying the column name in
+#'   the object's @condition slot that identifies the batch for each sample.
+#' @param bio_variables An optional character vector of column names in the
+#'   @condition slot that represent biological variables of interest. The
+#'   variation from these variables will be preserved during the correction.
+#'   If NULL (the default), a simpler correction is performed assuming a common
+#'   mean across all samples.
+#'
+#' @return The input ProtData object with its @data slot updated with the
+#'   batch-corrected values.
+#'
 #' @export
+#'
+#' @importFrom limma removeBatchEffect
 #'
 setGeneric("batch_correct",
            def = function(object, batch_variable, bio_variables = NULL) {
@@ -813,11 +828,21 @@ trim_names <- function(names) {
   return(colnames_out)
 }
 
-#' Title
+#' Safely Convert Character Columns to Numeric Type
 #'
-#' @param df
+#' @description
+#' This function inspects each column of a data frame. If a character column
+#' contains only values that can be interpreted as numbers (including integers,
+#' decimals, scientific notation, and the strings "NA" or "NaN"), it converts
+#' that entire column to the numeric type. Columns containing non-numeric
+#' text are left unchanged.
 #'
-#' @return
+#' @param df A data frame whose character columns will be checked for potential
+#'   conversion to numeric.
+#'
+#' @return The input data frame, with any eligible character columns converted
+#'   to the numeric class.
+#'
 #' @export
 #'
 convert_numeric_cols <- function(df) {

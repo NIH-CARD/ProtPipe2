@@ -7,7 +7,11 @@
 do_limma_by_condition(object, condition, control_group, treatment_group)
 }
 \arguments{
-\item{treatment_group}{}
+\item{condition}{the name of a column in the condition slot that contains the comparison group names.}
+
+\item{control_group}{the name of the control group}
+
+\item{treatment_group}{the name of the treatment group}
 }
 \description{
 Perform DEA using the condition labels of the protdata object

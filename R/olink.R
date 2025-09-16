@@ -1,14 +1,22 @@
-#' @importFrom magrittr %>%
-
-#' Title
+#' Create a ProtData Object from Olink NPX Data
 #'
-#' @param adat
-#' @param condition
+#' @description
+#' A wrapper function that processes a data frame of Olink NPX data, optionally
+#' merges it with a sample condition/metadata file, and formats the result into a
+#' ProtData object for downstream analysis.
 #'
-#' @return
+#' @param npx A data frame containing Olink NPX data, typically from OlinkAnalyze::read_npx().
+#' @param condition An optional data frame containing sample metadata. It is crucial
+#'   that this file contains a column named 'SampleID' for merging.
+#' @param filter A logical value (TRUE/FALSE) indicating whether to filter out
+#'   samples with QC warnings. Defaults to FALSE.
+#'
+#' @return A ProtData object formatted for use with other package functions.
+#'
 #' @export
 #'
-#' @examples
+#' @importFrom dplyr select everything
+#'
 create_protdata_from_olink <- function(npx, condition = NULL, filter = F) {
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)

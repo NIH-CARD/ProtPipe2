@@ -2,7 +2,7 @@
 % Please edit documentation in R/differential_expression.R
 \name{enrich_go}
 \alias{enrich_go}
-\title{Title}
+\title{Perform Gene Ontology (GO) Over-Representation Analysis (ORA)}
 \usage{
 enrich_go(
   gene_id,
@@ -12,8 +12,20 @@ enrich_go(
 )
 }
 \arguments{
-\item{enrich_pvalue}{}
+\item{gene_id}{A character vector of significant Entrez gene IDs to test.}
+
+\item{all_gene_vector}{A character vector of all background (universe) Entrez
+gene IDs against which to test.}
+
+\item{enrich_pvalue}{The p-value and q-value cutoff for enrichment. Defaults to 1.}
+
+\item{org}{An organism annotation database (e.g., org.Hs.eg.db).}
+}
+\value{
+An enrichResult object if the analysis is successful and finds
+enriched terms, otherwise NULL.
 }
 \description{
-Title
+A wrapper around clusterProfiler::enrichGO to perform ORA to
+find enriched GO terms (Biological Process, Molecular Function, Cellular Component).
 }
