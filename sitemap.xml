@@ -11,10 +11,13 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/compare_protein.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/convert_numeric_cols.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata_from_olink.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata_from_soma.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/detect_intensity_cols.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma_by_condition.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_t_test-ProtData-method.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/do_t_test.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_go.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_kegg.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_pathways.html</loc></url>
