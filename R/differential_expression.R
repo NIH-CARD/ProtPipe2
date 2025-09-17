@@ -182,7 +182,6 @@ setMethod("do_limma", "ProtData", function(object, treatment_samples, control_sa
 #'
 setGeneric("do_limma_by_condition", function(object, condition, control_group, treatment_group) standardGeneric("do_limma_by_condition"))
 
-#' @describeIn do_limma Method for ProtData objects
 setMethod("do_limma_by_condition", "ProtData", function(object, condition, control_group, treatment_group) {
   meta <- object@condition
   conditions <- names(meta)

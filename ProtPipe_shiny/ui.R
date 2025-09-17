@@ -72,26 +72,18 @@ ui <- page_sidebar(
                               )),
                      card(
                        h3("Pre-processing"),
-                       fluidRow(
-                         column(width = 6,
-                         card(h4("Normalization"),
+                        card(h4("1. Outlier Removal"),
+                            checkboxInput("remove_outliers", label = "remove outliers", value = FALSE),
+                            numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
+                         card(h4("2. Normalization"),
                               checkboxInput("normalize", label = "normalize", value = FALSE),
-                              selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median"))),
-                         column(width = 6,
-                         card(h4("Outlier Removal"),
-                              checkboxInput("remove_outliers", label = "remove outliers", value = FALSE),
-                              numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)))
-                       ),
-                       fluidRow(
-                         column(width = 6,
-                         card(h4("Batch Correction"),
+                              selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
+                        card(h4("3. Imputation"),
+                            checkboxInput("impute", label = "impute", value = FALSE),
+                            selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimum", "left-shifted distribution"), selected = "zero")),
+                         card(h4("4. Batch Correction"),
                               checkboxInput("batch_correct", label = "batch correct", value = FALSE),
-                              uiOutput("batch_correct_column"),)),
-                         column(width = 6,
-                         card(h4("Imputation"),
-                              checkboxInput("impute", label = "impute", value = FALSE),
-                              selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimum", "left-shifted distribution"), selected = "zero")))
-                       ),
+                              uiOutput("batch_correct_column")),
                        downloadButton("download_data", "Download pre-processed data")
                      )
                    )
