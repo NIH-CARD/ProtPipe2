@@ -22,10 +22,11 @@ ui <- page_sidebar(
     # Block-style buttons
     actionButton("view_0", "Input parameters", class = "btn-block btn-primary mb-2"),
     actionButton("view_1", "Quality Control", class = "btn-block btn-primary mb-2"),
-    actionButton("view_2", "Clustering", class = "btn-block btn-primary mb-2"),
-    actionButton("view_3", "Differential Intensity", class = "btn-block btn-primary mb-2"),
-    actionButton("view_4", "Heatmap", class = "btn-block btn-primary mb-2"),
-    actionButton("view_5", "Single Protein", class = "btn-block btn-primary mb-2"),
+    actionButton("view_2", "Pre-Processing", class = "btn-block btn-primary mb-2"),
+    actionButton("view_3", "Clustering", class = "btn-block btn-primary mb-2"),
+    actionButton("view_4", "Differential Intensity", class = "btn-block btn-primary mb-2"),
+    actionButton("view_5", "Heatmap", class = "btn-block btn-primary mb-2"),
+    actionButton("view_6", "Single Protein", class = "btn-block btn-primary mb-2"),
 
     hr(),
     verbatimTextOutput("value"),
@@ -36,21 +37,22 @@ ui <- page_sidebar(
   main = tagList(
     conditionalPanel("input.select == '0'", h4("Input parameters content")),
     conditionalPanel("input.select == '1'", h4("Quality Control content")),
-    conditionalPanel("input.select == '2'", h4("Clustering content")),
-    conditionalPanel("input.select == '3'", h4("Differential Intensity content")),
-    conditionalPanel("input.select == '4'", h4("Heatmap content")),
-    conditionalPanel("input.select == '5'", h4("Single protein content"))
+    conditionalPanel("input.select == '2'", h4("Pre Processing content")),
+    conditionalPanel("input.select == '3'", h4("Clustering content")),
+    conditionalPanel("input.select == '4'", h4("Differential Intensity content")),
+    conditionalPanel("input.select == '5'", h4("Heatmap content")),
+    conditionalPanel("input.select == '6'", h4("Single protein content"))
   ),
 
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",
                    fluidPage(
-                     fluidRow(
-                       column(width = 6,
                               card(
+                                h3("Upload Data"),
+                                card(
                                 fluidRow(
                                   column(width = 7,
-                                         card_header(h3("Upload protein intensity file")),
+                                         card_header(h4("Protein Intensity File")),
                                          fileUploadUI("intensity", label = NULL),
                                          checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE)
                                          ),
@@ -63,29 +65,13 @@ ui <- page_sidebar(
                                 uiOutput("column_range_ui"),
                                 verbatimTextOutput("range_result")
 
-                              )), column(width = 6,
+                              ),
                                          card(
-                                           card_header("Upload sample condition csv file"),
+                                           card_header(h4("Sample Condition File")),
                                            p("make sure row names match the column names of the intensity file exactly"),
                                            fileUploadUI("sample_condition", label = NULL)
-                                         ),
-                              )),
-                     card(
-                       h3("Pre-processing"),
-                        card(h4("1. Outlier Removal"),
-                            checkboxInput("remove_outliers", label = "remove outliers", value = FALSE),
-                            numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
-                         card(h4("2. Normalization"),
-                              checkboxInput("normalize", label = "normalize", value = FALSE),
-                              selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
-                        card(h4("3. Imputation"),
-                            checkboxInput("impute", label = "impute", value = FALSE),
-                            selectInput("imputation_method", label = "imputation method", choices = c("zero", "minimum", "left-shifted distribution"), selected = "zero")),
-                         card(h4("4. Batch Correction"),
-                              checkboxInput("batch_correct", label = "batch correct", value = FALSE),
-                              uiOutput("batch_correct_column")),
-                       downloadButton("download_data", "Download pre-processed data")
-                     )
+                                         )
+                              )
                    )
   ),
 
@@ -117,9 +103,38 @@ ui <- page_sidebar(
                      )
                    )
   ),
-
-  ### Clustering screen ############################################################################################
+  ### Pre Processing Screen ############################################################################################
   conditionalPanel(condition = "input.select == 2",
+                   fluidPage(card(
+    h3("Pre-processing"),
+    card(card_header(h4("1. Outlier Removal")),
+         fluidRow(
+           column(width = 6,
+                checkboxInput("remove_outliers", label = "remove outlier samples", value = FALSE),
+                numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
+           column(width = 6,
+                checkboxInput("remove_sparse_proteins", label = "remove outlier proteins", value = FALSE),
+                numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30))),
+    card(card_header(h4("2. Transformation")),
+         checkboxInput("log2_transform", label = "log2_transform", value = FALSE)),
+    card(card_header(h4("3. Normalization")),
+         checkboxInput("normalize", label = "normalize", value = FALSE),
+         selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
+    card(card_header(h4("4. Imputation")),
+         fluidRow(
+           column(width = 6,
+              checkboxInput("impute", label = "impute", value = FALSE),
+              selectInput("imputation_method", label = "imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
+           column(width = 6,
+                  uiOutput("imputation_parameters")
+           ))),
+    card(card_header(h4("5. Batch Correction")),
+         checkboxInput("batch_correct", label = "batch correct", value = FALSE),
+         uiOutput("batch_correct_column")),
+    downloadButton("download_data", "Download pre-processed data")
+  )))),
+  ### Clustering screen ############################################################################################
+  conditionalPanel(condition = "input.select == 3",
                    h2("Clustering Information"),
                    fluidPage(
                      uiOutput("clustering_condition"),
@@ -146,7 +161,7 @@ ui <- page_sidebar(
                    )
   ),
   ### Differential Intensity ############################################################################################
-  conditionalPanel(condition = "input.select == 3",
+  conditionalPanel(condition = "input.select == 4",
                    h2("Differential Expression"),
                    card(card_header("Options"),
                         fluidPage(
@@ -206,7 +221,7 @@ ui <- page_sidebar(
   ),
 
   ### Heatmap ############################################################################################
-  conditionalPanel(condition = "input.select == 4",
+  conditionalPanel(condition = "input.select == 5",
                    h2("Heatmap"),
                    fluidPage(
                      uiOutput("protein_label"),
@@ -220,7 +235,7 @@ ui <- page_sidebar(
                    )
   ),
   ### Single Protein view ############################################################################################
-  conditionalPanel(condition = "input.select == 5",
+  conditionalPanel(condition = "input.select == 6",
                    h2("View single protein"),
                    fluidPage(
                      uiOutput("pv_prot_meta"),

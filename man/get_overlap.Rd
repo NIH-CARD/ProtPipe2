@@ -2,15 +2,20 @@
 % Please edit documentation in R/preprocessing_methods.R
 \name{get_overlap}
 \alias{get_overlap}
-\title{Define the get_overlap generic method}
+\title{get_overlap method for protdata class}
 \usage{
 get_overlap(object, condition_name)
 }
 \arguments{
-\item{object}{The object to operate on.}
+\item{object}{A protdata object.}
 
-\item{condition_name}{The name of the condition to find overlap across.}
+\item{condition_name}{A character string specifying the column name in the
+condition' slot to group samples by.}
+}
+\value{
+A new, modified protdata object containing only the overlapping proteins.
 }
 \description{
-Define the get_overlap generic method
+Filters the protdata object to retain only proteins that are present (non-NA)
+in at least one sample within each unique group of the specified condition.
 }

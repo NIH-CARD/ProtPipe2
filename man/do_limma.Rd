@@ -2,12 +2,9 @@
 % Please edit documentation in R/differential_expression.R
 \name{do_limma}
 \alias{do_limma}
-\alias{do_limma_by_condition,ProtData-method}
 \title{Perform limma differential expression on a ProtData object}
 \usage{
 do_limma(object, treatment_samples, control_samples)
-
-\S4method{do_limma_by_condition}{ProtData}(object, condition, control_group, treatment_group)
 }
 \arguments{
 \item{object}{A \code{ProtData} object containing protein intensities, metadata, and condition info.}
@@ -26,8 +23,3 @@ of the treatment and control samples. It filters out proteins found in fewer tha
 of samples, performs a limma-based differential expression analysis, and returns
 a data frame with metadata, intensities, log fold changes, and p-values.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{do_limma_by_condition(ProtData)}: Method for ProtData objects
-
-}}

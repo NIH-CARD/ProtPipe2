@@ -8,6 +8,7 @@ server <- function(input, output, session) {
   observeEvent(input$view_3, { updateTextInput(session, "select", value = "3") })
   observeEvent(input$view_4, { updateTextInput(session, "select", value = "4") })
   observeEvent(input$view_5, { updateTextInput(session, "select", value = "5") })
+  observeEvent(input$view_6, { updateTextInput(session, "select", value = "6") })
 
   # Create a temp working directory for this zip session
   zip_workspace <- file.path(tempdir(), "zip_workspace")
@@ -166,6 +167,24 @@ server <- function(input, output, session) {
     )
   })
 
+  output$imputation_parameters <- renderUI({
+    req(intensity_file())
+    if(input$imputation_method == "fixed value"){
+      tagList(
+        numericInput("impute_fixed_value", "value:", value = 0)
+      )
+    }else if(input$imputation_method == "minimum"){
+      tagList(
+        numericInput("impute_min_value", "scale minimum by:", value = 1)
+      )
+    }else if(input$imputation_method == "left-shifted distribution"){
+      tagList(
+        numericInput("impute_left_dist_shift", "shift mean of distribution by n standard deviations:", value = 1.8),
+        numericInput("impute_left_dist_scale", "scale standard deviation of distribution by:", value = 0.3)
+      )
+    }
+  })
+
   # Validate and report selection
   output$range_result <- renderPrint({
     req(input$data_type == 1)
@@ -228,10 +247,24 @@ server <- function(input, output, session) {
     PD <- raw_prot_data()
     #1 outlier removal
     if(input$remove_outliers == TRUE){
-      PD <- ProtPipe::remove_outliers(PD, sds = input$outlier_sds)
+      PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds)
+    }
+    if(input$remove_sparse_proteins == TRUE){
+      PD <- ProtPipe::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent)
     }
 
-    #2 normalization
+    #2 transformation
+    if(input$log2_transform == TRUE){
+      print(paste("Perform", input$normalize_method))
+      tryCatch({
+        PD <- ProtPipe::log2_transform(PD)
+      }, error = function(e) {
+        print("Transformation failed")
+        print(e)
+      })
+    }
+
+    #3 normalization
     if(input$normalize == TRUE){
       print(paste("Normalizing using", input$normalize_method))
       tryCatch({
@@ -246,20 +279,18 @@ server <- function(input, output, session) {
       })
     }
 
-    #3 imputation
+    #4 imputation
     if(input$impute == TRUE){
-      if(input$imputation_method == "zero"){
-        PD <- ProtPipe::impute(PD, 0)
+      if(input$imputation_method == "fixed value"){
+        PD <- ProtPipe::impute(PD, input$impute_fixed_value)
       }else if(input$imputation_method == "minimum"){
-        PD <- ProtPipe::impute_min(PD, 1)
-        minaa <<- PD
+        PD <- ProtPipe::impute_min(PD, input$impute_min_value)
       }else if(input$imputation_method == "left-shifted distribution"){
-        PD <- ProtPipe::impute_left_dist(PD)
-        left_dist <<- PD
+        PD <- ProtPipe::impute_left_dist(PD, input$impute_left_dist_shift, input$impute_left_dist_scale)
       }
     }
 
-    #4 batch correction
+    #5 batch correction
     if(!is.null(input$batch_correct_column) && input$batch_correct == TRUE){
       PD <- ProtPipe::batch_correct(PD, input$batch_correct_column)
     }
@@ -704,12 +735,11 @@ server <- function(input, output, session) {
   })
 
   dea <- reactive({
-    df <- ProtPipe::log2_transform(prot_data())
     condition <- input$de_condition
     control_group <- input$control_condition
     treatment_group <- input$treatment_condition
 
-    return(ProtPipe::do_limma_by_condition(df,condition = condition, control_group = control_group, treatment_group = treatment_group))
+    return(ProtPipe::do_limma_by_condition(prot_data(),condition = condition, control_group = control_group, treatment_group = treatment_group))
   })
 
   #volcano plot

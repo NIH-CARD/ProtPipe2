@@ -132,7 +132,14 @@ setGeneric("do_limma", function(object, treatment_samples, control_samples) stan
 setMethod("do_limma", "ProtData", function(object, treatment_samples, control_samples) {
   #data
   meta_cols <- names(object@prot_meta)
-  DT <- cbind(object@prot_meta, object@data)
+  if (ProtPipe::has_step(object, "log2_transform")){
+    data <- object@data
+  }else{
+    object <- ProtPipe::log2_transform(object)
+    data <- object@data
+  }
+
+  DT <- cbind(object@prot_meta, data)
   meta <- object@condition
 
   # treatment_samples=grep(treatment,colnames(Log2_DT),value = T)
