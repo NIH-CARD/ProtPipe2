@@ -6,7 +6,9 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/authors.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/downstream_analysis.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/index.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/ProtData-class.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/add_entrez.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/add_processing_step.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/batch_correct.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/compare_protein.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/convert_numeric_cols.html</loc></url>
@@ -22,15 +24,18 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_kegg.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_pathways.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_features.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_outlier_samples.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_proteins_by_percent.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_unique_proteins.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_CVs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_PCs.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/get_overlap-protdata-character-method.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_overlap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_pg_counts.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_spearman.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_umap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/gse_go.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/gse_kegg.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/has_step.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/impute-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/impute_left_dist-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/impute_min-ProtData.html</loc></url>
@@ -51,8 +56,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_proteomics_heatmap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_umap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_volcano.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/remove_outliers.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/remove_sample.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/unique_data.html</loc></url>
 </urlset>
 
