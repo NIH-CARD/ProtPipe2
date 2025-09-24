@@ -1,7 +1,7 @@
 dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
 ipsc_genes <- data.table::fread("EXAMPLES/basic_example_data/stem_cell_gene.csv")$Gene
 neuron_genes <- data.table::fread("EXAMPLES/basic_example_data/neuron_gene.csv")$Gene
-dat_pro <- create_protdata(dat)
+dat_pro <- create_se(dat)
 
 test_that("basic heatmap", {
   p <- plot_proteomics_heatmap(dat_pro)

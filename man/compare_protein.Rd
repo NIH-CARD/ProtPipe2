@@ -2,21 +2,21 @@
 % Please edit documentation in R/protein_comparison.R
 \name{compare_protein}
 \alias{compare_protein}
-\alias{compare_protein,ProtData-method}
+\alias{compare_protein,SummarizedExperiment-method}
 \title{Generate a bar chart of protein intensity values}
 \usage{
-compare_protein(PD, prot, prot_meta_col = NULL, condition = NULL)
+compare_protein(object, prot, prot_meta_col = NULL, condition = NULL)
 
-\S4method{compare_protein}{ProtData}(PD, prot, prot_meta_col = NULL, condition = NULL)
+\S4method{compare_protein}{SummarizedExperiment}(object, prot, prot_meta_col = NULL, condition = NULL)
 }
 \arguments{
-\item{PD}{The ProtData object.}
+\item{object}{The \code{SummarizedExperiment} object.}
 
 \item{prot}{A string specifying the name of the protein to plot.}
 
-\item{prot_meta_col}{A string naming the column in the prot_meta slot to search for the protein. Defaults to the first column.}
+\item{prot_meta_col}{A string naming the column in the \code{rowData} slot to search for the protein. Defaults to the first column.}
 
-\item{condition}{(Optional) A string naming the column in the condition slot to group samples by.}
+\item{condition}{(Optional) A string naming the column in the \code{colData} slot to group samples by.}
 }
 \value{
 A ggplot object.
@@ -27,6 +27,6 @@ either across all samples or grouped by a condition.
 }
 \section{Functions}{
 \itemize{
-\item \code{compare_protein(ProtData)}: Method for ProtData objects.
+\item \code{compare_protein(SummarizedExperiment)}: Method for ProtData objects.
 
 }}

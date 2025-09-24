@@ -1,3 +1,155 @@
+# Make sure you have the required library loaded
+library(SummarizedExperiment)
+
+#' Create a SummarizedExperiment Object from Proteomics Data
+#'
+#' This function takes a data frame of proteomics data and its corresponding
+#' sample metadata to construct a SummarizedExperiment object. It handles
+#' detection of intensity columns, validation, and synchronization of metadata.
+#'
+#' @param data A data frame containing both protein metadata and intensity values.
+#' @param sample_metadata A data frame for sample metadata. It must contain a
+#'   'SampleID' column that matches the intensity column headers in 'dat'. If
+#'   NULL (the default), a basic metadata table is generated from the column names.
+#' @param intensity_cols An optional character or numeric vector specifying which
+#'   columns in 'dat' are the intensity/abundance columns. If NULL, the function
+
+#'   will attempt to autodetect them as all numeric columns.
+#' @param creation_method A character string to log how the data was created
+#'   (e.g., "MaxQuant_LFQ"). Stored in the object's metadata.
+#'
+#' @return A \code{SummarizedExperiment} object.
+#' @export
+#'
+#' @examples
+#' # --- Sample Data ---
+#' test_data <- data.frame(
+#'   ProteinID = c("P02768", "P01023", "P10636"),
+#'   Gene = c("ALB", "A2M", "CALM1"),
+#'   Sample_A_1 = c(10.1, 12.5, 13.2),
+#'   Sample_A_2 = c(10.5, 12.8, 13.9),
+#'   Sample_B_1 = c(15.2, 18.1, 19.0),
+#'   Sample_B_2 = c(15.8, 18.5, 19.9)
+#' )
+#'
+#' sample_info <- data.frame(
+#'   SampleID = c("Sample_A_1", "Sample_A_2", "Sample_B_1", "Sample_B_2"),
+#'   Condition = c("A", "A", "B", "B")
+#' )
+#'
+#' # --- Function Call ---
+#' se <- create_se(
+#'   dat = test_data,
+#'   sample_metadata = sample_info,
+#'   creation_method = "Example_Data"
+#' )
+#'
+#' # --- Inspect the new object ---
+#' print(se)
+#' assayNames(se)
+#' head(rowData(se))
+#' colData(se)
+#' metadata(se)
+#'
+create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creation_method = "Unknown") {
+
+  # --- 1. Initial Checks and Setup ---
+  if (!is.data.frame(data)) {
+    stop("The 'dat' argument must be a data frame.")
+  }
+
+  # NOTE: Assuming you have these helper functions available
+  data <- convert_numeric_cols(data)
+  colnames(data) <- trim_names(colnames(data))
+
+  # Autodetect intensity columns if not provided
+  if (is.null(intensity_cols)) {
+    message("`intensity_cols` not provided. Detecting numeric columns as intensity data.")
+    intensity_cols <- which(sapply(data, is.numeric))
+    if (length(intensity_cols) == 0) {
+      stop("No numeric intensity columns could be detected.")
+    }
+  }
+
+  # --- 2. Separate Data into Assay, RowData, and ColData Components ---
+
+  # The assay matrix (must be numeric)
+  assay_data <- as.matrix(data[, intensity_cols])
+
+  # The row metadata (protein metadata)
+  # Ensure it's a DataFrame for Bioconductor consistency
+  row_data <- S4Vectors::DataFrame(dat[, -intensity_cols, drop = FALSE])
+
+  # --- 3. Process and Synchronize Sample Metadata (colData) ---
+  if (!is.null(sample_metadata)) {
+    col_data <- as.data.frame(sample_metadata)
+
+    if (!"SampleID" %in% colnames(col_data)) {
+      stop("Error: The sample_metadata file is missing the required 'SampleID' column.")
+    }
+    if (any(duplicated(col_data$SampleID))) {
+      stop("Error: The 'SampleID' column contains duplicate values.")
+    }
+
+    # Set rownames from the SampleID column
+    rownames(col_data) <- as.character(col_data$SampleID)
+    col_data$SampleID <- NULL
+
+    # Synchronize rownames of col_data with colnames of assay_data
+    assay_colnames <- colnames(assay_data)
+
+    # Check for mismatches
+    if (!setequal(rownames(col_data), assay_colnames)) {
+      warning("SampleIDs in metadata do not perfectly match intensity column names.")
+
+      # Keep only intersecting samples
+      shared_samples <- intersect(rownames(col_data), assay_colnames)
+      if(length(shared_samples) == 0) {
+        stop("No samples in common between sample metadata and intensity data.")
+      }
+
+      assay_data <- assay_data[, shared_samples, drop = FALSE]
+      col_data <- col_data[shared_samples, , drop = FALSE]
+    }
+
+    # Reorder col_data to perfectly match the order of assay_data
+    col_data <- col_data[colnames(assay_data), , drop = FALSE]
+
+  } else {
+    # If no sample_metadata is provided, create a default one
+    warning("`sample_metadata` not provided. Generating a basic version from column names.")
+    col_data <- data.frame(
+      row.names = colnames(assay_data),
+      base_condition = gsub("_\\d+$", "", colnames(assay_data))
+    )
+  }
+
+  # --- 4. Construct the SummarizedExperiment Object ---
+
+  # IMPORTANT: The commented-out dplyr block from your original function for
+  # filtering proteins should NOT be in a constructor. That is a downstream
+  # *processing step*. This function should only build the object.
+
+  se <- SummarizedExperiment(
+    # Assays must be in a named list. We'll call the primary data "intensities".
+    assays = list(intensities = assay_data),
+
+    # Protein metadata
+    rowData = row_data,
+
+    # Sample metadata
+    colData = col_data,
+
+    # Experiment-level metadata, a perfect place for your processing log
+    metadata = list(
+      creation_method = creation_method,
+      processing_log = list() # Initialize the log
+    )
+  )
+
+  return(se)
+}
+
 #' ProtData Class
 #'
 #' An S4 class that holds proteomics data and provides methods for processing.
@@ -21,7 +173,7 @@ setClass("ProtData",
 )
 
 
-# Constructor for ProtData class
+# Constructor for making summarizedExperiment
 #' Create a ProtData Object
 #'
 #' This function creates an instance of the ProtData class.
@@ -34,8 +186,6 @@ setClass("ProtData",
 #' @return An instance of the ProtData class.
 #' @export
 create_protdata <- function(dat, intensity_cols = NULL, condition = NULL, method = "Unknown") {
-
-
 
   # Check that data is a data frame
   if (!is.data.frame(dat)) {
@@ -179,10 +329,10 @@ detect_intensity_cols <- function(df) {
 #'
 #' @export
 has_step <- function(object, step_name) {
-  if (length(object@processing) == 0) return(FALSE)
+  if (length(metadata(object)$processing_log) == 0) return(FALSE)
 
   # Get the names of all steps performed so far
-  executed_steps <- sapply(object@processing, function(x) x$name)
+  executed_steps <- sapply(metadata(object)$processing_log, function(x) x$name)
 
   return(step_name %in% executed_steps)
 }

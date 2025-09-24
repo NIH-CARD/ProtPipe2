@@ -8,14 +8,14 @@
 #' Creates a ggplot bar chart comparing the intensity of a single protein
 #' either across all samples or grouped by a condition.
 #'
-#' @param PD The ProtData object.
+#' @param object The `SummarizedExperiment` object.
 #' @param prot A string specifying the name of the protein to plot.
-#' @param prot_meta_col A string naming the column in the prot_meta slot to search for the protein. Defaults to the first column.
-#' @param condition (Optional) A string naming the column in the condition slot to group samples by.
+#' @param prot_meta_col A string naming the column in the `rowData` slot to search for the protein. Defaults to the first column.
+#' @param condition (Optional) A string naming the column in the `colData` slot to group samples by.
 #' @return A ggplot object.
 #' @export
 setGeneric("compare_protein",
-           def = function(PD, prot, prot_meta_col = NULL, condition = NULL) {
+           def = function(object, prot, prot_meta_col = NULL, condition = NULL) {
              standardGeneric("compare_protein")
            }
 )
@@ -23,8 +23,8 @@ setGeneric("compare_protein",
 # --- 3. S4 Method Implementation ---
 #' @describeIn compare_protein Method for ProtData objects.
 setMethod("compare_protein",
-          signature(PD = "ProtData"),
-          function(PD, prot, prot_meta_col = NULL, condition = NULL) {
+          signature(object = "SummarizedExperiment"),
+          function(object, prot, prot_meta_col = NULL, condition = NULL) {
 
             # --- Input Validation and Data Extraction ---
 
@@ -34,16 +34,16 @@ setMethod("compare_protein",
 
             # 1. Validate and default the prot_meta_col
             if (is.null(prot_meta_col)) {
-              prot_meta_col <- names(PD@prot_meta)[[1]]
+              prot_meta_col <- names(rowData(object))[[1]]
               message("`prot_meta_col` not provided. Using the first column: '", prot_meta_col, "'")
             }
-            if (!prot_meta_col %in% names(PD@prot_meta)) {
+            if (!prot_meta_col %in% names(rowData(object))) {
               stop("'", prot_meta_col, "' not found in the prot_meta slot of the object.")
             }
 
             # 2. Find the protein row index
             # Use case-insensitive matching
-            match_indices <- which(tolower(PD@prot_meta[[prot_meta_col]]) == tolower(prot))
+            match_indices <- which(tolower(rowData(object)[[prot_meta_col]]) == tolower(prot))
 
             if (length(match_indices) == 0) {
               stop("Analyte '", prot, "' not found in column '", prot_meta_col, "'.")
@@ -56,7 +56,7 @@ setMethod("compare_protein",
             }
 
             # 4. Extract the intensity data for the single protein
-            intensity_vector <- PD@data[match_indices, , drop = TRUE]
+            intensity_vector <- assay(object)[match_indices, ]
 
             # 5. Create a tidy data frame for plotting
             plotting_df <- data.frame(
@@ -84,9 +84,10 @@ setMethod("compare_protein",
 
               # Case 2: Condition provided, plot grouped means with stats
             }else{
-              if (!condition %in% names(PD@condition)) { stop("'", condition, "' not found in condition slot.") }
+              if (!condition %in% names(colData(object))) { stop("'", condition, "' not found in colData slot.") }
 
-              condition_df <- PD@condition %>%
+              condition_df <- colData(object) %>%
+                as.data.frame() %>%
                 dplyr::mutate(SampleID = as.character(rownames(.)))
 
               plotting_df <- dplyr::left_join(plotting_df, condition_df, by = "SampleID")

@@ -114,12 +114,12 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 
 #' Perform limma differential expression on a ProtData object
 #'
-#' This function takes a `ProtData` object and two vectors containing the column names
+#' This function takes a `SummarizedExperiment` object and two vectors containing the column names
 #' of the treatment and control samples. It filters out proteins found in fewer than 50%
 #' of samples, performs a limma-based differential expression analysis, and returns
 #' a data frame with metadata, intensities, log fold changes, and p-values.
 #'
-#' @param object A `ProtData` object containing protein intensities, metadata, and condition info.
+#' @param object A `SummarizedExperiment` object containing protein intensities, metadata, and condition info.
 #' @param treatment_samples Character vector of column names representing treatment samples.
 #' @param control_samples Character vector of column names representing control samples.
 #'
@@ -129,18 +129,22 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 #'
 setGeneric("do_limma", function(object, treatment_samples, control_samples) standardGeneric("do_limma"))
 
-setMethod("do_limma", "ProtData", function(object, treatment_samples, control_samples) {
-  #data
-  meta_cols <- names(object@prot_meta)
+setMethod("do_limma", "SummarizedExperiment", function(object, treatment_samples, control_samples) {
+  meta_cols <- names(rowData(object))
   if (ProtPipe::has_step(object, "log2_transform")){
-    data <- object@data
+    data <- assay(object) %>% as.data.frame()
   }else{
     object <- ProtPipe::log2_transform(object)
-    data <- object@data
+    data <- assay(object)%>% as.data.frame()
   }
 
-  DT <- cbind(object@prot_meta, data)
-  meta <- object@condition
+  # Stop if data contains missing values
+  if (anyNA(data)) {
+    stop("Missing values (NA) found. Please impute before running PCA.")
+  }
+
+  DT <- cbind(rowData(object), data) %>% as.data.frame()
+  meta <- colData(object)
 
   # treatment_samples=grep(treatment,colnames(Log2_DT),value = T)
   # control_samples=grep(control,colnames(Log2_DT),value = T)
@@ -148,10 +152,10 @@ setMethod("do_limma", "ProtData", function(object, treatment_samples, control_sa
   n_treatment <- length(treatment_samples)
   n_control <- length(control_samples)
   # Convert NA to 0
-  DT_limma[is.na(DT_limma)] <- 0
+  #DT_limma[is.na(DT_limma)] <- 0
 
-  # Filter out sparse proteins
-  DT_limma <- filter_features(DT_limma, control_samples, treatment_samples, alpha = 0.5)
+  # Filter out sparse proteins (not doing this anymore)
+  #DT_limma <- filter_features(DT_limma, control_samples, treatment_samples, alpha = 0.5)
 
   #design
   group_list <- factor(c(rep('treatment',n_treatment),
@@ -189,8 +193,8 @@ setMethod("do_limma", "ProtData", function(object, treatment_samples, control_sa
 #'
 setGeneric("do_limma_by_condition", function(object, condition, control_group, treatment_group) standardGeneric("do_limma_by_condition"))
 
-setMethod("do_limma_by_condition", "ProtData", function(object, condition, control_group, treatment_group) {
-  meta <- object@condition
+setMethod("do_limma_by_condition", "SummarizedExperiment", function(object, condition, control_group, treatment_group) {
+  meta <- colData(object) %>% as.data.frame()
   conditions <- names(meta)
 
   if (!(condition %in% conditions)) {

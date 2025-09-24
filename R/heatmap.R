@@ -1,68 +1,13 @@
-#' Plot a Proteomics Heatmap
-#'
-#' @description
-#' Generates a heatmap of protein expression. The function can operate in two modes
-#' depending on the `condition` argument.
-#'
-#' 1.  **Individual Samples (default):** If `condition` is `NULL`, a heatmap of
-#'     all individual samples is generated, with samples clustered by similarity.
-#' 2.  **Summarized Conditions:** If a `condition` is provided, the function first
-#'     calculates the mean expression for each protein across the replicates
-#'     within each condition group, then generates a heatmap of these mean values.
-#'
-#' In both modes, the data is row-wise Z-scored before plotting.
-#'
-#' @param PD A `ProtData` object. It is recommended to use data that has been
-#'   log-transformed and imputed.
-#' @param protmeta_col A character string specifying the name of the column in
-#'   the `@prot_meta` slot to use for protein labels on the heatmap rows.
-#'   Defaults to the first column of `@prot_meta`.
-#' @param genes Optional. A character vector of gene or protein names to subset
-#'   the data to. Only these proteins will be included in the heatmap. The match
-#'   is case-insensitive.
-#' @param title Optional. A character string for the plot title.
-#' @param condition Optional. A character string specifying a column name in the
-#'   `@condition` slot. If provided, triggers the summarized heatmap mode.
-#'
-#' @return A `ggplot` object representing the heatmap.
-#'
+#' @describeIn plot_proteomics_heatmap Method for SummarizedExperiment objects.
 #' @export
-#'
-#' @examples
-#' # Create sample data for the constructor
-#' raw_data <- data.frame(
-#'   ProteinID = paste0("P", 1:3), Gene = c("GENEA", "GENEB", "GENEC"),
-#'   Ctrl_1 = c(10, 20, 15), Ctrl_2 = c(12, 22, 14),
-#'   Treat_1 = c(25, 10, 5), Treat_2 = c(27, 12, 6)
-#' )
-#' cond_df <- data.frame(
-#'    SampleID = c("Ctrl_1", "Ctrl_2", "Treat_1", "Treat_2"),
-#'    group = c("Control", "Control", "Treatment", "Treatment")
-#' )
-#' pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
-#'
-#' # Example 1: Default mode (heatmap of individual samples)
-#' p1 <- plot_proteomics_heatmap(pd_obj)
-#' if (interactive()) print(p1)
-#'
-#' # Example 2: Summarized mode (heatmap of condition means)
-#' p2 <- plot_proteomics_heatmap(pd_obj, condition = "group")
-#' if (interactive()) print(p2)
-#'
-setGeneric("plot_proteomics_heatmap",
-           function(PD, protmeta_col = NULL, genes = NULL, title = NULL, condition = NULL) {
-             standardGeneric("plot_proteomics_heatmap")
-           }
-)
-
-setMethod("plot_proteomics_heatmap", "ProtData",
-          function(PD, protmeta_col = NULL, genes = NULL, title = NULL, condition = NULL) {
+setMethod("plot_proteomics_heatmap", "SummarizedExperiment",
+          function(object, protmeta_col = NULL, genes = NULL, title = NULL, condition = NULL) {
             # --- 1. Initial Data Extraction and Filtering ---
-            if (!inherits(PD, "ProtData")) { stop("Error: 'PD' must be of class ProtData") }
-            intensities <- PD@data
-            prot_meta <- PD@prot_meta
+            if (!inherits(object, "SummarizedExperiment")) { stop("Error: 'object' must be of class SummarizedExperiment") }
+            intensities <- assay(object) %>% as.data.frame()
+            prot_meta <- rowData(object) %>% as.data.frame()
             if (is.null(protmeta_col)) { protmeta_col <- names(prot_meta)[1] }
-            if (!protmeta_col %in% colnames(prot_meta)) { stop(paste("Column", protmeta_col, "not found in PD@prot_meta")) }
+            if (!protmeta_col %in% colnames(prot_meta)) { stop(paste("Column", protmeta_col, "not found in rowData slot")) }
 
             if (!is.null(genes)) {
               match_genes <- tolower(prot_meta[[protmeta_col]]) %in% tolower(genes)
@@ -75,14 +20,16 @@ setMethod("plot_proteomics_heatmap", "ProtData",
             if (!is.null(condition)) {
               # --- SUMMARIZED MODE ---
               cat("Condition provided. Summarizing replicates into means...\n")
-              if (!condition %in% names(PD@condition)) { stop("'", condition, "' not found in the condition slot.") }
+              if (!condition %in% names(colData(object))) { stop("'", condition, "' not found in the condition slot.") }
 
               # Use the summarize_replicates logic
               data_long <- intensities %>%
                 tibble::rownames_to_column(var = "ProteinID") %>%
                 tidyr::pivot_longer(cols = -ProteinID, names_to = "Sample", values_to = "Intensity")
 
-              condition_to_join <- PD@condition %>% tibble::rownames_to_column(var = "Sample")
+              condition_to_join <- colData(object) %>%
+                as.data.frame() %>%
+                tibble::rownames_to_column(var = "Sample")
 
               summarized_data <- data_long %>%
                 dplyr::left_join(condition_to_join, by = "Sample") %>%

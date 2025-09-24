@@ -1,5 +1,5 @@
 dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
-dat_pro <- create_protdata(dat)
+dat_pro <- create_se(dat)
 
 test_that("correctly get PG_counts", {
   pg_counts <- ProtPipe::get_pg_counts(dat_pro)
@@ -22,7 +22,7 @@ test_that("correctly plots pg intensities", {
 test_that("correctly gets CVs", {
   cvs <- ProtPipe::get_CVs(dat_pro, condition = 'base_condition')
   expect_s3_class(cvs, "data.frame")
-  expect_equal(dim(cvs), c(42, 2))
+  expect_equal(dim(cvs), c(57928,3))
 })
 
 test_that("correctly plot CVs", {
@@ -31,7 +31,7 @@ test_that("correctly plot CVs", {
 })
 
 test_that("correctly gets correlations", {
-  cors <- ProtPipe::get_spearman(dat_pro)
+  cors <- ProtPipe::get_sample_correlation(dat_pro)
   expect_s3_class(cvs, "data.frame")
   expect_equal(dim(cvs), c(1764, 3))
 })

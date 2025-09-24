@@ -1,5 +1,5 @@
 dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
-dat_pro <- create_protdata(dat)
+dat_pro <- create_se(dat)
 
 test_that("correctly perform PCA clustering", {
   expect_error(plot_PCs(dat_pro))

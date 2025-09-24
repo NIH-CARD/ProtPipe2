@@ -189,7 +189,6 @@ server <- function(input, output, session) {
   output$range_result <- renderPrint({
     req(input$data_type == 1)
     df <- intensity_file() %>% ProtPipe::convert_numeric_cols()
-    dfff<<- df
 
     # Ensure both selections are made
     req(input$lower_col, input$upper_col)
@@ -234,7 +233,7 @@ server <- function(input, output, session) {
     }
 
     if (data_type == 1) {
-      PD <- ProtPipe::create_protdata(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), condition = condition_file())
+      PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition_file())
     } else if(data_type == 2){
       PD <- ProtPipe::create_protdata_from_soma(adat = intensity_file(), condition = condition_file())
     } else if(data_type == 3){
@@ -295,7 +294,7 @@ server <- function(input, output, session) {
       PD <- ProtPipe::batch_correct(PD, input$batch_correct_column)
     }
 
-    pdata <- base::cbind(PD@prot_meta, PD@data)
+    pdata <- base::cbind(rowData(PD), assay(PD)) %>% as.data.frame()
     add_zip_tabular(pdata, "processed_data.tsv", "quality_control", zip_workspace, "output.zip")
 
     return(PD)
@@ -338,7 +337,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     #req(sample_condition())
 
-    choices <- names(prot_data()@condition)
+    choices <- names(colData(prot_data()))
 
     selectInput("qc_condition", "select condition to group by:", choices = choices)
   })
@@ -442,7 +441,7 @@ server <- function(input, output, session) {
     req(intensity_file())
 
     #save tabular data
-    dat.correlations <- ProtPipe::get_spearman(prot_data())
+    dat.correlations <- ProtPipe::get_sample_correlation(prot_data())
     add_zip_tabular(dat.correlations, "sample_correlations.tsv", "quality_control", zip_workspace, "output.zip")
 
     #save plot
@@ -470,7 +469,7 @@ server <- function(input, output, session) {
       paste("sample_correlation.tsv")
     },
     content = function(file){
-      dat.correlations <- ProtPipe::get_spearman(prot_data())
+      dat.correlations <- ProtPipe::get_sample_correlation(prot_data())
       write.table(dat.correlations , file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
@@ -484,7 +483,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     #req(sample_condition())
 
-    choices <- names(prot_data()@condition)
+    choices <- names(colData(prot_data()))
 
     selectInput("cluster_condition", "select condition to group by:", choices = choices)
   })
@@ -594,7 +593,7 @@ server <- function(input, output, session) {
   #select condition
   output$protein_label <- renderUI({
     req(intensity_file())
-    choices <- names(prot_data()@prot_meta)
+    choices <- names(rowData(prot_data()))
     selectInput("protein_label", "select the column used to label proteins:", choices = choices)
   })
 
@@ -642,7 +641,7 @@ server <- function(input, output, session) {
   #select condition
   output$pv_prot_meta <- renderUI({
     req(intensity_file())
-    choices <- names(prot_data()@prot_meta)
+    choices <- names(rowData(prot_data()))
     selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
   })
 
@@ -650,14 +649,14 @@ server <- function(input, output, session) {
   output$pv_protein <- renderUI({
     req(intensity_file())
     req(input$pv_prot_meta)
-    choices <- prot_data()@prot_meta[[input$pv_prot_meta]]
+    choices <- rowData(prot_data())[[input$pv_prot_meta]]
     selectInput("pv_protein", "select a protein:", choices = choices)
   })
 
   #select condition
   output$pv_condition <- renderUI({
     req(intensity_file())
-    choices <- c("No grouping", names(prot_data()@condition))
+    choices <- c("No grouping", names(colData(prot_data())))
     selectInput("pv_condition", "select the column used to group samples:", choices = choices)
   })
 
@@ -695,7 +694,7 @@ server <- function(input, output, session) {
   #select condition
   output$de_condition <- renderUI({
     req(intensity_file())
-    choices <- names(prot_data()@condition)
+    choices <- names(colData(prot_data()))
     selectInput("de_condition", "select the column used to compare groups:", choices = choices)
   })
 
@@ -703,7 +702,7 @@ server <- function(input, output, session) {
   output$de_groups <- renderUI({
     req(intensity_file())
     req(input$de_condition)
-    groups <- unique(prot_data()@condition[[input$de_condition]])
+    groups <- unique(colData(prot_data())[[input$de_condition]])
 
     tagList(
       selectInput("control_condition", "select the control groups:", choices = groups),
@@ -714,7 +713,7 @@ server <- function(input, output, session) {
   #select column to label the proteins
   output$label_col <- renderUI({
     req(intensity_file())
-    choices <- names(prot_data()@prot_meta)
+    choices <- names(rowData(prot_data()))
     selectInput("label_col", "select the column used to label proteins:", choices = choices)
   })
 
@@ -778,7 +777,7 @@ server <- function(input, output, session) {
   #select condition
   output$gene_col <- renderUI({
     req(intensity_file())
-    choices <- names(prot_data()@prot_meta)
+    choices <- names(rowData(prot_data()))
     selectInput("gene_col", "select the column containing official gene symbols (e.g., TP53):", choices = choices)
   })
 

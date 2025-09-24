@@ -7,15 +7,15 @@
 add_processing_step(object, log_entry)
 }
 \arguments{
-\item{object}{An S4 object that contains a \code{processing} slot (list).}
+\item{object}{A \code{SummarizedExperiment} object with a processing_log entry in the metadata slot.}
 
 \item{log_entry}{A named list containing metadata about the processing step.
-This list should ideally contain elements like \code{name}, \code{timestamp}, and
+This list should ideally contain elements like \code{name}, \code{description}, and
 \code{parameters}.}
 }
 \value{
-The modified S4 object with the \code{log_entry} appended to its
-\code{processing} history.
+The modified object with the \code{log_entry} appended to its
+\code{processing_log} history.
 }
 \description{
 Appends a formatted log entry to the \code{processing} slot of an S4 object.
