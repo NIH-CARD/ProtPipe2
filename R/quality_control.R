@@ -33,7 +33,7 @@ setMethod("plot_pg_counts", "SummarizedExperiment",
                   ggplot2::theme_classic()+
                   ggplot2::labs(fill = "",x="",y='Number of Protein Groups')+
                   ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(angle = 90))+
-                  ggplot2::geom_text(ggplot2::aes(label=N, y=N + (0.05*max(pgcounts$N))))
+                  ggplot2::geom_text(ggplot2::aes(label=Protein_Groups, y=Protein_Groups + (0.05*max(pgcounts$Protein_Groups))))
               }
             }else{
               # group by condition

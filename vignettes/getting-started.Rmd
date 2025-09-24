@@ -22,6 +22,7 @@ The `ProtPipe` package provides a streamlined, start-to-finish workflow for comm
 First, we load the `ProtPipe` package.
 ```{r setup}
 library(ProtPipe)
+library(SummarizedExperiment)
 library(ggplot2) # For plot customization
 ```
 
@@ -84,7 +85,7 @@ cond_df <- data.frame(
 )
 
 # 3. Use the constructor to create the ProtData object
-pd_obj <- ProtPipe::create_protdata(dat = raw_data, condition = cond_df)
+pd_obj <- ProtPipe::create_se(data = raw_data, sample_metadata = cond_df)
 
 # We can inspect the created object
 print(pd_obj)
@@ -139,7 +140,7 @@ set.seed(123) # Set a seed for reproducible imputation
 pd_obj_imputed <- ProtPipe::impute_left_dist(pd_obj_normalized)
 
 # The object should no longer have missing values
-any(is.na(pd_obj_imputed@data))
+any(is.na(assay(pd_obj_imputed)))
 ```
 
 ## Downstream Analysis and Visualization

@@ -1,7 +1,3 @@
-# Make sure you have the required library loaded
-library(SummarizedExperiment)
-
-#' Create a SummarizedExperiment Object from Proteomics Data
 #'
 #' This function takes a data frame of proteomics data and its corresponding
 #' sample metadata to construct a SummarizedExperiment object. It handles
@@ -9,10 +5,10 @@ library(SummarizedExperiment)
 #'
 #' @param data A data frame containing both protein metadata and intensity values.
 #' @param sample_metadata A data frame for sample metadata. It must contain a
-#'   'SampleID' column that matches the intensity column headers in 'dat'. If
+#'   'SampleID' column that matches the intensity column headers in 'data'. If
 #'   NULL (the default), a basic metadata table is generated from the column names.
 #' @param intensity_cols An optional character or numeric vector specifying which
-#'   columns in 'dat' are the intensity/abundance columns. If NULL, the function
+#'   columns in 'data' are the intensity/abundance columns. If NULL, the function
 
 #'   will attempt to autodetect them as all numeric columns.
 #' @param creation_method A character string to log how the data was created
@@ -39,9 +35,8 @@ library(SummarizedExperiment)
 #'
 #' # --- Function Call ---
 #' se <- create_se(
-#'   dat = test_data,
-#'   sample_metadata = sample_info,
-#'   creation_method = "Example_Data"
+#'   data = test_data,
+#'   sample_metadata = sample_info
 #' )
 #'
 #' # --- Inspect the new object ---
@@ -55,7 +50,7 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
 
   # --- 1. Initial Checks and Setup ---
   if (!is.data.frame(data)) {
-    stop("The 'dat' argument must be a data frame.")
+    stop("The 'data' argument must be a data frame.")
   }
 
   # NOTE: Assuming you have these helper functions available
@@ -78,7 +73,7 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
 
   # The row metadata (protein metadata)
   # Ensure it's a DataFrame for Bioconductor consistency
-  row_data <- S4Vectors::DataFrame(dat[, -intensity_cols, drop = FALSE])
+  row_data <- S4Vectors::DataFrame(data[, -intensity_cols, drop = FALSE])
 
   # --- 3. Process and Synchronize Sample Metadata (colData) ---
   if (!is.null(sample_metadata)) {

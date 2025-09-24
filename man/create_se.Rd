@@ -2,7 +2,9 @@
 % Please edit documentation in R/0-prot_data.R
 \name{create_se}
 \alias{create_se}
-\title{Create a SummarizedExperiment Object from Proteomics Data}
+\title{This function takes a data frame of proteomics data and its corresponding
+sample metadata to construct a SummarizedExperiment object. It handles
+detection of intensity columns, validation, and synchronization of metadata.}
 \usage{
 create_se(
   data,
@@ -15,11 +17,11 @@ create_se(
 \item{data}{A data frame containing both protein metadata and intensity values.}
 
 \item{sample_metadata}{A data frame for sample metadata. It must contain a
-'SampleID' column that matches the intensity column headers in 'dat'. If
+'SampleID' column that matches the intensity column headers in 'data'. If
 NULL (the default), a basic metadata table is generated from the column names.}
 
 \item{intensity_cols}{An optional character or numeric vector specifying which
-columns in 'dat' are the intensity/abundance columns. If NULL, the function
+columns in 'data' are the intensity/abundance columns. If NULL, the function
 will attempt to autodetect them as all numeric columns.}
 
 \item{creation_method}{A character string to log how the data was created
@@ -51,9 +53,8 @@ sample_info <- data.frame(
 
 # --- Function Call ---
 se <- create_se(
-  dat = test_data,
-  sample_metadata = sample_info,
-  creation_method = "Example_Data"
+  data = test_data,
+  sample_metadata = sample_info
 )
 
 # --- Inspect the new object ---
