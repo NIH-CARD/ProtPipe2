@@ -80,6 +80,79 @@ from data loading to quality control and visualization.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/">ProtPipe</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: MatrixGenerics</span></span>
+<span><span class="co">#&gt; Loading required package: matrixStats</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'MatrixGenerics'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:matrixStats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,</span></span>
+<span><span class="co">#&gt;     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,</span></span>
+<span><span class="co">#&gt;     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,</span></span>
+<span><span class="co">#&gt;     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,</span></span>
+<span><span class="co">#&gt;     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,</span></span>
+<span><span class="co">#&gt;     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,</span></span>
+<span><span class="co">#&gt;     colWeightedMeans, colWeightedMedians, colWeightedSds,</span></span>
+<span><span class="co">#&gt;     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,</span></span>
+<span><span class="co">#&gt;     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,</span></span>
+<span><span class="co">#&gt;     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,</span></span>
+<span><span class="co">#&gt;     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,</span></span>
+<span><span class="co">#&gt;     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,</span></span>
+<span><span class="co">#&gt;     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,</span></span>
+<span><span class="co">#&gt;     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,</span></span>
+<span><span class="co">#&gt;     rowWeightedSds, rowWeightedVars</span></span>
+<span><span class="co">#&gt; Loading required package: GenomicRanges</span></span>
+<span><span class="co">#&gt; Loading required package: stats4</span></span>
+<span><span class="co">#&gt; Loading required package: BiocGenerics</span></span>
+<span><span class="co">#&gt; Loading required package: generics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'generics'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,</span></span>
+<span><span class="co">#&gt;     setequal, union</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'BiocGenerics'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:ProtPipe':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     combine</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     IQR, mad, sd, var, xtabs</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     anyDuplicated, aperm, append, as.data.frame, basename, cbind,</span></span>
+<span><span class="co">#&gt;     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,</span></span>
+<span><span class="co">#&gt;     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,</span></span>
+<span><span class="co">#&gt;     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,</span></span>
+<span><span class="co">#&gt;     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,</span></span>
+<span><span class="co">#&gt;     unsplit, which.max, which.min</span></span>
+<span><span class="co">#&gt; Loading required package: S4Vectors</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'S4Vectors'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:utils':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     findMatches</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     expand.grid, I, unname</span></span>
+<span><span class="co">#&gt; Loading required package: IRanges</span></span>
+<span><span class="co">#&gt; Loading required package: GenomeInfoDb</span></span>
+<span><span class="co">#&gt; Loading required package: Biobase</span></span>
+<span><span class="co">#&gt; Welcome to Bioconductor</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     Vignettes contain introductory material; view with</span></span>
+<span><span class="co">#&gt;     'browseVignettes()'. To cite Bioconductor, see</span></span>
+<span><span class="co">#&gt;     'citation("Biobase")', and for packages 'citation("pkgname")'.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'Biobase'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:MatrixGenerics':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     rowMedians</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:matrixStats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     anyMissing, rowMedians</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># For plot customization</span></span></code></pre></div>
 <p>Our analysis begins with two primary data frames:</p>
 <ol style="list-style-type: decimal">
@@ -142,131 +215,19 @@ mapping each sample to its condition.</li>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 3. Use the constructor to create the ProtData object</span></span>
-<span><span class="va">pd_obj</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/create_protdata.html">create_protdata</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">raw_data</span>, condition <span class="op">=</span> <span class="va">cond_df</span><span class="op">)</span></span>
+<span><span class="va">pd_obj</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/create_se.html">create_se</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">raw_data</span>, sample_metadata <span class="op">=</span> <span class="va">cond_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `intensity_cols` not provided. Detecting numeric columns as intensity data.</span></span>
 <span></span>
 <span><span class="co"># We can inspect the created object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
-<span><span class="co">#&gt; An object of class "ProtData"</span></span>
-<span><span class="co">#&gt; Slot "data":</span></span>
-<span><span class="co">#&gt;      Ctrl_1   Ctrl_2   Ctrl_3  Treat_1  Treat_2  Treat_3</span></span>
-<span><span class="co">#&gt; 1  23.87905 25.63330 23.43711 26.57548 30.49703 24.17367</span></span>
-<span><span class="co">#&gt; 2  24.53965 24.92863 25.56514 26.53808 28.28103 23.76387</span></span>
-<span><span class="co">#&gt; 3  28.11742 24.89282 24.45728 25.66441 24.33714 24.24338</span></span>
-<span><span class="co">#&gt; 4  25.14102 28.42151 24.23541 22.98325 26.35799 25.19909</span></span>
-<span><span class="co">#&gt; 5  25.25858 24.43557 22.90644 24.76109 23.96415 28.51672</span></span>
-<span><span class="co">#&gt; 6  28.43013 28.79118 24.90094 24.43921 23.80938 24.80516</span></span>
-<span><span class="co">#&gt; 7  25.92183       NA 23.27321 26.12598 23.02849 27.37776</span></span>
-<span><span class="co">#&gt; 8  22.46988 26.46153 21.33053       NA 23.51346 26.38766</span></span>
-<span><span class="co">#&gt; 9  23.62629 25.30964 24.16350 26.95395 29.12727 24.74999</span></span>
-<span><span class="co">#&gt; 10 24.10868 25.53985 27.02179 24.25084 24.86493 21.62762</span></span>
-<span><span class="co">#&gt; 11 27.44816 25.94910 23.73424 27.10542 25.29811 23.85354</span></span>
-<span><span class="co">#&gt; 12 25.71963 23.74419 26.33752 22.90165 25.60922 23.92229</span></span>
-<span><span class="co">#&gt; 13 25.80154 24.16698 21.44066 22.47969 28.08119 25.10374</span></span>
-<span><span class="co">#&gt; 14 25.22137 22.45356 24.87776 31.48208 23.70984 27.86044</span></span>
-<span><span class="co">#&gt; 15 23.88832 22.32052 26.14270 24.16628 22.51873 30.04477</span></span>
-<span><span class="co">#&gt; 16 28.57383 25.75882 25.66254 25.59646 29.18924 28.40468</span></span>
-<span><span class="co">#&gt; 17 25.99570 26.12052 25.23249 26.27314 23.89709 24.70707</span></span>
-<span><span class="co">#&gt; 18 21.06677 25.13251 23.59045 24.03244 23.19234 21.13564</span></span>
-<span><span class="co">#&gt; 19 26.40271 27.30567 23.13065 26.03372 21.90932 24.14468</span></span>
-<span><span class="co">#&gt; 20 24.05442 30.12521       NA 25.73793 21.78821 25.19626</span></span>
-<span><span class="co">#&gt; 21       NA 23.77242 25.25882 24.56924 23.56507 26.85903</span></span>
-<span><span class="co">#&gt; 22 24.56405 19.22708 22.91556 25.13059 26.54496 27.11756</span></span>
-<span><span class="co">#&gt; 23 22.94799 27.51435 23.92077 24.93187 27.77462 26.50548</span></span>
-<span><span class="co">#&gt; 24 23.54222 23.22700 24.43660       NA 26.76897 21.93040</span></span>
-<span><span class="co">#&gt; 25 23.74992 23.27998 29.05650 23.51733 24.09086 26.86921</span></span>
-<span><span class="co">#&gt; 26 21.62661 27.56393 23.56571 22.80801 25.14937 24.01757</span></span>
-<span><span class="co">#&gt; 27 26.67557 24.28807 25.51785 25.07558 23.23851 25.38457</span></span>
-<span><span class="co">#&gt; 28 25.30675 21.94821 25.17151 25.62096 23.20695 25.16401</span></span>
-<span><span class="co">#&gt; 29 22.72373 25.45326 22.88392 25.87305 27.21163 25.94197</span></span>
-<span><span class="co">#&gt; 30 27.50763 24.65277       NA 24.08327 22.46102 25.05428</span></span>
-<span><span class="co">#&gt; 31 25.85293 25.01441 28.17801 22.87335 29.88823 21.33155</span></span>
-<span><span class="co">#&gt; 32 24.40986 25.96320 25.99331 27.52637 24.77420 26.62029</span></span>
-<span><span class="co">#&gt; 33 26.79025 24.07335 25.09071 24.30070 25.53635 25.84926</span></span>
-<span><span class="co">#&gt; 34 26.75627       NA 24.07051 23.26897 23.15368 24.41557</span></span>
-<span><span class="co">#&gt; 35 26.64316 24.44878 20.48286 24.52744 23.56403 25.25992</span></span>
-<span><span class="co">#&gt; 36 26.37728 25.82945 27.48894 24.60565 21.70746 25.29489</span></span>
-<span><span class="co">#&gt; 37 26.10784       NA 21.78659 27.21984 24.54269 25.48624</span></span>
-<span><span class="co">#&gt; 38       NA 26.08795 26.62788       NA 26.04746 28.60986</span></span>
-<span><span class="co">#&gt; 39 24.38807 24.18517       NA       NA 25.81076 24.51809</span></span>
-<span><span class="co">#&gt; 40 24.23906 27.87202 21.82344 24.00142 23.04616 25.36974</span></span>
-<span><span class="co">#&gt; 41 23.61059 27.48376 26.54393 28.42889 26.02845 30.57044</span></span>
-<span><span class="co">#&gt; 42 24.58417 26.37099 24.42317 27.35063 26.74450 30.31920</span></span>
-<span><span class="co">#&gt; 43 22.46921 25.59683 21.54128 28.18917 31.74015 30.51958</span></span>
-<span><span class="co">#&gt; 44 29.33791 23.43023 21.66773 26.20927 25.15674 26.72957</span></span>
-<span><span class="co">#&gt; 45 27.41592 28.40163 21.47662 25.37840 27.55237 32.40546</span></span>
-<span><span class="co">#&gt; 46 22.75378 23.49935 23.83201 25.99443 26.75590 22.14674</span></span>
-<span><span class="co">#&gt; 47 24.19423 30.46833 21.78414 23.20142 21.74756       NA</span></span>
-<span><span class="co">#&gt; 48 24.06669 28.83153 26.51342 19.49746 18.60040 19.02801</span></span>
-<span><span class="co">#&gt; 49 26.55993 24.41075 29.62024       NA 20.33808 22.04616</span></span>
-<span><span class="co">#&gt; 50 24.83326 22.43395 22.16853       NA 23.21365 24.74981</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "condition":</span></span>
-<span><span class="co">#&gt;             group batch</span></span>
-<span><span class="co">#&gt; Ctrl_1    Control     A</span></span>
-<span><span class="co">#&gt; Ctrl_2    Control     B</span></span>
-<span><span class="co">#&gt; Ctrl_3    Control     A</span></span>
-<span><span class="co">#&gt; Treat_1 Treatment     B</span></span>
-<span><span class="co">#&gt; Treat_2 Treatment     A</span></span>
-<span><span class="co">#&gt; Treat_3 Treatment     B</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "prot_meta":</span></span>
-<span><span class="co">#&gt;    ProteinID   Gene        Status</span></span>
-<span><span class="co">#&gt; 1         P1  GENE1        Stable</span></span>
-<span><span class="co">#&gt; 2         P2  GENE2        Stable</span></span>
-<span><span class="co">#&gt; 3         P3  GENE3        Stable</span></span>
-<span><span class="co">#&gt; 4         P4  GENE4        Stable</span></span>
-<span><span class="co">#&gt; 5         P5  GENE5        Stable</span></span>
-<span><span class="co">#&gt; 6         P6  GENE6        Stable</span></span>
-<span><span class="co">#&gt; 7         P7  GENE7        Stable</span></span>
-<span><span class="co">#&gt; 8         P8  GENE8        Stable</span></span>
-<span><span class="co">#&gt; 9         P9  GENE9        Stable</span></span>
-<span><span class="co">#&gt; 10       P10 GENE10        Stable</span></span>
-<span><span class="co">#&gt; 11       P11 GENE11        Stable</span></span>
-<span><span class="co">#&gt; 12       P12 GENE12        Stable</span></span>
-<span><span class="co">#&gt; 13       P13 GENE13        Stable</span></span>
-<span><span class="co">#&gt; 14       P14 GENE14        Stable</span></span>
-<span><span class="co">#&gt; 15       P15 GENE15        Stable</span></span>
-<span><span class="co">#&gt; 16       P16 GENE16        Stable</span></span>
-<span><span class="co">#&gt; 17       P17 GENE17        Stable</span></span>
-<span><span class="co">#&gt; 18       P18 GENE18        Stable</span></span>
-<span><span class="co">#&gt; 19       P19 GENE19        Stable</span></span>
-<span><span class="co">#&gt; 20       P20 GENE20        Stable</span></span>
-<span><span class="co">#&gt; 21       P21 GENE21        Stable</span></span>
-<span><span class="co">#&gt; 22       P22 GENE22        Stable</span></span>
-<span><span class="co">#&gt; 23       P23 GENE23        Stable</span></span>
-<span><span class="co">#&gt; 24       P24 GENE24        Stable</span></span>
-<span><span class="co">#&gt; 25       P25 GENE25        Stable</span></span>
-<span><span class="co">#&gt; 26       P26 GENE26        Stable</span></span>
-<span><span class="co">#&gt; 27       P27 GENE27        Stable</span></span>
-<span><span class="co">#&gt; 28       P28 GENE28        Stable</span></span>
-<span><span class="co">#&gt; 29       P29 GENE29        Stable</span></span>
-<span><span class="co">#&gt; 30       P30 GENE30        Stable</span></span>
-<span><span class="co">#&gt; 31       P31 GENE31        Stable</span></span>
-<span><span class="co">#&gt; 32       P32 GENE32        Stable</span></span>
-<span><span class="co">#&gt; 33       P33 GENE33        Stable</span></span>
-<span><span class="co">#&gt; 34       P34 GENE34        Stable</span></span>
-<span><span class="co">#&gt; 35       P35 GENE35        Stable</span></span>
-<span><span class="co">#&gt; 36       P36 GENE36        Stable</span></span>
-<span><span class="co">#&gt; 37       P37 GENE37        Stable</span></span>
-<span><span class="co">#&gt; 38       P38 GENE38        Stable</span></span>
-<span><span class="co">#&gt; 39       P39 GENE39        Stable</span></span>
-<span><span class="co">#&gt; 40       P40 GENE40        Stable</span></span>
-<span><span class="co">#&gt; 41       P41 GENE41   Upregulated</span></span>
-<span><span class="co">#&gt; 42       P42 GENE42   Upregulated</span></span>
-<span><span class="co">#&gt; 43       P43 GENE43   Upregulated</span></span>
-<span><span class="co">#&gt; 44       P44 GENE44   Upregulated</span></span>
-<span><span class="co">#&gt; 45       P45 GENE45   Upregulated</span></span>
-<span><span class="co">#&gt; 46       P46 GENE46 Downregulated</span></span>
-<span><span class="co">#&gt; 47       P47 GENE47 Downregulated</span></span>
-<span><span class="co">#&gt; 48       P48 GENE48 Downregulated</span></span>
-<span><span class="co">#&gt; 49       P49 GENE49 Downregulated</span></span>
-<span><span class="co">#&gt; 50       P50 GENE50 Downregulated</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "method":</span></span>
-<span><span class="co">#&gt; [1] "Unknown"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "processing":</span></span>
-<span><span class="co">#&gt; list()</span></span></code></pre></div>
+<span><span class="co">#&gt; class: SummarizedExperiment </span></span>
+<span><span class="co">#&gt; dim: 50 6 </span></span>
+<span><span class="co">#&gt; metadata(2): creation_method processing_log</span></span>
+<span><span class="co">#&gt; assays(1): intensities</span></span>
+<span><span class="co">#&gt; rownames: NULL</span></span>
+<span><span class="co">#&gt; rowData names(3): ProteinID Gene Status</span></span>
+<span><span class="co">#&gt; colnames(6): Ctrl_1 Ctrl_2 ... Treat_2 Treat_3</span></span>
+<span><span class="co">#&gt; colData names(2): group batch</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="initial-quality-control-qc">Initial Quality Control (QC)<a class="anchor" aria-label="anchor" href="#initial-quality-control-qc"></a>
@@ -281,18 +242,18 @@ visualize the intensity distributions with boxplots.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get the number of identified proteins per sample</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/get_pg_counts.html">get_pg_counts</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          Sample  N</span></span>
-<span><span class="co">#&gt; Ctrl_1   Ctrl_1 48</span></span>
-<span><span class="co">#&gt; Ctrl_2   Ctrl_2 47</span></span>
-<span><span class="co">#&gt; Ctrl_3   Ctrl_3 47</span></span>
-<span><span class="co">#&gt; Treat_1 Treat_1 44</span></span>
-<span><span class="co">#&gt; Treat_2 Treat_2 50</span></span>
-<span><span class="co">#&gt; Treat_3 Treat_3 49</span></span>
+<span><span class="co">#&gt;          Sample Protein_Groups</span></span>
+<span><span class="co">#&gt; Ctrl_1   Ctrl_1             48</span></span>
+<span><span class="co">#&gt; Ctrl_2   Ctrl_2             47</span></span>
+<span><span class="co">#&gt; Ctrl_3   Ctrl_3             47</span></span>
+<span><span class="co">#&gt; Treat_1 Treat_1             44</span></span>
+<span><span class="co">#&gt; Treat_2 Treat_2             50</span></span>
+<span><span class="co">#&gt; Treat_3 Treat_3             49</span></span>
 <span></span>
 <span><span class="co"># Plot the counts for each sample</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_counts.html">plot_pg_counts</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Use of `pgcounts$N` is discouraged.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `N` instead.</span></span>
+<span><span class="co">#&gt; Warning: Use of `pgcounts$Protein_Groups` is discouraged.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `Protein_Groups` instead.</span></span>
 <span><span class="co">#&gt; Ignoring unknown labels:</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">fill</span> : <span style="color: #0000BB;">""</span></span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/qc-plots-1.png" width="700"></p>
@@ -355,7 +316,7 @@ this is a stochastic method, we set a seed for reproducibility.</p>
 <span><span class="va">pd_obj_imputed</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/impute_left_dist-ProtData.html">impute_left_dist</a></span><span class="op">(</span><span class="va">pd_obj_normalized</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The object should no longer have missing values</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">@</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
 </div>
 </div>

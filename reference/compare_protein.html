@@ -44,18 +44,18 @@ either across all samples or grouped by a condition.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compare_protein</span><span class="op">(</span><span class="va">PD</span>, <span class="va">prot</span>, prot_meta_col <span class="op">=</span> <span class="cn">NULL</span>, condition <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compare_protein</span><span class="op">(</span><span class="va">object</span>, <span class="va">prot</span>, prot_meta_col <span class="op">=</span> <span class="cn">NULL</span>, condition <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'ProtData'</span></span>
-<span><span class="fu">compare_protein</span><span class="op">(</span><span class="va">PD</span>, <span class="va">prot</span>, prot_meta_col <span class="op">=</span> <span class="cn">NULL</span>, condition <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for class 'SummarizedExperiment'</span></span>
+<span><span class="fu">compare_protein</span><span class="op">(</span><span class="va">object</span>, <span class="va">prot</span>, prot_meta_col <span class="op">=</span> <span class="cn">NULL</span>, condition <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-pd">PD<a class="anchor" aria-label="anchor" href="#arg-pd"></a></dt>
-<dd><p>The ProtData object.</p></dd>
+<dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
+<dd><p>The <code>SummarizedExperiment</code> object.</p></dd>
 
 
 <dt id="arg-prot">prot<a class="anchor" aria-label="anchor" href="#arg-prot"></a></dt>
@@ -63,11 +63,11 @@ either across all samples or grouped by a condition.</p>
 
 
 <dt id="arg-prot-meta-col">prot_meta_col<a class="anchor" aria-label="anchor" href="#arg-prot-meta-col"></a></dt>
-<dd><p>A string naming the column in the prot_meta slot to search for the protein. Defaults to the first column.</p></dd>
+<dd><p>A string naming the column in the <code>rowData</code> slot to search for the protein. Defaults to the first column.</p></dd>
 
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
-<dd><p>(Optional) A string naming the column in the condition slot to group samples by.</p></dd>
+<dd><p>(Optional) A string naming the column in the <code>colData</code> slot to group samples by.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -77,7 +77,7 @@ either across all samples or grouped by a condition.</p>
     <div class="section level2">
     <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>
 
-<ul><li><p><code>compare_protein(ProtData)</code>: Method for ProtData objects.</p></li>
+<ul><li><p><code>compare_protein(SummarizedExperiment)</code>: Method for ProtData objects.</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

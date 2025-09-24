@@ -55,19 +55,19 @@ This function is intended to be used internally by preprocessing functions
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>An S4 object that contains a <code>processing</code> slot (list).</p></dd>
+<dd><p>A <code>SummarizedExperiment</code> object with a processing_log entry in the metadata slot.</p></dd>
 
 
 <dt id="arg-log-entry">log_entry<a class="anchor" aria-label="anchor" href="#arg-log-entry"></a></dt>
 <dd><p>A named list containing metadata about the processing step.
-This list should ideally contain elements like <code>name</code>, <code>timestamp</code>, and
+This list should ideally contain elements like <code>name</code>, <code>description</code>, and
 <code>parameters</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The modified S4 object with the <code>log_entry</code> appended to its
-<code>processing</code> history.</p>
+    <p>The modified object with the <code>log_entry</code> appended to its
+<code>processing_log</code> history.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

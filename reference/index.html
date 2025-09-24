@@ -61,7 +61,7 @@
           <code><a href="batch_correct.html">batch_correct()</a></code>
 
         </dt>
-        <dd>Perform Batch Correction on a ProtData Object</dd>
+        <dd>Correct for Batch Effects</dd>
       </dl><dl><dt>
 
           <code><a href="compare_protein.html">compare_protein()</a></code>
@@ -92,6 +92,12 @@
 
         </dt>
         <dd>Create a ProtData Object from SomaScan Data</dd>
+      </dl><dl><dt>
+
+          <code><a href="create_se.html">create_se()</a></code>
+
+        </dt>
+        <dd>This function takes a data frame of proteomics data and its corresponding sample metadata to construct a SummarizedExperiment object. It handles detection of intensity columns, validation, and synchronization of metadata.</dd>
       </dl><dl><dt>
 
           <code><a href="do_limma.html">do_limma()</a></code>
@@ -148,6 +154,12 @@
         <dd>Filter Outlier Samples Based on Protein Counts</dd>
       </dl><dl><dt>
 
+          <code><a href="filter_overlap.html">filter_overlap()</a></code>
+
+        </dt>
+        <dd>get_overlap method for protdata class</dd>
+      </dl><dl><dt>
+
           <code><a href="filter_proteins_by_percent.html">filter_proteins_by_percent()</a></code>
 
         </dt>
@@ -172,19 +184,13 @@
         <dd>Calculate Principal Components Analysis (PCA)</dd>
       </dl><dl><dt>
 
-          <code><a href="get_overlap.html">get_overlap()</a></code>
-
-        </dt>
-        <dd>get_overlap method for protdata class</dd>
-      </dl><dl><dt>
-
           <code><a href="get_pg_counts.html">get_pg_counts()</a></code>
 
         </dt>
         <dd>Get Protein Group Counts Per Sample</dd>
       </dl><dl><dt>
 
-          <code><a href="get_spearman.html">get_spearman()</a></code>
+          <code><a href="get_sample_correlation.html">get_sample_correlation()</a></code>
 
         </dt>
         <dd>Calculate Pairwise Sample Correlations</dd>
@@ -236,12 +242,6 @@
 
         </dt>
         <dd>Performs a log2 transform of protein intensity values</dd>
-      </dl><dl><dt>
-
-          <code><a href="log_transform.html">log_transform()</a></code>
-
-        </dt>
-        <dd>Performs a log10 transform of protein intensity values</dd>
       </dl><dl><dt>
 
           <code><a href="mean_normalize-ProtData.html">mean_normalize()</a></code>
@@ -320,12 +320,6 @@
 
         </dt>
         <dd>Plot a Volcano Plot for Differential Expression Results</dd>
-      </dl><dl><dt>
-
-          <code><a href="remove_sample.html">remove_sample()</a></code>
-
-        </dt>
-        <dd>Remove Specific Samples from a ProtData Object</dd>
       </dl><dl><dt>
 
           <code><a href="scale-ProtData.html">z_score()</a></code>

@@ -47,7 +47,10 @@ the coordinates and then plots them using <code>ggplot2</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">object</span>, condition <span class="op">=</span> <span class="cn">NA</span>, neighbors <span class="op">=</span> <span class="fl">15</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">object</span>, condition <span class="op">=</span> <span class="cn">NA</span>, neighbors <span class="op">=</span> <span class="fl">15</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SummarizedExperiment'</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">object</span>, condition <span class="op">=</span> <span class="cn">NA</span>, neighbors <span class="op">=</span> <span class="fl">15</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,7 +58,7 @@ the coordinates and then plots them using <code>ggplot2</code>.</p>
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>A <code>ProtData</code> object. The data should be imputed.</p></dd>
+<dd><p>A <code>SummarizedExperiment</code> object. The data should be imputed.</p></dd>
 
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
@@ -85,6 +88,11 @@ best results, as these are the best inputs for the wrapped <code>get_umap</code>
 <strong>must set a seed</strong> (e.g., <code>set.seed(123)</code>) <em>before</em> calling this function.</p>
 <p>This function requires the <code>umap</code> and <code>ggplot2</code> packages.</p>
     </div>
+    <div class="section level2">
+    <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>
+
+<ul><li><p><code>plot_umap(SummarizedExperiment)</code>: Method for SummarizedExperiment objects.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -110,7 +118,7 @@ best results, as these are the best inputs for the wrapped <code>get_umap</code>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> umap: number of neighbors must be smaller than number of items</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> unable to find an inherited method for function ‘plot_umap’ for signature ‘object = "ProtData"’</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

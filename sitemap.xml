@@ -15,6 +15,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata_from_olink.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_protdata_from_soma.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/create_se.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/detect_intensity_cols.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma_by_condition.html</loc></url>
@@ -25,13 +26,13 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/enrich_pathways.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_features.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_outlier_samples.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_overlap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_proteins_by_percent.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_unique_proteins.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_CVs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_PCs.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/get_overlap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_pg_counts.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/get_spearman.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/get_sample_correlation.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_umap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/gse_go.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/gse_kegg.html</loc></url>
@@ -41,7 +42,6 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/impute_min-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/index.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/log2_transform.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/log_transform.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/mean_normalize-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/median_normalize-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/num_samples.html</loc></url>
@@ -56,7 +56,6 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_proteomics_heatmap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_umap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_volcano.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/reference/remove_sample.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.html</loc></url>
 </urlset>
 
