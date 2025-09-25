@@ -53,7 +53,6 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
     stop("The 'data' argument must be a data frame.")
   }
 
-  # NOTE: Assuming you have these helper functions available
   data <- convert_numeric_cols(data)
   colnames(data) <- trim_names(colnames(data))
 
@@ -97,15 +96,30 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
     if (!setequal(rownames(col_data), assay_colnames)) {
       warning("SampleIDs in metadata do not perfectly match intensity column names.")
 
-      # Keep only intersecting samples
-      shared_samples <- intersect(rownames(col_data), assay_colnames)
-      if(length(shared_samples) == 0) {
-        stop("No samples in common between sample metadata and intensity data.")
-      }
+      # Drop rows of col_data that are not in data
+      matching_rows <- intersect(rownames(col_data), colnames(assay_data))
+      col_data <- col_data[matching_rows, ]
 
-      assay_data <- assay_data[, shared_samples, drop = FALSE]
-      col_data <- col_data[shared_samples, , drop = FALSE]
+      dropped_rows <- setdiff(rownames(col_data), matching_rows)
+      warning("Dropped rows:\n")
+      warning(dropped_rows)
     }
+    # add additional rows to col_data if they exist in data
+    if (ncol(assay_data) > nrow(col_data)) {
+      # Find missing columns
+      missing_cols <- setdiff(colnames(assay_data), rownames(col_data))
+
+      # Create rows with NA for the missing columns and add them to 'col_data'
+      missing_rows <- data.frame(matrix(NA, nrow = length(missing_cols), ncol = ncol(col_data)))
+      colnames(missing_rows) <- names(col_data)
+      rownames(missing_rows) <- missing_cols
+
+      # Add missing rows to 'col_data'
+      col_data <- rbind(col_data, missing_rows)
+    }
+
+      #assay_data <- assay_data[, shared_samples, drop = FALSE]
+      #col_data <- col_data[shared_samples, , drop = FALSE]
 
     # Reorder col_data to perfectly match the order of assay_data
     col_data <- col_data[colnames(assay_data), , drop = FALSE]
@@ -118,6 +132,10 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
       base_condition = gsub("_\\d+$", "", colnames(assay_data))
     )
   }
+
+  # ensure proper sample names are used
+  colnames(assay_data) <- make.names(colnames(assay_data))
+  rownames(col_data) <- make.names(rownames(col_data))
 
   # --- 4. Construct the SummarizedExperiment Object ---
 

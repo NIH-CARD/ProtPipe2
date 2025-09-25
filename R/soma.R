@@ -1,8 +1,8 @@
-#' Create a ProtData Object from SomaScan Data
+#' Create a SummarizedExperiment Object from SomaScan Data
 #'
 #' @description
 #' Processes SomaScan data from an ADAT object, optionally performs filtering
-#' (e.g., on buffer controls), and formats the result into a ProtData object
+#' (e.g., on buffer controls), and formats the result into a SummarizedExperiment object
 #' for downstream analysis.
 #'
 #' @param adat A SomaScan ADAT object, typically loaded using the SomaDataIO package.
@@ -11,65 +11,71 @@
 #' @param filter A logical value (TRUE/FALSE) indicating whether to perform
 #'   filtering on the data, including for buffer controls. Defaults to TRUE.
 #'
-#' @return A ProtData object formatted for use with other package functions.
+#' @return A SummarizedExperiment object formatted for use with other package functions.
 #'
 #' @export
 #'
 #' @importFrom dplyr rename
 #' @importFrom magrittr %>%
 #'
-create_protdata_from_soma <- function(adat, condition = NULL, filter = TRUE) {
+create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
+
+  soma_out <- soma_all_output(adat)
+  dat <- soma_out$data
+  soma_condition <- soma_out$condition
+  number_samples <- soma_out$number_samples
 
   if(filter){
-    soma_out <- soma_all_output(adat)
-    dat <- soma_out$data
-    soma_condition <- soma_out$condition
     dat <- Buffer_filter(dat)
-  }else{
-    soma_out <- soma_sample_out(adat)
-    dat <- soma_out$data
-    soma_condition <- soma_out$condition
   }
+
+  # combine condition with soma sample metadata
   soma_condition <- soma_condition %>%
     dplyr::rename(SampleID = SampleId)
-  # if(!is.null(condition)){
-  #   soma_condition <- soma_condition %>%
-  #     dplyr::left_join(condition, by = "SampleID")
-  # }
-  return(create_protdata(dat, condition = condition, method = "SomaScan"))
-}
-
-
-soma_sample_out=function(DT){
-  anno <- SomaDataIO::getAnalyteInfo(DT)%>%
-    dplyr::filter(Organism == "Human") %>%
-    dplyr::filter(Type == "Protein")
-  DT=as.data.frame(DT)
-  DT_dat=DT%>%
-    dplyr::filter(grepl("Sample", SampleType, ignore.case = TRUE))
-
-  #check for duplicated SampleID
-  duplicate_ids <- DT_dat$SampleId[duplicated(DT_dat$SampleId) | duplicated(DT_dat$SampleId, fromLast = TRUE)]
-  if(length(duplicate_ids>0)){
-    cat(paste0("removing duplicates: ", paste(duplicate_ids, collapse = ", ")))
-    DT_dat <- DT_dat[!DT_dat$SampleId %in% duplicate_ids, ]
+  soma_condition$SampleID <- as.character(soma_condition$SampleID)
+  if(!is.null(condition)){
+    condition$SampleID <- as.character(condition$SampleID)
+    soma_condition <- soma_condition %>%
+      dplyr::left_join(condition, by = "SampleID")
   }
 
+  # get intensity cols
+  num_rows <- length(names(dat))
+  intensity_cols <- c((num_rows-number_samples+1):num_rows)
 
-  rownames(DT_dat)=DT_dat$SampleId
-  condition=DT_dat %>%
-    dplyr::select(-matches("seq\\.", ignore.case = TRUE))
-  DT_dat=DT_dat%>%
-    dplyr::select(matches("seq\\.", ignore.case = TRUE))%>%
-    t()
-  DT_dat=merge(anno[,grep('AptName|UniProt|EntrezGeneSymbol|TargetFullName',colnames(anno))], DT_dat,by.x='AptName',by.y=0,all.x=T)
-  DT_dat=DT_dat %>%
-    dplyr::filter(UniProt != "")%>%
-    dplyr::filter(EntrezGeneSymbol != "") %>%
-    dplyr::rename(Protein_Group= UniProt)%>%
-    dplyr::rename(Genes= EntrezGeneSymbol)
-  return(list(data = DT_dat, condition = condition))
+  return(create_se(data = dat, sample_metadata = soma_condition, intensity_cols = intensity_cols, creation_method = "SomaScan"))
 }
+
+# soma_sample_out=function(DT){
+#   anno <- SomaDataIO::getAnalyteInfo(DT)%>%
+#     dplyr::filter(Organism == "Human") %>%
+#     dplyr::filter(Type == "Protein")
+#   DT=as.data.frame(DT)
+#   DT_dat=DT%>%
+#     dplyr::filter(grepl("Sample", SampleType, ignore.case = TRUE))
+#
+#   #check for duplicated SampleID
+#   duplicate_ids <- DT_dat$SampleId[duplicated(DT_dat$SampleId) | duplicated(DT_dat$SampleId, fromLast = TRUE)]
+#   if(length(duplicate_ids>0)){
+#     cat(paste0("removing duplicates: ", paste(duplicate_ids, collapse = ", ")))
+#     DT_dat <- DT_dat[!DT_dat$SampleId %in% duplicate_ids, ]
+#   }
+#
+#
+#   rownames(DT_dat)=DT_dat$SampleId
+#   condition=DT_dat %>%
+#     dplyr::select(-matches("seq\\.", ignore.case = TRUE))
+#   DT_dat=DT_dat%>%
+#     dplyr::select(matches("seq\\.", ignore.case = TRUE))%>%
+#     t()
+#   DT_dat=merge(anno[,grep('AptName|UniProt|EntrezGeneSymbol|TargetFullName',colnames(anno))], DT_dat,by.x='AptName',by.y=0,all.x=T)
+#   DT_dat=DT_dat %>%
+#     dplyr::filter(UniProt != "")%>%
+#     dplyr::filter(EntrezGeneSymbol != "") %>%
+#     dplyr::rename(Protein_Group= UniProt)%>%
+#     dplyr::rename(Genes= EntrezGeneSymbol)
+#   return(list(data = DT_dat, condition = condition))
+# }
 
 ##format data
 soma_all_output=function(DT){
@@ -77,6 +83,7 @@ soma_all_output=function(DT){
   DT=data.frame(DT)
   DT_dat=data.frame(DT)%>%
     dplyr::filter(grepl("Sample", SampleType, ignore.case = TRUE))
+
 
   #check for duplicated SampleID
   duplicate_ids <- DT_dat$SampleId[duplicated(DT_dat$SampleId) | duplicated(DT_dat$SampleId, fromLast = TRUE)]
@@ -91,6 +98,8 @@ soma_all_output=function(DT){
   DT_dat = DT_dat[, grep('seq\\.', colnames(DT_dat))] %>%
     t() %>%
     as.data.frame()
+
+  number_samples <- length(names(DT_dat))
 
   Buffer_mean <- DT %>%
     dplyr::filter(SampleType == "Buffer") %>%
@@ -113,7 +122,7 @@ soma_all_output=function(DT){
   DT_out=DT_out%>%
     dplyr::rename(Protein_Group= UniProt)%>%
     dplyr::rename(Genes= EntrezGeneSymbol)
-  return(list(data = DT_out, condition = condition))
+  return(list(data = DT_out, condition = condition, number_samples = number_samples))
 }
 
 Buffer_filter=function(DT){

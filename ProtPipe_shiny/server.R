@@ -1,4 +1,4 @@
-#options(shiny.maxRequestSize=5000 * 1024^2)
+options(shiny.maxRequestSize=5000 * 1024^2)
 server <- function(input, output, session) {
 
   # Update hidden input$select based on which button was clicked
@@ -235,9 +235,9 @@ server <- function(input, output, session) {
     if (data_type == 1) {
       PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition_file())
     } else if(data_type == 2){
-      PD <- ProtPipe::create_protdata_from_soma(adat = intensity_file(), condition = condition_file())
+      PD <- ProtPipe::create_se_from_soma(adat = intensity_file(), condition = condition_file())
     } else if(data_type == 3){
-      PD <- ProtPipe::create_protdata_from_olink(npx = intensity_file(), condition = condition_file())
+      PD <- ProtPipe::create_se_from_olink(npx = intensity_file(), condition = condition_file())
     }
     return(PD)
   })
@@ -324,7 +324,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     req(sample_condition())
 
-    choices <- names(raw_prot_data()@condition)
+    choices <- names(colData(raw_prot_data()))
 
     selectInput("batch_correct_column", "select condition for correction:", choices = choices)
   })

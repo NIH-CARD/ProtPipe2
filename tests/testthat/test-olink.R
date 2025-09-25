@@ -1,17 +1,15 @@
 library(testthat)
 setwd("../../..")
 
-load("EXAMPLES/olink/npx_data1.rda")
 file = "EXAMPLES/olink/npx_data1.csv"
 metafile <- "EXAMPLES/olink/manifest.tsv"
 
 npx <- OlinkAnalyze::read_NPX(file)
-
 meta <- read.delim(metafile, sep = "\t")
 
 test_that("correctly make a prot_data object from Olink without LOD filtering", {
-  dat_pro <- create_protdata_from_olink(npx, meta, filter = T)
-  t <- ProtPipe::get_spearman(dat_pro)
+  dat_pro <- create_se_from_olink(npx, meta, filter = T)
+  t <- ProtPipe::get_sample_correlation(dat_pro)
   tt <- ProtPipe::plot_correlation_heatmap(dat_pro)
   expect_s4_class(dat_pro, "ProtData")
   cols = ncol(dat_pro@data)

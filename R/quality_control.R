@@ -169,7 +169,9 @@ setMethod("get_sample_correlation", "SummarizedExperiment",
             DT <- as.data.frame(assay(object))
 
             dt.samples <- DT[, sapply(DT, is.numeric)] #better way of getting just intensity columns
-            dt.corrs <- cor(as.matrix(na.omit(dt.samples)+1), method=method)
+            dt.corrs <- cor(as.matrix(dt.samples) + 1,
+                            method = method,
+                            use = "pairwise.complete.obs")
 
             # Format correlations as 3 digits
             dt.corrs <- data.table::data.table(reshape2::melt(dt.corrs, measure.vars=dt.corrs[,rn], value.name='Spearman'))

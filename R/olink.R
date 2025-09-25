@@ -1,9 +1,9 @@
-#' Create a ProtData Object from Olink NPX Data
+#' Create a SummarizedExperiment Object from Olink NPX Data
 #'
 #' @description
 #' A wrapper function that processes a data frame of Olink NPX data, optionally
 #' merges it with a sample condition/metadata file, and formats the result into a
-#' ProtData object for downstream analysis.
+#' SummarizedExperiment object for downstream analysis.
 #'
 #' @param npx A data frame containing Olink NPX data, typically from OlinkAnalyze::read_npx().
 #' @param condition An optional data frame containing sample metadata. It is crucial
@@ -11,13 +11,13 @@
 #' @param filter A logical value (TRUE/FALSE) indicating whether to filter out
 #'   samples with QC warnings. Defaults to FALSE.
 #'
-#' @return A ProtData object formatted for use with other package functions.
+#' @return A SummarizedExperiment object formatted for use with other package functions.
 #'
 #' @export
 #'
 #' @importFrom dplyr select everything
 #'
-create_protdata_from_olink <- function(npx, condition = NULL, filter = F) {
+create_se_from_olink <- function(npx, condition = NULL, filter = F) {
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)
   if(!is.null(condition)){
@@ -26,7 +26,8 @@ create_protdata_from_olink <- function(npx, condition = NULL, filter = F) {
     }
     condition <- dplyr::select(condition, SampleID, dplyr::everything())
   }
-  return(create_protdata(dat, intensity_cols = c(4:length(colnames(dat))), condition, method = "Olink"))
+  return(create_se(data = dat, intensity_cols = c(4:length(colnames(dat))),
+                   sample_metadata = condition, creation_method = "Olink"))
 }
 
 

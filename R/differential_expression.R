@@ -143,9 +143,8 @@ setMethod("do_limma", "SummarizedExperiment", function(object, treatment_samples
     stop("Missing values (NA) found. Please impute before running PCA.")
   }
 
-  DT <- cbind(rowData(object), data) %>% as.data.frame()
+  DT <- cbind(rowData(object), data) %>% as.data.frame(make.names = FALSE)
   meta <- colData(object)
-
   # treatment_samples=grep(treatment,colnames(Log2_DT),value = T)
   # control_samples=grep(control,colnames(Log2_DT),value = T)
   DT_limma <- DT[,c(treatment_samples, control_samples)]
@@ -209,6 +208,12 @@ setMethod("do_limma_by_condition", "SummarizedExperiment", function(object, cond
   control_samples <- rownames(meta %>% dplyr::filter(.data[[condition]] == control_group))
   treatment_samples <- rownames(meta %>% dplyr::filter(.data[[condition]] == treatment_group))
 
+
+  treatment_samples <<- treatment_samples
+  control_samples <<- control_samples
+  object <<- object
+  control_group <<- control_group
+  treatment_group <<- treatment_group
   if (length(control_samples) < 2 || length(treatment_samples) < 2) {
     stop("Each of the control and treatment groups must contain at least 2 samples.")
   }
