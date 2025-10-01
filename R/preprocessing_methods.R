@@ -351,6 +351,7 @@ setMethod(
   function(object, value) {
     stopifnot(length(value) == 1, is.numeric(value))
     m <- assay(object)
+    m[m < 0] <- NA
 
     # NA *and* NaN are TRUE for is.na()
     total_missing <- sum(is.na(m))
@@ -388,6 +389,7 @@ setMethod(
     stopifnot(length(alpha) == 1, is.numeric(alpha))
 
     m <- assay(object)
+    m[m < 0] <- NA
 
     # total NA/NaN count (is.na() treats NaN as TRUE)
     total_missing <- sum(is.na(m))
@@ -437,6 +439,7 @@ setMethod(
               is.numeric(shift), is.numeric(scale))
 
     m <- assay(object)
+    m[m < 0] <- NA
     total_missing <- sum(is.na(m))  # counts NA and NaN
 
     # Row-wise imputation without changing dimnames/class of 'm'

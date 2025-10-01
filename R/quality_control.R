@@ -101,7 +101,7 @@ setMethod("get_CVs", "SummarizedExperiment",
 
             intensities <- as.matrix(assay(object))
             if (!is.numeric(intensities)) {
-              stop("PD@data must contain only numeric values.")
+              stop("The assay must contain only numeric values.")
             }
 
             conds <- condition_file[[condition]]

@@ -86,7 +86,7 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
     }
 
     # Set rownames from the SampleID column
-    rownames(col_data) <- as.character(col_data$SampleID)
+    rownames(col_data) <- trim_names(as.character(col_data$SampleID))
     col_data$SampleID <- NULL
 
     # Synchronize rownames of col_data with colnames of assay_data

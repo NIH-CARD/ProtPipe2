@@ -55,3 +55,42 @@ add_zip_tabular <- function(data, filename, subfolder, zip_workspace, zip_file){
   # )
   # file.remove(file_path)
 }
+
+detect_olink_npx <- function(file_path) {
+
+  # 2. Validate that the file exists
+  if (!file.exists(file_path)) {
+    warning("File does not exist: ", file_path)
+    return(FALSE)
+  }
+
+  # 3. Read only the header based on the file extension
+  ext <- tolower(tools::file_ext(file_path))
+
+  header_df <- tryCatch({
+    if (ext %in% c("xls", "xlsx")) {
+      # For Excel files, use readxl to read zero rows
+      readxl::read_excel(file_path, n_max = 0)
+    } else if (ext %in% c("csv", "tsv", "txt")) {
+      # For text files, use data.table::fread to read zero rows
+      data.table::fread(file_path, nrows = 0)
+    } else {
+      warning("Unsupported file extension: ", ext)
+      return(NULL)
+    }
+  }, error = function(e) {
+    warning("Failed to read file header. Error: ", e$message)
+    return(NULL)
+  })
+
+  # 4. If reading the header failed, it's not a valid file
+  if (is.null(header_df)) {
+    return(FALSE)
+  }
+
+  # 5. Check for the Olink signature columns
+  file_colnames <- colnames(header_df)
+  olink_signature_cols <- c("OlinkID", "Panel", "NPX")
+
+  return(all(olink_signature_cols %in% file_colnames))
+}

@@ -25,8 +25,7 @@ ui <- page_sidebar(
     actionButton("view_2", "Pre-Processing", class = "btn-block btn-primary mb-2"),
     actionButton("view_3", "Clustering", class = "btn-block btn-primary mb-2"),
     actionButton("view_4", "Differential Intensity", class = "btn-block btn-primary mb-2"),
-    actionButton("view_5", "Heatmap", class = "btn-block btn-primary mb-2"),
-    actionButton("view_6", "Single Protein", class = "btn-block btn-primary mb-2"),
+    actionButton("view_5", "Protein View", class = "btn-block btn-primary mb-2"),
 
     hr(),
     verbatimTextOutput("value"),
@@ -51,15 +50,13 @@ ui <- page_sidebar(
                                 h3("Upload Data"),
                                 card(
                                 fluidRow(
-                                  column(width = 7,
-                                         card_header(h4("Protein Intensity File")),
-                                         fileUploadUI("intensity", label = NULL),
-                                         checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE)
-                                         ),
-                                  column(width = 5,
-                                         radioButtons("data_type", label = h5("select data type"),
-                                                      choices = list("standard quantification (.csv, .tsv, or .xlsx)" = 1, "somascan (.adat)" = 2, "olink (.csv, .tsv, or .xlsx)" = 3),
-                                                      selected = 1))
+                                   card_header(h4("Protein Intensity File")),
+                                   fileUploadUI("intensity", label = NULL),
+                                   checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),
+                                   fluidRow(
+                                   column(width = 6, h5("Detected File Type")),
+                                   column(width = 6, verbatimTextOutput("file_type_output", T))),
+
                                 ),
 
                                 uiOutput("column_range_ui"),
@@ -232,10 +229,8 @@ ui <- page_sidebar(
                           plotOutput("h_map"),
                           downloadButton("download_hmap", "Download Plot as PDF")
                      )
-                   )
-  ),
-  ### Single Protein view ############################################################################################
-  conditionalPanel(condition = "input.select == 6",
+                   ),
+
                    h2("View single protein"),
                    fluidPage(
                      uiOutput("pv_prot_meta"),

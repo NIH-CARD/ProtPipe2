@@ -71,66 +71,86 @@ server <- function(input, output, session) {
 
   #### Reactive functions ############################################################################################
 
-  #if sample conditions are provided, the data is reformatted so that the intensity columns
-  #match the condition rows
+  # intensity() is your reactive fileInput, e.g.,
+  # intensity <- reactive(input$yourFileInput)
 
-  intensity_file <- reactive({
-    # This part is unchanged. It requires either the example checkbox
-    # to be checked or a file to be uploaded.
-    req(input$use_example || !is.null(intensity()))
+  # 1. Use reactiveValues to store state that can be changed.
+  # This is the correct way to manage variables like data frames and their types.
+  rv <- reactiveValues(
+    data = NULL,
+    type = "upload file first"
+  )
 
-    # This logic for loading the example data is also unchanged.
-    if(input$use_example){
-      return(data.table::fread("www/iPSC.csv", data.table=FALSE))
-    } else {
-      # --- START OF EDITED SECTION ---
+  # 2. Use an observeEvent to perform the ACTION of reading the file
+  #    and detecting its type. This runs whenever the file input or
+  #    the example checkbox changes.
+  observeEvent(list(intensity(), input$use_example), {
 
-      # Get information about the uploaded file
-      file_info <- intensity() # Avoid calling the reactive multiple times
+    # Logic for loading the example data
+    if (input$use_example) {
+      rv$type <- "Standard Matrix"
+      rv$data <- data.table::fread("www/iPSC.csv", data.table = FALSE)
+      return() # Stop execution here
+    }
 
-      # Extract the file extension and convert to lowercase for matching
+    # If not using an example, require a file upload
+    req(intensity())
+    file_info <- intensity()
+
+    # Use a tryCatch block for robust error handling during file read
+    tryCatch({
       ext <- tolower(tools::file_ext(file_info$datapath))
 
-      # Use validate() to stop execution and show a user-friendly message
-      # if the file extension is not one of the allowed types.
+      # Validate file extension
       validate(
-        need(ext %in% c("csv", "tsv", "xlsx", "xls", "adat"), "Invalid file format. Please upload a .csv, .tsv, or .xlsx file.")
+        need(ext %in% c("csv", "tsv", "xlsx", "xls", "adat"), "Invalid file format.")
       )
 
-      # Use the correct function based on the file extension
-      tryCatch({
-
-        # First, validate the inputs to make sure the combination is valid
-        # This provides specific feedback to the user.
-        if (input$data_type == 1 && !(ext %in% c("csv", "tsv", "xlsx", "xls"))) {
-          validate(need(FALSE, "For Mass Spec, please upload a .csv, .tsv, or .xlsx file."))
-        } else if (input$data_type == 2 && ext != "adat") { # Assuming 2 is SomaScan
-          validate(need(FALSE, "For SomaScan, please upload an .adat file."))
-        } else if (input$data_type == 3 && !(ext %in% c("csv", "tsv", "xlsx", "xls"))) {
-          validate(need(FALSE, "For Olink, please upload a .csv, .tsv, or .xlsx file."))
+      # --- Simplified and Corrected Logic ---
+      if (ext == "adat") {
+        rv$type <- "SomaScan"
+        rv$data <- SomaDataIO::read_adat(file_info$datapath)
+      } else if (detect_olink_npx(file_info$datapath)) {
+        rv$type <- "Olink"
+        # **CORRECTED**: Use an Olink reader or a generic one.
+        # olinkanalyze::read_npx is the standard for Olink files.
+        rv$data <- OlinkAnalyze::read_NPX(file_info$datapath)
+      } else {
+        # Fallback for standard CSV, TSV, or Excel files
+        rv$type <- "Standard Matrix"
+        if (ext %in% c("csv", "tsv")) {
+          rv$data <- data.table::fread(file_info$datapath, data.table = FALSE)
+        } else {
+          rv$data <- readxl::read_excel(file_info$datapath)
         }
+      }
 
-        # If validation passes, proceed to read the file
-        if (input$data_type == 1) { # Mass Spec
-          if (ext %in% c("csv", "tsv")) {
-            data.table::fread(file_info$datapath, data.table = FALSE)
-          } else { # ext is "xlsx"
-            readxl::read_excel(file_info$datapath)
-          }
-        } else if (input$data_type == 2) { # SomaScan
-          SomaDataIO::read_adat(file_info$datapath)
-        } else if (input$data_type == 3) { # Olink
-          OlinkAnalyze::read_NPX(file_info$datapath)
-        }
-
-        # This 'error' function is the key to preventing crashes.
-        # It catches any error from the reading functions (e.g., read_NPX)
-        # and displays it as a safe validation message instead of crashing.
-      }, error = function(e) {
-        validate(need(FALSE, paste("File processing error:", e$message)))
-      })
-    }
+    }, error = function(e) {
+      # Show a user-friendly error if anything in the try block fails
+      showNotification(paste("File Processing Error:", e$message), type = "error", duration = 10)
+      # Reset reactive values on error
+      rv$data <- NULL
+      rv$type <- "error"
+    })
   })
+
+  # 3. Create simple reactive expressions to safely access the results.
+  #    Your original `intensity_file` now just returns the data.
+  intensity_file <- reactive({
+    req(rv$data) # Require data to be non-NULL
+    rv$data
+  })
+
+  # A new reactive to access the type
+  data_type <- reactive({
+    rv$type
+  })
+
+  output$file_type_output <- renderText({
+    # The output will display the string returned by the reactive
+    data_type()
+  })
+
   condition_file <- reactive({
     if (!is.null(sample_condition())) {
       # Extract the file extension and convert to lowercase for matching
@@ -150,7 +170,7 @@ server <- function(input, output, session) {
   # Dynamically generate dropdowns for column range selection
   output$column_range_ui <- renderUI({
     req(intensity_file())
-    req(input$data_type == 1)
+    req(data_type() == "Standard Matrix")
     df <- intensity_file() %>%
       ProtPipe::convert_numeric_cols()
     choices <- names(df)
@@ -187,7 +207,7 @@ server <- function(input, output, session) {
 
   # Validate and report selection
   output$range_result <- renderPrint({
-    req(input$data_type == 1)
+    req(data_type() == "Standard Matrix")
     df <- intensity_file() %>% ProtPipe::convert_numeric_cols()
 
     # Ensure both selections are made
@@ -227,20 +247,19 @@ server <- function(input, output, session) {
     lower_idx <- match(input$lower_col, cols)
     upper_idx <- match(input$upper_col, cols)
 
-    data_type <- input$data_type
-    if(input$use_example){
-      data_type <- 1
-    }
+    data_type <- data_type()
 
-    if (data_type == 1) {
+    if (data_type == "Standard Matrix") {
       PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition_file())
-    } else if(data_type == 2){
-      PD <- ProtPipe::create_se_from_soma(adat = intensity_file(), condition = condition_file())
-    } else if(data_type == 3){
-      PD <- ProtPipe::create_se_from_olink(npx = intensity_file(), condition = condition_file())
+    } else if(data_type == "SomaScan"){
+      PD <- ProtPipe::create_se_from_soma(adat = intensity_file(), condition = condition_file(), filter = T)
+    } else if(data_type == "Olink"){
+      PD <- ProtPipe::create_se_from_olink(npx = intensity_file(), condition = condition_file(), filter = T)
     }
     return(PD)
   })
+
+
   prot_data <- reactive({
     req(raw_prot_data())
     PD <- raw_prot_data()
@@ -349,11 +368,38 @@ server <- function(input, output, session) {
     req(input$qc_condition)
 
     #save tabular data
-    cvs <- ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
-    add_zip_tabular(cvs, "CVs.tsv", "quality_control", zip_workspace, "output.zip")
+    cvs <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Calculating CVs failed:", e$message)))
+    })
+
+    tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      add_zip_tabular(cvs, "CVs.tsv", "quality_control", zip_workspace, "output.zip")
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Calculating CVs failed:", e$message)))
+    })
+
 
     #save plot
-    p <- ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting CVs failed:", e$message)))
+    })
+
     add_zip_plot(p, "CV_plot.pdf", "quality_control", zip_workspace, "output.zip")
 
     #print
@@ -385,7 +431,16 @@ server <- function(input, output, session) {
     req(intensity_file())
 
     #save plot
-    p <- ProtPipe::plot_pg_intensities(prot_data())
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_pg_intensities(prot_data())
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting intensity failed:", e$message)))
+    })
+
     add_zip_plot(p, "intensities_plot.pdf", "quality_control", zip_workspace, "output.zip")
 
     #print
@@ -407,11 +462,28 @@ server <- function(input, output, session) {
     req(intensity_file())
 
     #save tabular data
-    pgcounts <- get_pg_counts(prot_data())
+    pgcounts <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      get_pg_counts(prot_data())
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Calculating counts failed:", e$message)))
+    })
+
     add_zip_tabular(pgcounts, "pg_counts.tsv", "quality_control", zip_workspace, "output.zip")
 
     #save plot
-    p <- ProtPipe::plot_pg_counts(prot_data())
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_pg_counts(prot_data())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting counts failed:", e$message)))
+    })
+
     add_zip_plot(p, "pg_groups_plot.pdf", "quality_control", zip_workspace, "output.zip")
     print(p)
   })
@@ -441,16 +513,27 @@ server <- function(input, output, session) {
     req(intensity_file())
 
     #save tabular data
-    dat.correlations <- ProtPipe::get_sample_correlation(prot_data())
+    dat.correlations <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::get_sample_correlation(prot_data())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Calculating sample correlation failed:", e$message)))
+    })
     add_zip_tabular(dat.correlations, "sample_correlations.tsv", "quality_control", zip_workspace, "output.zip")
 
     #save plot
-    p <- ProtPipe::plot_correlation_heatmap(prot_data())
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_correlation_heatmap(prot_data())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting sample correlation failed:", e$message)))
+    })
     add_zip_plot(p, "sample_correlation_heatmap.pdf", "quality_control", zip_workspace, "output.zip")
 
-
-    protd<<- prot_data()
-    heatd <<- p
     print(p)
   })
 
@@ -491,7 +574,17 @@ server <- function(input, output, session) {
   #hierarchical clustering
   output$hcluster <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    p <- ProtPipe::plot_hierarchical_cluster(prot_data())
+
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_hierarchical_cluster(prot_data())
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Clustering failed:", e$message)))
+    })
+
 
     #save data to zip
     add_zip_plot(p, "hierarchical_clustering.pdf", "clustering", zip_workspace, "output.zip")
@@ -513,7 +606,16 @@ server <- function(input, output, session) {
   #PCA
   output$pca <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    p <- ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
+
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Clustering failed:", e$message)))
+    })
     #save data to zip
     add_zip_plot(p, "PCA.pdf", "clustering", zip_workspace, "output.zip")
     add_zip_tabular(get_PCs(prot_data(), condition = input$cluster_condition)$components, "pca_components.tsv", "clustering", zip_workspace, "output.zip")
@@ -556,7 +658,16 @@ server <- function(input, output, session) {
   output$umap <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded'
     #req(sample_condition())
-    p <- ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Clustering failed:", e$message)))
+    })
 
     #save data to zip
     add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
@@ -614,7 +725,14 @@ server <- function(input, output, session) {
   #complete heatmap
   output$h_map <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting heatmap failed:", e$message)))
+    })
 
     #save to zip
     add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
@@ -671,8 +789,14 @@ server <- function(input, output, session) {
   #complete barchart
   output$protein_barchart <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
-    p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
-
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting barchart failed:", e$message)))
+    })
     #save to zip
     add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
 
@@ -744,7 +868,14 @@ server <- function(input, output, session) {
   #volcano plot
   output$volcano <- renderPlot({
     req(intensity_file())
-    p <- ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting vocano failed:", e$message)))
+    })
 
     #save data to zip
     add_zip_plot(p, "volcano_plot.pdf", "differential_expression", zip_workspace, "output.zip")

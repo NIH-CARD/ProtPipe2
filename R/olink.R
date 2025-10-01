@@ -17,7 +17,7 @@
 #'
 #' @importFrom dplyr select everything
 #'
-create_se_from_olink <- function(npx, condition = NULL, filter = F) {
+create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)
   if(!is.null(condition)){
