@@ -1552,16 +1552,16 @@ L_remain_channel=function(DT,design_matrix,output_dir,output_filename){
                                variable.name = 'sample',
                                value.name ='intensity' )
     DT_RIA_condition_long =DT_RIA_condition_long%>%
-      left_join(design[design$condition==condition,], by = "sample") 
+      left_join(design[design$condition==condition,], by = "sample")
     DT_mean <- DT_RIA_condition_long %>%
-      group_by(Precursor, timepoint) %>%  
+      group_by(Precursor, timepoint) %>%
       summarize(mean_intensity = mean(intensity, na.rm = TRUE), .groups = 'drop')
-    
+
     # Function to check for continuous decay
     is_continuous_decay <- function(x) {
       all(diff(x) <= 0)  # Check if each timepoint decreases or stays the same
     }
-    
+
     # Filter out precursors that do not show a continuous decay
     DT_filtered <- DT_mean %>%
       group_by(Precursor) %>%
@@ -2222,62 +2222,62 @@ miss_value_plot=function(DT,outdir){
 }
 
 ##soma pca plot
-<<<<<<< HEAD
-soma_plot_PCs <- function(adat,DT,condition_file, output_dir) {
-  #pca all
-  cluster_data <- adat %>%
-    select(matches("seq\\.", ignore.case = TRUE)) %>%
-    mutate(across(where(is.numeric), ~ log2(.)))
-  pca=prcomp(cluster_data, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
-  summary <- as.data.table(t(summary(pca)$importance), keep.rownames=T)
-  setnames(summary, c('component','stdv','percent','cumulative'))
-  summary$percent=round(summary$percent*100, digits = 2)
-  pca_df = as.data.frame(pca$x)[,1:5]
-  pca_df=merge(pca_df,adat,by=0)
-  p=ggplot(pca_df, aes(x = PC1, y = PC2, color = SampleType)) +
-    geom_point(size=4) +
-    xlab(paste0("PC1","(",summary$percent[1],"%)")) +
-    ylab(paste0("PC2","(",summary$percent[2],"%)")) +
-    theme_classic()
-  ggsave(p,filename=paste0(output_dir, 'pca_all.pdf'), height = 4,width = 5)
-  #pca sample
-=======
-soma_get_PCs=function(DT,condition_file,cluster_dir){
-  out <- list()
-  ##cluster data(na=0)
->>>>>>> 1e7a12a (functions)
-  cluster_data <- DT %>%
-    select_if(is.numeric) %>%
-    mutate(across(everything(), ~ log2(. )))
-  pca_data=t(cluster_data)
-  pca=prcomp(pca_data, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
-  summary <- as.data.table(t(summary(pca)$importance), keep.rownames=T)
-  setnames(summary, c('component','stdv','percent','cumulative'))
-  summary$percent=round(summary$percent*100, digits = 2)
-  pca_df = as.data.frame(pca$x)[,1:5]
-  condition_file=condition_file%>%
-    filter(!is.na(SampleGroup))
-  pca_df <- merge(pca_df, condition_file[,grep('SampleId|SampleGroup|RowCheck',colnames(condition_file))],
-                  by.x = 0, by.y = 'SampleId',all=T)
-  ezwrite(pca_df, output_dir, 'PCA.tsv')
-  ezwrite(summary, output_dir, 'PCA_summary.tsv')
-  p=ggplot(pca_df, aes(x = PC1, y = PC2, color =SampleGroup )) +
-    geom_point(size=4) +
-    xlab(paste0("PC1","(",summary$percent[1],"%)")) +
-    ylab(paste0("PC2","(",summary$percent[2],"%)")) +
-    theme_classic()
-  ggsave(p,filename=paste0(output_dir, 'pca.pdf'), height = 4,width = 5)
-  cat(paste0('   -> ', output_dir, '/','pca.pdf', '\n'))
-  if ("FLAG" %in% pca_df$RowCheck) {
-    p=ggplot(pca_df, aes(x = PC1, y = PC2, color =RowCheck )) +
-      geom_point(size=4) +
-      xlab(paste0("PC1","(",summary$percent[1],"%)")) +
-      ylab(paste0("PC2","(",summary$percent[2],"%)")) +
-      theme_classic()
-    ggsave(p,filename=paste0(output_dir, 'pca_flag.pdf'), height = 4,width = 5)
-    cat(paste0('   -> ', output_dir, '/','pca_flag.pdf', '\n'))
-  }
-}
+# <<<<<<< HEAD
+# soma_plot_PCs <- function(adat,DT,condition_file, output_dir) {
+#   #pca all
+#   cluster_data <- adat %>%
+#     select(matches("seq\\.", ignore.case = TRUE)) %>%
+#     mutate(across(where(is.numeric), ~ log2(.)))
+#   pca=prcomp(cluster_data, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
+#   summary <- as.data.table(t(summary(pca)$importance), keep.rownames=T)
+#   setnames(summary, c('component','stdv','percent','cumulative'))
+#   summary$percent=round(summary$percent*100, digits = 2)
+#   pca_df = as.data.frame(pca$x)[,1:5]
+#   pca_df=merge(pca_df,adat,by=0)
+#   p=ggplot(pca_df, aes(x = PC1, y = PC2, color = SampleType)) +
+#     geom_point(size=4) +
+#     xlab(paste0("PC1","(",summary$percent[1],"%)")) +
+#     ylab(paste0("PC2","(",summary$percent[2],"%)")) +
+#     theme_classic()
+#   ggsave(p,filename=paste0(output_dir, 'pca_all.pdf'), height = 4,width = 5)
+#   #pca sample
+# =======
+# soma_get_PCs=function(DT,condition_file,cluster_dir){
+#   out <- list()
+#   ##cluster data(na=0)
+# >>>>>>> 1e7a12a (functions)
+#   cluster_data <- DT %>%
+#     select_if(is.numeric) %>%
+#     mutate(across(everything(), ~ log2(. )))
+#   pca_data=t(cluster_data)
+#   pca=prcomp(pca_data, center = TRUE, scale. = TRUE)#pca,remember if you use the sample to do the pca,you need to transpose
+#   summary <- as.data.table(t(summary(pca)$importance), keep.rownames=T)
+#   setnames(summary, c('component','stdv','percent','cumulative'))
+#   summary$percent=round(summary$percent*100, digits = 2)
+#   pca_df = as.data.frame(pca$x)[,1:5]
+#   condition_file=condition_file%>%
+#     filter(!is.na(SampleGroup))
+#   pca_df <- merge(pca_df, condition_file[,grep('SampleId|SampleGroup|RowCheck',colnames(condition_file))],
+#                   by.x = 0, by.y = 'SampleId',all=T)
+#   ezwrite(pca_df, output_dir, 'PCA.tsv')
+#   ezwrite(summary, output_dir, 'PCA_summary.tsv')
+#   p=ggplot(pca_df, aes(x = PC1, y = PC2, color =SampleGroup )) +
+#     geom_point(size=4) +
+#     xlab(paste0("PC1","(",summary$percent[1],"%)")) +
+#     ylab(paste0("PC2","(",summary$percent[2],"%)")) +
+#     theme_classic()
+#   ggsave(p,filename=paste0(output_dir, 'pca.pdf'), height = 4,width = 5)
+#   cat(paste0('   -> ', output_dir, '/','pca.pdf', '\n'))
+#   if ("FLAG" %in% pca_df$RowCheck) {
+#     p=ggplot(pca_df, aes(x = PC1, y = PC2, color =RowCheck )) +
+#       geom_point(size=4) +
+#       xlab(paste0("PC1","(",summary$percent[1],"%)")) +
+#       ylab(paste0("PC2","(",summary$percent[2],"%)")) +
+#       theme_classic()
+#     ggsave(p,filename=paste0(output_dir, 'pca_flag.pdf'), height = 4,width = 5)
+#     cat(paste0('   -> ', output_dir, '/','pca_flag.pdf', '\n'))
+#   }
+# }
 
 #soma umap
 soma_get_umap <- function(DT, condition_file) {

@@ -1,4 +1,5 @@
 options(shiny.sanitize.errors = TRUE)
+library(SummarizedExperiment)
 library(shiny)
 library(ProtPipe)
 library(shinyjs)
