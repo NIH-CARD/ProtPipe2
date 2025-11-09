@@ -6,6 +6,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/authors.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/downstream_analysis.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/index.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/processing.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/ProtData-class.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/add_entrez.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/add_processing_step.html</loc></url>
@@ -17,7 +18,9 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_se_from_olink.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/create_se_from_soma.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/detect_intensity_cols.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/do_comparison_continuous.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma_binary.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_limma_by_condition.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_t_test-ProtData-method.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/do_t_test.html</loc></url>
@@ -29,6 +32,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_overlap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_proteins_by_percent.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/filter_unique_proteins.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/generate_preprocessing_report.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_CVs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_PCs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/get_pg_counts.html</loc></url>
@@ -49,6 +53,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_CVs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_PCs.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_correlation_heatmap.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_correlation_volcano.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_hierarchical_cluster.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_pg_counts.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_pg_intensities.html</loc></url>

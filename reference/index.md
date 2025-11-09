@@ -1,0 +1,109 @@
+# Package index
+
+## All functions
+
+- [`ProtData-class`](https://nih-card.github.io/ProtPipe2/reference/ProtData-class.md)
+  : ProtData Class
+- [`add_entrez()`](https://nih-card.github.io/ProtPipe2/reference/add_entrez.md)
+  : Add Entrez Gene IDs to a Data Frame
+- [`batch_correct()`](https://nih-card.github.io/ProtPipe2/reference/batch_correct.md)
+  : Correct for Batch Effects
+- [`compare_protein()`](https://nih-card.github.io/ProtPipe2/reference/compare_protein.md)
+  : Generate a bar chart of protein intensity values
+- [`convert_numeric_cols()`](https://nih-card.github.io/ProtPipe2/reference/convert_numeric_cols.md)
+  : Safely Convert Character Columns to Numeric Type
+- [`create_protdata()`](https://nih-card.github.io/ProtPipe2/reference/create_protdata.md)
+  : Create a ProtData Object
+- [`create_se()`](https://nih-card.github.io/ProtPipe2/reference/create_se.md)
+  : This function takes a data frame of proteomics data and its
+  corresponding sample metadata to construct a SummarizedExperiment
+  object. It handles detection of intensity columns, validation, and
+  synchronization of metadata.
+- [`create_se_from_olink()`](https://nih-card.github.io/ProtPipe2/reference/create_se_from_olink.md)
+  : Create a SummarizedExperiment Object from Olink NPX Data
+- [`create_se_from_soma()`](https://nih-card.github.io/ProtPipe2/reference/create_se_from_soma.md)
+  : Create a SummarizedExperiment Object from SomaScan Data
+- [`do_comparison_continuous()`](https://nih-card.github.io/ProtPipe2/reference/do_comparison_continuous.md)
+  : Perform limma differential expression for a continuous outcome
+- [`do_limma()`](https://nih-card.github.io/ProtPipe2/reference/do_limma.md)
+  : Perform limma differential expression on a ProtData object
+- [`do_limma_binary()`](https://nih-card.github.io/ProtPipe2/reference/do_limma_binary.md)
+  : Perform limma differential expression on a SummarizedExperiment
+- [`do_limma_by_condition()`](https://nih-card.github.io/ProtPipe2/reference/do_limma_by_condition.md)
+  : Perform DEA using the condition labels of the protdata object
+- [`do_t_test(`*`<ProtData>`*`)`](https://nih-card.github.io/ProtPipe2/reference/do_t_test-ProtData-method.md)
+  : Title
+- [`do_t_test()`](https://nih-card.github.io/ProtPipe2/reference/do_t_test.md)
+  : Title
+- [`enrich_go()`](https://nih-card.github.io/ProtPipe2/reference/enrich_go.md)
+  : Perform Gene Ontology (GO) Over-Representation Analysis (ORA)
+- [`enrich_kegg()`](https://nih-card.github.io/ProtPipe2/reference/enrich_kegg.md)
+  : Perform KEGG Over-Representation Analysis (ORA)
+- [`enrich_pathways()`](https://nih-card.github.io/ProtPipe2/reference/enrich_pathways.md)
+  : Perform Comprehensive GO and KEGG Pathway Enrichment Analysis
+- [`filter_features()`](https://nih-card.github.io/ProtPipe2/reference/filter_features.md)
+  : Helper function to filter out sparse proteins
+- [`filter_outlier_samples()`](https://nih-card.github.io/ProtPipe2/reference/filter_outlier_samples.md)
+  : Filter Outlier Samples Based on Protein Counts
+- [`filter_overlap()`](https://nih-card.github.io/ProtPipe2/reference/filter_overlap.md)
+  : get_overlap method for protdata class
+- [`filter_proteins_by_percent()`](https://nih-card.github.io/ProtPipe2/reference/filter_proteins_by_percent.md)
+  : Filter Proteins by Percentage of Valid Values
+- [`filter_unique_proteins()`](https://nih-card.github.io/ProtPipe2/reference/filter_unique_proteins.md)
+  : Removes duplicate analytes
+- [`generate_preprocessing_report()`](https://nih-card.github.io/ProtPipe2/reference/generate_preprocessing_report.md)
+  : Generate Markdown Report of Preprocessing Steps
+- [`get_CVs()`](https://nih-card.github.io/ProtPipe2/reference/get_CVs.md)
+  : Calculate Coefficient of Variation (CV) for Protein Groups
+- [`get_PCs()`](https://nih-card.github.io/ProtPipe2/reference/get_PCs.md)
+  : Calculate Principal Components Analysis (PCA)
+- [`get_pg_counts()`](https://nih-card.github.io/ProtPipe2/reference/get_pg_counts.md)
+  : Get Protein Group Counts Per Sample
+- [`get_sample_correlation()`](https://nih-card.github.io/ProtPipe2/reference/get_sample_correlation.md)
+  : Calculate Pairwise Sample Correlations
+- [`get_umap()`](https://nih-card.github.io/ProtPipe2/reference/get_umap.md)
+  : Calculate UMAP Dimensionality Reduction
+- [`gse_go()`](https://nih-card.github.io/ProtPipe2/reference/gse_go.md)
+  : Perform Gene Ontology (GO) Gene Set Enrichment Analysis (GSEA)
+- [`gse_kegg()`](https://nih-card.github.io/ProtPipe2/reference/gse_kegg.md)
+  : Perform KEGG Gene Set Enrichment Analysis (GSEA)
+- [`has_step()`](https://nih-card.github.io/ProtPipe2/reference/has_step.md)
+  : Check if a Processing Step has been Applied
+- [`impute()`](https://nih-card.github.io/ProtPipe2/reference/impute-ProtData.md)
+  : Impute Missing Values with a Constant
+- [`impute_left_dist()`](https://nih-card.github.io/ProtPipe2/reference/impute_left_dist-ProtData.md)
+  : Impute from a Down-Shifted Normal Distribution
+- [`impute_min()`](https://nih-card.github.io/ProtPipe2/reference/impute_min-ProtData.md)
+  : Impute Missing Values with the Row Minimum
+- [`log2_transform()`](https://nih-card.github.io/ProtPipe2/reference/log2_transform.md)
+  : Performs a log2 transform of protein intensity values
+- [`mean_normalize()`](https://nih-card.github.io/ProtPipe2/reference/mean_normalize-ProtData.md)
+  : Mean Normalization of Proteomics Data
+- [`median_normalize()`](https://nih-card.github.io/ProtPipe2/reference/median_normalize-ProtData.md)
+  : Median Normalization of Proteomics Data
+- [`num_samples()`](https://nih-card.github.io/ProtPipe2/reference/num_samples.md)
+  : Number of samples
+- [`plot_CVs()`](https://nih-card.github.io/ProtPipe2/reference/plot_CVs.md)
+  : Plot Coefficient of Variation (CV) Distributions
+- [`plot_PCs()`](https://nih-card.github.io/ProtPipe2/reference/plot_PCs.md)
+  : Plot Principal Component Analysis Results
+- [`plot_correlation_heatmap()`](https://nih-card.github.io/ProtPipe2/reference/plot_correlation_heatmap.md)
+  : Plot a Sample Correlation Heatmap
+- [`plot_correlation_volcano()`](https://nih-card.github.io/ProtPipe2/reference/plot_correlation_volcano.md)
+  : Plot a Volcano Plot for Correlation Results
+- [`plot_hierarchical_cluster()`](https://nih-card.github.io/ProtPipe2/reference/plot_hierarchical_cluster.md)
+  : Plot a Hierarchical Clustering Dendrogram of Samples
+- [`plot_pg_counts()`](https://nih-card.github.io/ProtPipe2/reference/plot_pg_counts.md)
+  : Plot Protein Group Counts
+- [`plot_pg_intensities()`](https://nih-card.github.io/ProtPipe2/reference/plot_pg_intensities.md)
+  : Plot Boxplots of Sample Intensity Distributions
+- [`plot_plsda()`](https://nih-card.github.io/ProtPipe2/reference/plot_plsda.md)
+  : Generate a PLS-DA scores plot for a ProtData object
+- [`plot_proteomics_heatmap()`](https://nih-card.github.io/ProtPipe2/reference/plot_proteomics_heatmap.md)
+  : Plot a Proteomics Heatmap
+- [`plot_umap()`](https://nih-card.github.io/ProtPipe2/reference/plot_umap.md)
+  : Plot UMAP Dimensionality Reduction Results
+- [`plot_volcano()`](https://nih-card.github.io/ProtPipe2/reference/plot_volcano.md)
+  : Plot a Volcano Plot for Differential Expression Results
+- [`z_score()`](https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.md)
+  : Z-Score Normalization for Proteins Across Samples
