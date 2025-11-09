@@ -162,12 +162,21 @@ ui <- page_sidebar(
                    h2("Differential Expression"),
                    card(card_header("Options"),
                         fluidPage(
+                          radioButtons(
+                            inputId = "outcome_type",
+                            label = "Select outcome type:",
+                            choices = c("Categorical" = "binary", "Continuous" = "continuous"),
+                            selected = "binary"
+                          ),
                           fluidRow(
                             column(width = 4,
                                    uiOutput("de_condition"),
-                                   uiOutput("de_groups")),
+                                   uiOutput("de_groups"),
+                                   uiOutput("de_covariates")),
                             column(width = 4,
-                                   numericInput("logfc", label = "Enter log2 fold-change cutoff", value = 1),
+                                   # this is called logfc but can be spearman coef if outcome is continuous
+                                   uiOutput("logfc"),
+                                   #numericInput("logfc", label = "Enter log2 fold-change cutoff", value = 1),
                                    numericInput("pvalue", label = "Enter pvalue cutoff", value = 0.01)),
                             column(width = 4,
                                    uiOutput("label_col"),

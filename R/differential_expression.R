@@ -220,6 +220,177 @@ setMethod("do_limma_by_condition", "SummarizedExperiment", function(object, cond
 
   return(ProtPipe::do_limma(object, treatment_samples, control_samples))
 })
+#' Perform limma differential expression on a SummarizedExperiment
+#'
+#' This function takes a `SummarizedExperiment` object and uses group labels in
+#' `colData(object)` to perform differential expression between a treatment group
+#' and a control group. Covariates can be included in the model design.
+#'
+#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
+#' @param condition String: column name in `colData(object)` that holds group labels.
+#' @param treatment_group String: name of treatment group in `condition`.
+#' @param control_group String: name of control group in `condition`.
+#' @param covariates Optional character vector: column names in `colData(object)` to use as covariates.
+#'
+#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @export
+#'
+setGeneric("do_limma_binary", function(object,
+                                condition,
+                                treatment_group,
+                                control_group,
+                                covariates = NULL) {
+  standardGeneric("do_limma_binary")
+})
+
+setMethod("do_limma_binary", "SummarizedExperiment",
+          function(object, condition, treatment_group, control_group, covariates) {
+            # -- prepare assay data --
+            meta_cols <- names(rowData(object))
+            if (ProtPipe::has_step(object, "log2_transform")) {
+              data <- assay(object) %>% as.data.frame()
+            } else {
+              object <- ProtPipe::log2_transform(object)
+              data <- assay(object) %>% as.data.frame()
+            }
+            if (anyNA(data)) stop("Missing values detected. Please impute before running limma.")
+
+            DT <- cbind(rowData(object), data) %>% as.data.frame()
+            meta <- colData(object) %>% as.data.frame()
+
+            # -- check condition column --
+            if (!(condition %in% colnames(meta))) {
+              stop("`condition` must be a column name in colData(object).")
+            }
+            # -- ensure groups are different --
+            if (treatment_group == control_group) {
+              stop("Treatment group and control group must be different.")
+            }
+
+            # -- covariate check: must not include the grouping variable --
+            if (!is.null(covariates) && condition %in% covariates) {
+              stop("Covariates cannot include the grouping variable used for treatment/control.")
+            }
+
+            # -- extract sample groups --
+            groups <- meta[[condition]]
+            groups <<- groups
+            if (!(treatment_group %in% groups && control_group %in% groups)) {
+              stop("Both treatment and control groups must exist in `condition`.")
+            }
+
+            treatment_samples <- rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE])
+            control_samples   <- rownames(meta[meta[[condition]] == control_group, , drop = FALSE])
+
+            if (length(treatment_samples) < 2 || length(control_samples) < 2) {
+              stop("Each group must contain at least 2 samples.")
+            }
+
+            DT_limma <- DT[, c(treatment_samples, control_samples)]
+
+            # -- build design matrix --
+            group_list <- factor(c(rep("treatment", length(treatment_samples)),
+                                   rep("control",   length(control_samples))),
+                                 levels = c("control", "treatment"))
+
+            design_df <- data.frame(group = group_list)
+            rownames(design_df) <- c(treatment_samples, control_samples)
+
+            # add covariates if provided
+            if (!is.null(covariates)) {
+              for (cov in covariates) {
+                if (!(cov %in% colnames(meta))) {
+                  stop(paste("Covariate", cov, "not found in colData(object)."))
+                }
+                design_df[[cov]] <- meta[rownames(design_df), cov]
+              }
+            }
+
+            limma_design <- model.matrix(~ 0 + ., data = design_df)
+            colnames(limma_design) <- make.names(colnames(limma_design))
+
+            # -- contrast matrix --
+            cont.matrix <- limma::makeContrasts(grouptreatment - groupcontrol, levels = limma_design)
+
+            # -- limma pipeline --
+            fit <- limma::lmFit(DT_limma, limma_design)
+            fit2 <- limma::contrasts.fit(fit, cont.matrix)
+            fit2 <- limma::eBayes(fit2, trend = TRUE)
+
+            result_limma <- limma::topTable(fit2, coef = 1, n = Inf)
+            result_limma <- merge(DT[, c(meta_cols, treatment_samples, control_samples)],
+                                  result_limma, by.x = 0, by.y = 0)
+            result_limma$Row.names <- NULL
+
+            # sort by adjusted p-value then effect size
+            result_limma_sorted <- result_limma[order(result_limma$adj.P.Val, -abs(result_limma$logFC)), ]
+            return(result_limma_sorted)
+          })
+
+#' Perform limma differential expression for a continuous outcome
+#'
+#' This function takes a SummarizedExperiment object, a numeric condition column,
+#' and optional covariates, and performs limma-based differential expression.
+#'
+#' @param object A SummarizedExperiment object
+#' @param condition Column name in colData(object) used as the continuous predictor
+#' @param covariates Optional covariates (must be in colData(object), cannot include `condition`)
+#'
+#' @return A data frame with metadata, intensities, logFC, p-values
+#' @export
+#'
+setGeneric("do_comparison_continuous",
+           function(object, condition, covariates = NULL) standardGeneric("do_comparison_continuous"))
+setMethod("do_comparison_continuous", "SummarizedExperiment",
+          function(object, condition, covariates = NULL) {
+
+            # -- Prepare assay data --
+            meta_cols <- names(rowData(object))
+            if (ProtPipe::has_step(object, "log2_transform")) {
+              data <- assay(object) %>% as.data.frame()
+            } else {
+              object <- ProtPipe::log2_transform(object)
+              data <- assay(object) %>% as.data.frame()
+            }
+
+            if (anyNA(data))
+              stop("Missing values detected. Please impute before running correlation analysis.")
+
+            DT <- cbind(rowData(object), data) %>% as.data.frame()
+            meta <- colData(object) %>% as.data.frame()
+
+            # -- Check condition column --
+            if (!(condition %in% colnames(meta))) {
+              stop("`condition` must be a column name in colData(object).")
+            }
+
+            # -- Condition must be numeric --
+            if (!is.numeric(meta[[condition]])) {
+              stop("For continuous outcome, `condition` must be numeric.")
+            }
+
+            # -- Run Spearman correlations for each protein --
+            cor_results <- apply(data, 1, function(x) {
+              test <- suppressWarnings(cor.test(x, meta[[condition]], method = "spearman"))
+              c(rho = unname(test$estimate), pval = test$p.value)
+            })
+
+            cor_df <- as.data.frame(t(cor_results))
+            cor_df$protein <- rownames(cor_df)
+
+            # -- Add adjusted p-values --
+            cor_df$adj.P.Val <- p.adjust(cor_df$pval, method = "BH")
+
+            # -- Merge with metadata (if needed) --
+            cor_df <- merge(DT, cor_df, by.x = "row.names", by.y = "protein", all.x = TRUE)
+            cor_df$Row.names <- NULL
+            # -- Sort by adjusted p-value (then by |rho|) --
+            cor_df_sorted <- cor_df[order(cor_df$adj.P.Val, -abs(cor_df$rho)), ]
+
+            return(cor_df_sorted)
+          })
+
+
 
 
 
@@ -301,6 +472,82 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
   print(g)
   return(g)
 }
+
+
+#' Plot a Volcano Plot for Correlation Results
+#'
+#' This function generates a volcano plot based on the correlation coefficient rho and
+#' adjusted p-values. It highlights genes
+#' that pass the specified thresholds for rho and FDR (false discovery rate).
+#' Optionally, it can label genes of interest or the top up/downregulated genes.
+#'
+#' @param DT.original A data frame containing the differential expression results.
+#'        It should have columns `logFC` (log fold change) and `adj.P.Val` (adjusted p-value).
+#' @param label_col The column name (as a string) used for labeling genes in the plot. Default is `NULL`.
+#'        If `NULL`, the function will select the first column of `DT.original` for labeling.
+#' @param rho_threshold A numeric value representing the threshold for rho (default is 0.35).
+#'        Genes with logFC greater than or equal to this value are labeled as "UP",
+#'        and genes with logFC less than or equal to the negative of this value are labeled as "DOWN".
+#' @param fdr_threshold A numeric value representing the false discovery rate (FDR) threshold (default is 0.01).
+#'        Genes with an adjusted p-value greater than or equal to this threshold will be labeled as "Others".
+#' @param labelgene A character vector of gene names to be labeled in the plot (default is `NULL`).
+#'        If provided, only these genes will be labeled in the plot.
+#'
+#' @return A `ggplot2` object representing the volcano plot.
+#' @export
+#'
+plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshold=.35, fdr_threshold=0.01, labelgene=NULL) {
+  if(is.null(label_col)){
+    label_col = names(DT.original)[1]
+  }
+  options(ggrepel.max.overlaps = Inf)
+  DT <- DT.original
+
+  # Set initial group to 'Others' and update based on thresholds
+  DT <- DT %>%
+    dplyr::mutate(Group = 'Others',
+                  Group = dplyr::if_else(rho >= rho_threshold, "Positive", Group),
+                  Group = dplyr::if_else(rho <= -rho_threshold, "Negative", Group),
+                  Group = dplyr::if_else(adj.P.Val >= fdr_threshold, 'Others', Group),
+                  labeltext = '')
+
+  # If labelgene is provided, update labeltext accordingly
+  if (!is.null(labelgene)) {
+    DT <- DT %>%
+      dplyr::mutate(labeltext = dplyr::if_else(!!rlang::sym(label_col) %in% labelgene, !!rlang::sym(label_col), labeltext))
+  } else{
+    # Select top 5 genes for UP and DOWN groups
+    up_rows <- which(DT$Group == "Positive")
+    sorted_up_indices <- up_rows[order(DT$rho[up_rows], decreasing = TRUE)]
+    top_up_indices <- head(sorted_up_indices, 5)
+    down_rows <- which(DT$Group == "Negative")
+    sorted_down_indices <- down_rows[order(DT$rho[down_rows], decreasing = FALSE)]
+    top_down_indices <- head(sorted_down_indices, 5)
+    top_indices <- c(top_up_indices, top_down_indices)
+    DT$labeltext[top_indices] <- DT[top_indices, label_col]
+  }
+
+  #plot
+  g <- ggplot2::ggplot(DT, ggplot2::aes(x = rho, y = -log10(adj.P.Val))) +
+    ggplot2::geom_point(ggplot2::aes(color = Group)) +
+    ggplot2::scale_color_manual(breaks = c("Negative", "Others", "Positive"),
+                                values = c("#67a9cf", "#969696", "#ef8a62")) +
+    ggplot2::theme_bw(base_size = 12) +
+    ggplot2::theme(legend.position = "bottom") +
+    ggrepel::geom_label_repel(
+      data = DT,
+      ggplot2::aes(label = labeltext),
+      size = 5,
+      box.padding = grid::unit(0.35, "lines"),
+      point.padding = grid::unit(0.3, "lines")) +
+    ggplot2::geom_hline(yintercept = -log10(fdr_threshold), linetype = "dashed") +
+    ggplot2::geom_vline(xintercept = rho_threshold, linetype = "dashed") +
+    ggplot2::geom_vline(xintercept = -rho_threshold, linetype = "dashed") +
+    ggplot2::theme_classic()
+  print(g)
+  return(g)
+}
+
 
 #' Add Entrez Gene IDs to a Data Frame
 #'
@@ -616,7 +863,13 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   datas <- list()
   plots <- list()
 
+
+
   DT <- ProtPipe::add_entrez(DE, org = go_org, gene_col = gene_col)
+
+  if("rho" %in% names(DT)){
+    DT$logFC <- DT$rho
+  }
 
   # Check if any genes were successfully mapped
   if (is.null(DT)) {

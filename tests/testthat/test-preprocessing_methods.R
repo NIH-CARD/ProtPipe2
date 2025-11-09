@@ -19,6 +19,7 @@ test_that("correctly filter proteins and samples", {
   expect_true(ProtPipe::has_step(dat_pro_ultra_filtered, "filter_outlier_samples"))
   expect_true(ProtPipe::has_step(dat_pro_ultra_filtered, "filter_proteins_by_percent"))
   expect_equal(ncol(dat_pro) - ncol(dat_pro_ultra_filtered), 1)
+  ProtPipe::generate_preprocessing_report(dat_pro_ultra_filtered, "processing.md")
 
   dat_common_prots <- ProtPipe::filter_overlap(dat_pro, condition_name = "base_condition")
   expect_true(ProtPipe::has_step(dat_common_prots, "filter_overlap"))

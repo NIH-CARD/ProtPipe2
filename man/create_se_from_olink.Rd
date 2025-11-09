@@ -4,7 +4,7 @@
 \alias{create_se_from_olink}
 \title{Create a SummarizedExperiment Object from Olink NPX Data}
 \usage{
-create_se_from_olink(npx, condition = NULL, filter = F)
+create_se_from_olink(npx, condition = NULL, filter = TRUE)
 }
 \arguments{
 \item{npx}{A data frame containing Olink NPX data, typically from OlinkAnalyze::read_npx().}

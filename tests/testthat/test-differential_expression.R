@@ -12,3 +12,15 @@ test_that("correctly perform limma comparison", {
   DE_condition <- do_limma_by_condition(dat_pro_imputed, condition = "base_condition", control_group = "Day0", treatment_group = "Day10")
   ProtPipe::plot_volcano(DE_condition)
 })
+
+test_that("correctly perform continuous comparison", {
+  dat <- data.table::fread("/Users/jacobepstein/Documents/noberto/tio2_proteomics - Sheet1.csv")
+  meta <- data.table::fread("/Users/jacobepstein/Documents/noberto/tio2_metadata - Sheet1 (2).csv")
+  dat_pro <- create_se(dat, meta)
+
+  DE <- do_comparison_continuous(dat_pro, "sp.P01027.CO3_MOUSE.Complement.C3.OS.Mus.musculus.OX.10090.GN.C3.PE.1.SV.3")
+  ProtPipe::plot_correlation_volcano(DE)
+
+  DE_condition <- do_limma_by_condition(dat_pro_imputed, condition = "base_condition", control_group = "Day0", treatment_group = "Day10")
+  ProtPipe::plot_volcano(DE_condition)
+})

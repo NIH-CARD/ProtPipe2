@@ -826,6 +826,7 @@ server <- function(input, output, session) {
   output$de_groups <- renderUI({
     req(intensity_file())
     req(input$de_condition)
+    req(input$outcome_type == "binary")
     groups <- unique(colData(prot_data())[[input$de_condition]])
 
     tagList(
@@ -834,12 +835,30 @@ server <- function(input, output, session) {
     )
   })
 
+  output$de_covariates <- renderUI({
+    req(intensity_file())
+    choices <- names(colData(prot_data()))
+    selectInput("de_covariates", "select the covariaes:", choices = choices,multiple = TRUE,selected = NULL)
+  })
+
+
   #select column to label the proteins
   output$label_col <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
     selectInput("label_col", "select the column used to label proteins:", choices = choices)
   })
+  output$logfc <- renderUI({
+    if (input$outcome_type == "continuous"){
+      x<-0.35
+      label <- "Enter spearman rho cutoff"
+    }else{
+        x<-1
+        label <- "Enter log2 fold-change cutoff"
+    }
+    numericInput("logfc", label = label, value = x)
+  })
+
 
   #custom labels for volcano
   gene_labels <- reactive({
@@ -861,16 +880,40 @@ server <- function(input, output, session) {
     condition <- input$de_condition
     control_group <- input$control_condition
     treatment_group <- input$treatment_condition
+    covariates <- input$de_covariates
 
-    return(ProtPipe::do_limma_by_condition(prot_data(),condition = condition, control_group = control_group, treatment_group = treatment_group))
+    dea <-tryCatch({
+        # This is the "try" block. R will attempt to run this code.
+      if (input$outcome_type == "continuous"){
+        (ProtPipe::do_comparison_continuous(prot_data()
+                                   ,condition = condition,
+                                   covariates = covariates))
+      }else{(ProtPipe::do_limma_binary(prot_data()
+                                       ,condition = condition,
+                                       control_group = control_group,
+                                       treatment_group = treatment_group,
+                                       covariates = covariates))}
+      }, error = function(e) {
+        # This is the "catch" block. It only runs if an error occurs.
+        # We use validate() to display a user-friendly message in the plot area.
+        validate(need(FALSE, paste("Calculating limma failed:", e$message)))
+      })
   })
 
   #volcano plot
   output$volcano <- renderPlot({
     req(intensity_file())
     p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+      if (input$outcome_type == "continuous"){
+        ProtPipe::plot_correlation_volcano(dea(), label_col = input$label_col,
+                                 labelgene = gene_labels(),
+                                 fdr_threshold = input$pvalue,
+                                 rho_threshold = input$logfc)
+      }else{
+        ProtPipe::plot_volcano(dea(), label_col = input$label_col,
+                               labelgene = gene_labels(),
+                               fdr_threshold = input$pvalue,
+                               lfc_threshold = input$logfc)}
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.

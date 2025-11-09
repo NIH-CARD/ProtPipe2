@@ -135,6 +135,7 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
 
   # ensure proper sample names are used
   colnames(assay_data) <- make.names(colnames(assay_data))
+  colnames(col_data) <- make.names(colnames(col_data))
   rownames(col_data) <- make.names(rownames(col_data))
 
   # --- 4. Construct the SummarizedExperiment Object ---

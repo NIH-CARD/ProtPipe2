@@ -18,6 +18,73 @@ add_processing_step <- function(object, log_entry) {
   return(object)
 }
 
+#' Generate Markdown Report of Preprocessing Steps
+#'
+#' @description
+#' Takes a SummarizedExperiment object with a populated `processing_log`
+#' in its metadata and writes a Markdown file summarizing the preprocessing
+#' steps in order.
+#'
+#' @param object A SummarizedExperiment object.
+#' @param output_file A character string giving the name of the output Markdown file.
+#'
+#' @return Invisibly returns the file path to the Markdown report.
+#' @export
+generate_preprocessing_report <- function(object, output_file = "preprocessing_report.md") {
+  if (!"SummarizedExperiment" %in% class(object)) {
+    stop("Input must be a SummarizedExperiment object.")
+  }
+
+  log <- metadata(object)$processing_log
+
+  if (is.null(log) || length(log) == 0) {
+    warning("No processing log found in metadata(object)$processing_log.")
+    cat("# Preprocessing Report\n\nNo preprocessing steps recorded.\n", file = output_file)
+    return(invisible(output_file))
+  }
+
+  # --- Build Markdown content ---
+  lines <- c("# Preprocessing Report\n")
+  lines <- c(lines, paste0("_Generated on ", Sys.Date(), "_\n\n"))
+
+  for (i in seq_along(log)) {
+    step <- log[[i]]
+
+    # Step title
+    step_title <- paste0("### Step ", i, ": ", step$name, "\n")
+
+    # Parameters (formatted as list)
+    if (!is.null(step$parameters) && length(step$parameters) > 0) {
+      param_lines <- paste(
+        names(step$parameters),
+        ": ",
+        unlist(step$parameters),
+        collapse = "\n- "
+      )
+      param_lines <- paste0("- ", param_lines)
+    } else {
+      param_lines <- "_No parameters recorded._"
+    }
+
+    # Details
+    details <- if (!is.null(step$details)) step$details else "_No details provided._"
+
+    lines <- c(lines,
+               step_title,
+               "**Parameters:",
+               param_lines,
+               "**Details:",
+               details)
+  }
+
+  # --- Write Markdown file ---
+  cat(paste(lines, collapse = "\n"), file = output_file)
+
+  message("Preprocessing report written to: ", output_file)
+  invisible(output_file)
+}
+
+
 ### Filtering #################################################################
 
 #' @describeIn filter_proteins_by_percent
