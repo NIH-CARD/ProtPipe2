@@ -9,7 +9,7 @@ ui <- page_sidebar(
   # Title and subtitle
   title = tagList(
     h1("ProtPipe", style = "margin-bottom: 0;"),
-    tags$div("Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")
+    tags$div("This website is free and open to all users. Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")
   ),
 
   # SIDEBAR CONTENT GOES HERE
@@ -26,6 +26,7 @@ ui <- page_sidebar(
     actionButton("view_3", "Clustering", class = "btn-block btn-primary mb-2"),
     actionButton("view_4", "Differential Intensity", class = "btn-block btn-primary mb-2"),
     actionButton("view_5", "Protein View", class = "btn-block btn-primary mb-2"),
+    actionButton("view_6", "Help", class = "btn-block btn-primary mb-2"),
 
     hr(),
     verbatimTextOutput("value"),
@@ -39,8 +40,8 @@ ui <- page_sidebar(
     conditionalPanel("input.select == '2'", h4("Pre Processing content")),
     conditionalPanel("input.select == '3'", h4("Clustering content")),
     conditionalPanel("input.select == '4'", h4("Differential Intensity content")),
-    conditionalPanel("input.select == '5'", h4("Heatmap content")),
-    conditionalPanel("input.select == '6'", h4("Single protein content"))
+    conditionalPanel("input.select == '5'", h4("Protein content")),
+    conditionalPanel("input.select == '6'", h4("Help content"))
   ),
 
   ### Parameter input screen ############################################################################################
@@ -53,6 +54,7 @@ ui <- page_sidebar(
                                    card_header(h4("Protein Intensity File")),
                                    fileUploadUI("intensity", label = NULL),
                                    checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),
+                                   downloadButton("download_ex", "Download example dataset"),
                                    fluidRow(
                                    column(width = 6, h5("Detected File Type")),
                                    column(width = 6, verbatimTextOutput("file_type_output", T))),
@@ -250,6 +252,12 @@ ui <- page_sidebar(
                           downloadButton("download_protein_barchart", "Download Plot as PDF")
                      )
                    )
-  )
+  ),
+
+### Help ############################################################################################
+conditionalPanel(condition = "input.select == 6",
+                 includeMarkdown("help.md")
 )
+)
+
 

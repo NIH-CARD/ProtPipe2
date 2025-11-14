@@ -248,15 +248,19 @@ setMethod("do_limma_binary", "SummarizedExperiment",
             # -- prepare assay data --
             meta_cols <- names(rowData(object))
             if (ProtPipe::has_step(object, "log2_transform")) {
-              data <- assay(object) %>% as.data.frame()
+              data <- assay(object) %>% as.data.frame(check.names = FALSE)
             } else {
               object <- ProtPipe::log2_transform(object)
-              data <- assay(object) %>% as.data.frame()
+              data <- assay(object) %>% as.data.frame(check.names = FALSE)
             }
             if (anyNA(data)) stop("Missing values detected. Please impute before running limma.")
-
-            DT <- cbind(rowData(object), data) %>% as.data.frame()
-            meta <- colData(object) %>% as.data.frame()
+            obj_row <<- rowData(object)
+            datass<<- data
+            DT <- cbind(rowData(object), data)
+            DT1 <<- DT
+            #DT <- as.data.frame(DT, check.names = FALSE)
+            DT2 <<- DT
+            meta <- colData(object) %>% as.data.frame(check.names = FALSE)
 
             # -- check condition column --
             if (!(condition %in% colnames(meta))) {
@@ -279,15 +283,19 @@ setMethod("do_limma_binary", "SummarizedExperiment",
               stop("Both treatment and control groups must exist in `condition`.")
             }
 
-            treatment_samples <- rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE])
-            control_samples   <- rownames(meta[meta[[condition]] == control_group, , drop = FALSE])
+            treatment_samples <- as.character(rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE]))
+            control_samples   <- as.character(rownames(meta[meta[[condition]] == control_group, , drop = FALSE]))
+
+            print(treatment_samples)
+            print(control_samples)
 
             if (length(treatment_samples) < 2 || length(control_samples) < 2) {
               stop("Each group must contain at least 2 samples.")
             }
+            print("try")
 
-            DT_limma <- DT[, c(treatment_samples, control_samples)]
-
+            DT_limma <- DT[, colnames(DT) %in% c(treatment_samples, control_samples)]
+            print("fail")
             # -- build design matrix --
             group_list <- factor(c(rep("treatment", length(treatment_samples)),
                                    rep("control",   length(control_samples))),
@@ -313,6 +321,10 @@ setMethod("do_limma_binary", "SummarizedExperiment",
             cont.matrix <- limma::makeContrasts(grouptreatment - groupcontrol, levels = limma_design)
 
             # -- limma pipeline --
+            DT_limma <<- DT_limma
+            limma_design <<- limma_design
+
+
             fit <- limma::lmFit(DT_limma, limma_design)
             fit2 <- limma::contrasts.fit(fit, cont.matrix)
             fit2 <- limma::eBayes(fit2, trend = TRUE)

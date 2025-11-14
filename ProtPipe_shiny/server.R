@@ -236,6 +236,15 @@ server <- function(input, output, session) {
           "| Count:", ncol(selected))
   })
 
+  output$download_ex <- downloadHandler(
+    filename = function(){
+      paste("neuron_differentiation.csv")
+    },
+    content = function(file){
+      file.copy("www/iPSC.csv", file)
+    }
+  )
+
   raw_prot_data <- reactive({
     req(intensity_file())
     df <- intensity_file()
