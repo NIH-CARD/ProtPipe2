@@ -130,7 +130,8 @@ ui <- page_sidebar(
     card(card_header(h4("5. Batch Correction")),
          checkboxInput("batch_correct", label = "batch correct", value = FALSE),
          uiOutput("batch_correct_column")),
-    downloadButton("download_data", "Download pre-processed data")
+    downloadButton("download_data", "Download pre-processed data"),
+    downloadButton("download_preprocessing_report", "Download pre-processing report")
   )))),
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",

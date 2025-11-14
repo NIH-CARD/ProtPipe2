@@ -334,10 +334,32 @@ server <- function(input, output, session) {
       paste("processed_data.tsv")
     },
     content = function(file){
-      data <- base::cbind(prot_data()@prot_meta, prot_data()@data)
+      data <- base::cbind(rowData(prot_data()), assay(prot_data()))
       write.table(data, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
+
+  output$download_preprocessing_report <- downloadHandler(
+    filename = function() {
+      # This part is fine
+      "processing_report.md"
+    },
+
+    content = function(file) {
+      # 'file' is the special temporary path Shiny provides (e.g., "/tmp/RtmpsXYZ/file123.md")
+
+      # 1. Get your reactive data object
+      # It's good practice to add req() to ensure data exists before downloading.
+      req(prot_data())
+
+      # 2. Pass the special 'file' path from Shiny to your function's argument
+      ProtPipe::generate_preprocessing_report(
+        object = prot_data(),
+        output_file = file  # <-- This is the fix
+      )
+    }
+  )
+
 
 
 

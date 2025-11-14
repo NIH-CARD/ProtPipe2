@@ -37,7 +37,7 @@ This panel helps you assess the quality of your data before analysis.
     * **How to interpret:** Lower CV is generally better. Proteins with very high CV may be unreliable.
 
 * **Protein Intensity:**
-    * **What it is:** Shows the distribution of protein intensities for each sample (often as a boxplot).
+    * **What it is:** Shows the distribution of protein intensities for each sample.
     * **How to interpret:** Before preprocessing, samples may have different distributions. After normalization (in the next step), you should return here and check that the distributions are properly aligned (e.g., all boxplot medians are at the same level).
 
 * **Number of Non-Missing Proteins per Sample:**
@@ -46,7 +46,7 @@ This panel helps you assess the quality of your data before analysis.
 
 * **Spearman Correlation between Samples:**
     * **What it is:** A heatmap showing how similar your samples are to each other.
-    * **How to interpret:** You want to see high correlation (darker colors) between your biological replicates. You should also see clear "blocks" of correlation corresponding to your experimental groups.
+    * **How to interpret:** You want to see high correlation between your biological replicates. You should also see clear "blocks" of correlation corresponding to your experimental groups.
 
 ---
 
@@ -54,18 +54,23 @@ This panel helps you assess the quality of your data before analysis.
 
 This panel allows you to clean, transform, and correct your data.
 
-* **Remove Samples / Remove Proteins:** Allows you to filter out low-quality samples (identified in QC) or proteins with too many missing values.
+* **Remove Samples / Remove Proteins:** 
+    * **Remove outlier samples:** Removes samples (columns) if the number of non-missing proteins is outside n standard deviations from the mean
+    * **Remove outlier proteins:** Removes proteins (rows) if they are present in less than n% of samlpes
 * **Log2-Transform:**
-    * **What it is:** Applies a $log_2(x)$ transformation to your intensities.
+    * **What it is:** Applies a `log_2(x+1)` transformation to your intensities.
     * **Why:** This is standard practice. It makes the data more symmetrical and prevents highly-abundant proteins from dominating the analysis.
 * **Normalization:**
-    * **What it is:** Corrects for technical variation between samples (e.g., one sample was loaded with more total protein than another).
+    * **What it is:** Corrects for technical variation between samples by leveling the global mean or median protein intensity (e.g., one sample was loaded with more total protein than another).
     * **How to interpret:** After normalizing, go back to the **QC** tab. The "Protein Intensity" boxplots should now be well-aligned.
-* **Impute Missing Values:** Uses algorithms (e.g., kNN, MinProb) to "fill in" missing data points (NAs). This is often required for clustering or PCA.
+* **Impute Missing Values:** Fill in missing data points (NAs). This is often required for clustering and differential.
+    * **Fixed value:** Fill in missing values with n
+    * **Minimum:** Fill in missing values with n(minimum value per protein)
+    * **Left-shifted distribution:** Fits a normal distribution to impute missing values stochastically
 * **Batch Correction:**
-    * **Requirement:** You must have provided a metadata file with a "Batch" column.
+    * **Requirement:** You must have provided a metadata file.
     * **What it is:** Uses the `removeBatchEffect` function from the `limma` package to remove unwanted variation caused by processing samples in different batches.
-    * **How to interpret:** After running this, check the **Clustering** tab. Samples should now cluster by their biological condition, *not* by their batch.
+    * **How to interpret:** After running this, check the **Clustering** tab. Samples should now not cluster by the batch variable.
 
 ---
 
@@ -123,13 +128,13 @@ This panel identifies proteins that are significantly different between your exp
 
 This panel allows you to "zoom in" on specific proteins of interest from your DE results or from prior knowledge.
 
-* **Compare Proteins Across Samples/Conditions:**
-    * **What it is:** Generates boxplots or violin plots for any protein you select.
-    * **How to interpret:** This is a simple, direct way to visualize the expression of a single protein (e.g., "Protein_X") and see how it differs between your experimental groups.
-
 * **Proteomics Heatmap:**
     * **What it is:** A grid of colors showing the expression of selected proteins (rows) across all your samples (columns).
     * **How to interpret:** This is a powerful way to see patterns. Look for "blocks" of color. For example, a red block might show a set of proteins that are all highly up-regulated in your "Treated" group, suggesting they are part of a coordinated biological response.
+
+* **Compare Proteins Across Samples/Conditions:**
+    * **What it is:** Generates boxplots or violin plots for any protein you select.
+    * **How to interpret:** This is a simple, direct way to visualize the expression of a single protein (e.g., "Protein_X") and see how it differs between your experimental groups.
 
 ### Saving Outputs
 All plots generated in the app can be saved in **PDF format** for your records or for publication.
