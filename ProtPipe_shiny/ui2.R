@@ -12,7 +12,6 @@ ui <- page_sidebar(
     tags$div("This website is free and open to all users. Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")
   ),
 
-  # SIDEBAR CONTENT GOES HERE
   sidebar = tagList(
     h3("Select view"),
 
@@ -34,37 +33,44 @@ ui <- page_sidebar(
   ),
 
   # MAIN PANEL CONTENT
-  main = tagList(
-    conditionalPanel("input.select == '0'", h4("Input parameters content")),
-    conditionalPanel("input.select == '1'", h4("Quality Control content")),
-    conditionalPanel("input.select == '2'", h4("Pre Processing content")),
-    conditionalPanel("input.select == '3'", h4("Clustering content")),
-    conditionalPanel("input.select == '4'", h4("Differential Intensity content")),
-    conditionalPanel("input.select == '5'", h4("Protein content")),
-    conditionalPanel("input.select == '6'", h4("Help content"))
-  ),
+  tagList(
+  #   conditionalPanel("input.select == '0'", h4("Input parameters content")),
+  #   conditionalPanel("input.select == '1'", h4("Quality Control content")),
+  #   conditionalPanel("input.select == '2'", h4("Pre Processing content")),
+  #   conditionalPanel("input.select == '3'", h4("Clustering content")),
+  #   conditionalPanel("input.select == '4'", h4("Differential Intensity content")),
+  #   conditionalPanel("input.select == '5'", h4("Protein content")),
+  #   conditionalPanel("input.select == '6'", h4("Help content"))
+  # ),
+
 
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",
                    fluidPage(
-                     card(
-                       h3("Upload Data"),
-                       card(
-                         card_header(h4("Protein Intensity File")),
-                         fluidRow(
-                           column(width = 6, fileUploadUI("intensity", label = NULL)),
-                           column(width = 6, verbatimTextOutput("file_type_output", T))),
-                         fluidRow(
-                           column(width = 6, checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),),
-                           column(width = 6, downloadButton("download_ex", "Download example dataset"))),
-                         uiOutput("column_range_ui"),
-                         verbatimTextOutput("range_result")),
-                       card(
-                         card_header(h4("Sample Condition File")),
-                         p("make sure row names match the column names of the intensity file exactly"),
-                         fileUploadUI("sample_condition", label = NULL)
-                       )
-                     )
+                              card(
+                                h3("Upload Data"),
+                                card(
+                                fluidRow(
+                                   card_header(h4("Protein Intensity File")),
+                                   fileUploadUI("intensity", label = NULL),
+                                   checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),
+                                   downloadButton("download_ex", "Download example dataset"),
+                                   fluidRow(
+                                   column(width = 6, h5("Detected File Type")),
+                                   column(width = 6, verbatimTextOutput("file_type_output", T))),
+
+                                ),
+
+                                uiOutput("column_range_ui"),
+                                verbatimTextOutput("range_result")
+
+                              ),
+                                         card(
+                                           card_header(h4("Sample Condition File")),
+                                           p("make sure row names match the column names of the intensity file exactly"),
+                                           fileUploadUI("sample_condition", label = NULL)
+                                         )
+                              )
                    )
   ),
 
@@ -99,34 +105,34 @@ ui <- page_sidebar(
   ### Pre Processing Screen ############################################################################################
   conditionalPanel(condition = "input.select == 2",
                    fluidPage(card(
-                     h3("Pre-processing"),
-                     card(card_header(h4("1. Outlier Removal")),
-                          fluidRow(
-                            column(width = 6,
-                                   checkboxInput("remove_outliers", label = "remove outlier samples", value = FALSE),
-                                   numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
-                            column(width = 6,
-                                   checkboxInput("remove_sparse_proteins", label = "remove outlier proteins", value = FALSE),
-                                   numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30))),
-                          card(card_header(h4("2. Transformation")),
-                               checkboxInput("log2_transform", label = "log2_transform", value = FALSE)),
-                          card(card_header(h4("3. Normalization")),
-                               checkboxInput("normalize", label = "normalize", value = FALSE),
-                               selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
-                          card(card_header(h4("4. Imputation")),
-                               fluidRow(
-                                 column(width = 6,
-                                        checkboxInput("impute", label = "impute", value = FALSE),
-                                        selectInput("imputation_method", label = "imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
-                                 column(width = 6,
-                                        uiOutput("imputation_parameters")
-                                 ))),
-                          card(card_header(h4("5. Batch Correction")),
-                               checkboxInput("batch_correct", label = "batch correct", value = FALSE),
-                               uiOutput("batch_correct_column")),
-                          downloadButton("download_data", "Download pre-processed data"),
-                          downloadButton("download_preprocessing_report", "Download pre-processing report")
-                     )))),
+    h3("Pre-processing"),
+    card(card_header(h4("1. Outlier Removal")),
+         fluidRow(
+           column(width = 6,
+                checkboxInput("remove_outliers", label = "remove outlier samples", value = FALSE),
+                numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
+           column(width = 6,
+                checkboxInput("remove_sparse_proteins", label = "remove outlier proteins", value = FALSE),
+                numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30))),
+    card(card_header(h4("2. Transformation")),
+         checkboxInput("log2_transform", label = "log2_transform", value = FALSE)),
+    card(card_header(h4("3. Normalization")),
+         checkboxInput("normalize", label = "normalize", value = FALSE),
+         selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
+    card(card_header(h4("4. Imputation")),
+         fluidRow(
+           column(width = 6,
+              checkboxInput("impute", label = "impute", value = FALSE),
+              selectInput("imputation_method", label = "imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
+           column(width = 6,
+                  uiOutput("imputation_parameters")
+           ))),
+    card(card_header(h4("5. Batch Correction")),
+         checkboxInput("batch_correct", label = "batch correct", value = FALSE),
+         uiOutput("batch_correct_column")),
+    downloadButton("download_data", "Download pre-processed data"),
+    downloadButton("download_preprocessing_report", "Download pre-processing report")
+  )))),
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",
                    h2("Clustering Information"),
@@ -248,13 +254,6 @@ ui <- page_sidebar(
                      )
                    )
   ),
-
-  ### Help ############################################################################################
+### Help ############################################################################################
   conditionalPanel(condition = "input.select == 6",
-                   tags$iframe(
-                     src = "help.html",
-                     style = "width: 100%; height: 80vh; border: none; overflow-y: auto;"
-                   )
-  )
-)
-
+                   includeHTML("www/help.html"))))

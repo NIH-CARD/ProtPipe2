@@ -13,18 +13,67 @@ This is the first step of the analysis. You must upload your data and metadata h
 * **Excel:** `xls` or `xlsx`
 * **SomaLogic:** `Somascan.adat` format
 
-### Data & Metadata Files
-1.  **Protein Intensity File (Required):** This file contains your core expression data.
-    * **Format:** It must be structured with **proteins as rows** and **samples as columns**.
-    * The first column should contain protein descriptions or IDs.
+### Protein Intensity File
 
-2.  **Sample Metadata File (Optional but Recommended):** This file describes your samples.
-    * **Format:** Must contain a column named **`SampleID`**.
-    * The names in the `SampleID` column *must exactly match* the sample names in the columns of your Protein Intensity File.
-    * Other columns can contain experimental conditions (e.g., "Group", "Batch", "Timepoint").
+The main input is a dataframe containing your protein expression data.
+This may contain a file from the SomaLogic or Olink proteomic platforms.
+Otherwise it must be a tabular data file that must follow these rules:
 
-### How It Works
-When you upload, the app validates that the sample names and dimensions match. It then builds a `SummarizedExperiment` object, which stores all your data and results reactively throughout your session.
+- **Rows**: Each row should represent a single protein or analyte.
+- **Columns**: The columns should contain both metadata about the
+  proteins (e.g., Protein ID, Gene Name, UniProt Accession) and the
+  quantitative values for each sample. The column headers for your
+  samples will be used to link to the condition data.
+
+### Example Protein Intensity File
+
+Here is a small example of a correctly formatted protein data dataframe.
+Columns `ProteinID` and `Gene.Name` are metadata, while `Sample_A`,
+`Sample_B`, `Sample_C`, and `Sample_D` contain the measurements for each
+sample.
+
+| ProteinID | Gene.Name | Description | Sample_A | Sample_B | Sample_C | Sample_D |
+|:---|:---|:---|---:|---:|---:|---:|
+| P12345 | GENEA | Protein A Description | 1.2 | 1.5 | 5.5 | 5.9 |
+| P67890 | GENEB | Protein B Description | 2.5 | 2.8 | 6.2 | 6.5 |
+| Q54321 | GENEC | Protein C Description | 3.1 | 3.3 | 7.8 | 7.5 |
+| Q09876 | GENED | Protein D Description | 4.0 | 4.2 | 8.1 | 8.3 |
+
+### Sample Condition File
+
+You can provide an optional second dataframe that describes the
+experimental conditions for each sample. This file is highly recommended
+for downstream analysis.
+
+- **Crucial Requirement**: This dataframe **MUST** contain a column
+  named `SampleID`.
+- The values in the `SampleID` column **MUST** exactly match the column
+  names of the samples in your protein data file (e.g., `Sample_A`,
+  `Sample_B`, etc.).
+- Other columns can contain any metadata you wish to associate with your
+  samples, such as treatment group, time point, batch, etc.
+
+### Example Condition Format
+
+This is an example of a correctly formatted condition dataframe that
+corresponds to the protein data example above.
+
+| SampleID | Condition | Timepoint | Batch |
+|:---------|:----------|:----------|------:|
+| Sample_A | Control   | 24h       |     1 |
+| Sample_B | Control   | 24h       |     1 |
+| Sample_C | Treated   | 24h       |     2 |
+| Sample_D | Treated   | 24h       |     2 |
+
+**Important**: A mismatch in sample names between the protein data
+columns and the `SampleID` column in the condition file will result in
+an error. Please ensure they are identical.
+
+**Important**: If no Sample Condition File is provided, one will be 
+generated internally. This will have one metadata column called "base_condition"
+that contains the sample names with trailing "_integer" removed. For example if the
+sample names are control_1, control_2, treatment_1, treatment_2, then the base_condition
+column will contain control, control, treatment, treatment.
 
 ---
 
@@ -56,7 +105,7 @@ This panel allows you to clean, transform, and correct your data.
 
 * **Remove Samples / Remove Proteins:** 
     * **Remove outlier samples:** Removes samples (columns) if the number of non-missing proteins is outside n standard deviations from the mean
-    * **Remove outlier proteins:** Removes proteins (rows) if they are present in less than n% of samlpes
+    * **Remove outlier proteins:** Removes proteins (rows) if they are present in less than n% of samples
 * **Log2-Transform:**
     * **What it is:** Applies a `log_2(x+1)` transformation to your intensities.
     * **Why:** This is standard practice. It makes the data more symmetrical and prevents highly-abundant proteins from dominating the analysis.

@@ -148,7 +148,7 @@ server <- function(input, output, session) {
 
   output$file_type_output <- renderText({
     # The output will display the string returned by the reactive
-    data_type()
+    paste("Detected File Type: ", data_type())
   })
 
   condition_file <- reactive({
