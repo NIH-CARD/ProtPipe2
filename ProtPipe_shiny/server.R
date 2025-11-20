@@ -930,7 +930,7 @@ server <- function(input, output, session) {
   output$de_covariates <- renderUI({
     req(intensity_file())
     choices <- names(colData(prot_data()))
-    selectInput("de_covariates", "select the covariaes:", choices = choices,multiple = TRUE,selected = NULL)
+    selectInput("de_covariates", "select the covariates:", choices = choices,multiple = TRUE,selected = NULL)
   })
 
 
