@@ -144,7 +144,7 @@ ui <- page_sidebar(
                             fluidRow(
                               column(width = 3, div(style = "display: flex; align-items: center; height: 100%;",
                                                     sliderInput("neighbors", label = h3("Select number of neighbors for UMAP"),
-                                                                min = 0, max = 100, value = 15))
+                                                                min = 2, max = 100, value = 15))
                               ),column(width = 9,
                                        plotOutput("umap")
                               )
@@ -223,7 +223,7 @@ ui <- page_sidebar(
 
   ),
 
-  ### Heatmap ############################################################################################
+  ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
                    h2("Heatmap"),
                    fluidPage(
@@ -242,6 +242,7 @@ ui <- page_sidebar(
                      uiOutput("pv_prot_meta"),
                      uiOutput("pv_protein"),
                      uiOutput("pv_condition"),
+                     uiOutput("barchart_selected_groups"),
                      card(card_header("protein barchart"),
                           plotOutput("protein_barchart"),
                           downloadButton("download_protein_barchart", "Download Plot as PDF")
@@ -253,7 +254,7 @@ ui <- page_sidebar(
   conditionalPanel(condition = "input.select == 6",
                    tags$iframe(
                      src = "help.html",
-                     style = "width: 100%; height: 80vh; border: none; overflow-y: auto;"
+                     style = "width: 100%; height: 100vh; border: none; display: block;"
                    )
   )
 )

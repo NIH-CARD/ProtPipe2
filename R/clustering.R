@@ -137,7 +137,6 @@ setMethod("plot_hierarchical_cluster", "SummarizedExperiment",
 #' @export
 setMethod("get_umap", "SummarizedExperiment",
           function(object, condition, neighbors, ...) {
-            ttt<<- condition
             # --- 1. Input Validation and Data Prep ---
             if (!requireNamespace("umap", quietly = TRUE)) stop("Please install the 'umap' package.")
 
@@ -181,7 +180,7 @@ setMethod("plot_umap", "SummarizedExperiment",
             umap_df <- get_umap(
               object = object,
               condition = condition,
-              n_neighbors = neighbors,
+              neighbors = neighbors,
               ...
             )
 

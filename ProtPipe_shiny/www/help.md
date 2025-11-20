@@ -181,8 +181,8 @@ This panel allows you to "zoom in" on specific proteins of interest from your DE
     * **What it is:** A grid of colors showing the expression of selected proteins (rows) across all your samples (columns).
     * **How to interpret:** This is a powerful way to see patterns. Look for "blocks" of color. For example, a red block might show a set of proteins that are all highly up-regulated in your "Treated" group, suggesting they are part of a coordinated biological response.
 
-* **Compare Proteins Across Samples/Conditions:**
-    * **What it is:** Generates boxplots or violin plots for any protein you select.
+* **View Single Protein:**
+    * **What it is:** Generates a barchart for any protein you select, either across all samples or between experimental groups. Pairwise comparison of means is done using the Wilcoxon Rank Sum Test.
     * **How to interpret:** This is a simple, direct way to visualize the expression of a single protein (e.g., "Protein_X") and see how it differs between your experimental groups.
 
 ### Saving Outputs

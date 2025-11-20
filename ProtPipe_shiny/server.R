@@ -685,28 +685,83 @@ server <- function(input, output, session) {
     }
   )
 
-  #UMAP
-  output$umap <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded'
-    #req(sample_condition())
+  # 1. Create a reactive to handle the calculation and saving.
+  #    This only runs when 'input$neighbors' or 'input$cluster_condition' changes,
+  #    NOT when the user resizes the window.
+  umap_results <- reactive({
+    req(intensity_file())
+    req(input$neighbors)
 
-    p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+    # Set a seed so the Plot and the Table data are mathematically identical
+    set.seed(123)
+
+    tryCatch({
+      # A. Generate the Data
+      # We generate the data first to ensure consistency
+      umap_table <- ProtPipe::get_umap(
+        prot_data(),
+        neighbors = input$neighbors,
+        condition = input$cluster_condition
+      )
+
+      # B. Generate the Plot
+      # (Assuming plot_umap re-runs calculations, we set the seed above to match.
+      #  Ideally, plot_umap would accept 'umap_table' as input to be perfectly safe.)
+      p <- ProtPipe::plot_umap(
+        prot_data(),
+        neighbors = input$neighbors,
+        condition = input$cluster_condition
+      )
+
+      # C. Save to Zip (Only happens once per input change)
+      add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
+      add_zip_tabular(umap_table, "umap_summary.tsv", "clustering", zip_workspace, "output.zip")
+
+      return(list(plot = p, table = umap_table))
 
     }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Clustering failed:", e$message)))
+      # Return a specific error message string if it fails
+      return(paste("Clustering failed:", e$message))
     })
-
-    #save data to zip
-    add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
-    add_zip_tabular(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), "umap_summary.tsv", "clustering", zip_workspace, "output.zip")
-
-    #plot data
-    print(p)
   })
+
+  # 2. The render function is now lightweight.
+  #    It just shows the result of the reactive above.
+  output$umap <- renderPlot({
+    # Get the result from the reactive
+    result <- umap_results()
+
+    # Check if the result is a string (which means it's our error message)
+    # If it is, trigger the validate/stop mechanism
+    if (is.character(result)) {
+      validate(need(FALSE, result))
+    }
+
+    print(result$plot)
+  })
+
+  # #UMAP
+  # output$umap <- renderPlot({
+  #   req(intensity_file())  # Ensure file is uploaded'
+  #   req(input$neighbors)
+  #
+  #   p <- tryCatch({
+  #     # This is the "try" block. R will attempt to run this code.
+  #     ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
+  #
+  #   }, error = function(e) {
+  #     # This is the "catch" block. It only runs if an error occurs.
+  #     # We use validate() to display a user-friendly message in the plot area.
+  #     validate(need(FALSE, paste("Clustering failed:", e$message)))
+  #   })
+  #
+  #   #save data to zip
+  #   add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
+  #   add_zip_tabular(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), "umap_summary.tsv", "clustering", zip_workspace, "output.zip")
+  #
+  #   #plot data
+  #   print(p)
+  # })
 
   output$download_umap <- downloadHandler(
     filename = function(){
@@ -714,8 +769,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
-      ggsave(file, plot=p, device = "pdf")
+      ggsave(file, plot=umap_results()$plot, device = "pdf")
     }
   )
 
@@ -725,7 +779,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      data.table::fwrite(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), file, sep = "\t")
+      data.table::fwrite(umap_results()$table, file, sep = "\t")
     }
   )
 
@@ -809,7 +863,7 @@ server <- function(input, output, session) {
     selectInput("pv_condition", "select the column used to group samples:", choices = choices)
   })
 
-  pv_condition <-reactive({
+  pv_selected_condition <-reactive({
     if(input$pv_condition == "No grouping"){
       NULL
     }else{
@@ -817,12 +871,19 @@ server <- function(input, output, session) {
     }
   })
 
+  output$barchart_selected_groups <- renderUI({
+    req(intensity_file())
+    req(pv_selected_condition())
+    choices <- colData(prot_data())[[pv_selected_condition()]]
+    selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
+  })
+
   #complete barchart
   output$protein_barchart <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
+      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -899,12 +960,12 @@ server <- function(input, output, session) {
     }
     dat <- data.table::fread(gene_labels_file()$datapath, data.table=FALSE)
 
-    if (!'Gene' %in% names(dat)) {
-      warning("The uploaded gene label file must contain a column called 'Gene'.")
+    if (!'Genes' %in% names(dat)) {
+      validate("The uploaded gene label file must contain a column called 'Genes'.")
       return(NULL)
     }
 
-    return(dat$Gene)
+    return(dat$Genes)
   })
 
   dea <- reactive({
