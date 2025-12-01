@@ -136,7 +136,7 @@ setMethod("plot_hierarchical_cluster", "SummarizedExperiment",
 #' @describeIn get_umap Method for SummarizedExperiment objects.
 #' @export
 setMethod("get_umap", "SummarizedExperiment",
-          function(object, condition, neighbors, ...) {
+          function(object, condition, neighbors) {
             # --- 1. Input Validation and Data Prep ---
             if (!requireNamespace("umap", quietly = TRUE)) stop("Please install the 'umap' package.")
 
@@ -150,7 +150,7 @@ setMethod("get_umap", "SummarizedExperiment",
 
             # --- 2. Run UMAP ---
             # The function does NOT set a seed; the user must do this for reproducibility.
-            umap_result <- umap::umap(t(umap_data), n_neighbors = neighbors, ...)
+            umap_result <- umap::umap(t(umap_data), n_neighbors = neighbors)
 
             # --- 3. Format Output ---
             umap_df <- data.table::as.data.table(umap_result$layout, keep.rownames = TRUE)
@@ -173,15 +173,14 @@ setMethod("get_umap", "SummarizedExperiment",
 #' @describeIn plot_umap Method for SummarizedExperiment objects.
 #' @export
 setMethod("plot_umap", "SummarizedExperiment",
-          function(object, condition, neighbors, ...) {
+          function(object, condition, neighbors) {
 
             # Step 1: Call the calculation method to get UMAP coordinates.
             # Pass the ellipsis (...) to allow for more umap arguments.
             umap_df <- get_umap(
               object = object,
               condition = condition,
-              neighbors = neighbors,
-              ...
+              neighbors = neighbors
             )
 
             # Step 2: Create the plot
