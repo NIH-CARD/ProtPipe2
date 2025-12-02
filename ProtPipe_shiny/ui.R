@@ -173,8 +173,10 @@ ui <- page_sidebar(
                             column(width = 4,
                                    # this is called logfc but can be spearman coef if outcome is continuous
                                    uiOutput("logfc"),
-                                   #numericInput("logfc", label = "Enter log2 fold-change cutoff", value = 1),
-                                   numericInput("pvalue", label = "Enter pvalue cutoff", value = 0.01)),
+                                   checkboxInput(inputId = "use_adj_pval", 
+                                                 label = "Use Adjusted P-value (FDR)", 
+                                                 value = TRUE),
+                                   numericInput("pvalue", label = "Enter P-value cutoff", value = 0.01)),
                             column(width = 4,
                                    uiOutput("label_col"),
                                    p("optional: upload csv file with genes to label in volcano plot.

@@ -274,7 +274,6 @@ setMethod("do_limma_binary", "SummarizedExperiment",
 
             # -- extract sample groups --
             groups <- meta[[condition]]
-            groups <<- groups
             if (!(treatment_group %in% groups && control_group %in% groups)) {
               stop("Both treatment and control groups must exist in `condition`.")
             }
@@ -328,102 +327,6 @@ setMethod("do_limma_binary", "SummarizedExperiment",
           })
 
 
-# setMethod("do_limma_binary", "SummarizedExperiment",
-#           function(object, condition, treatment_group, control_group, covariates) {
-#             # -- prepare assay data --
-#             meta_cols <- names(rowData(object))
-#             if (ProtPipe::has_step(object, "log2_transform")) {
-#               data <- assay(object) %>% as.data.frame(check.names = FALSE)
-#             } else {
-#               object <- ProtPipe::log2_transform(object)
-#               data <- assay(object) %>% as.data.frame(check.names = FALSE)
-#             }
-#             if (anyNA(data)) stop("Missing values detected. Please impute before running limma.")
-#             obj_row <<- rowData(object)
-#             datass<<- data
-#             DT <- cbind(rowData(object), data)
-#             DT1 <<- DT
-#             #DT <- as.data.frame(DT, check.names = FALSE)
-#             DT2 <<- DT
-#             meta <- colData(object) %>% as.data.frame(check.names = FALSE)
-#
-#             # -- check condition column --
-#             if (!(condition %in% colnames(meta))) {
-#               stop("`condition` must be a column name in colData(object).")
-#             }
-#             # -- ensure groups are different --
-#             if (treatment_group == control_group) {
-#               stop("Treatment group and control group must be different.")
-#             }
-#
-#             # -- covariate check: must not include the grouping variable --
-#             if (!is.null(covariates) && condition %in% covariates) {
-#               stop("Covariates cannot include the grouping variable used for treatment/control.")
-#             }
-#
-#             # -- extract sample groups --
-#             groups <- meta[[condition]]
-#             groups <<- groups
-#             if (!(treatment_group %in% groups && control_group %in% groups)) {
-#               stop("Both treatment and control groups must exist in `condition`.")
-#             }
-#
-#             treatment_samples <- as.character(rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE]))
-#             control_samples   <- as.character(rownames(meta[meta[[condition]] == control_group, , drop = FALSE]))
-#
-#             print(treatment_samples)
-#             print(control_samples)
-#
-#             if (length(treatment_samples) < 2 || length(control_samples) < 2) {
-#               stop("Each group must contain at least 2 samples.")
-#             }
-#             print("try")
-#
-#             DT_limma <- DT[, colnames(DT) %in% c(treatment_samples, control_samples)]
-#             print("fail")
-#             # -- build design matrix --
-#             group_list <- factor(c(rep("treatment", length(treatment_samples)),
-#                                    rep("control",   length(control_samples))),
-#                                  levels = c("control", "treatment"))
-#
-#             design_df <- data.frame(group = group_list)
-#             rownames(design_df) <- c(treatment_samples, control_samples)
-#
-#             # add covariates if provided
-#             if (!is.null(covariates)) {
-#               for (cov in covariates) {
-#                 if (!(cov %in% colnames(meta))) {
-#                   stop(paste("Covariate", cov, "not found in colData(object)."))
-#                 }
-#                 design_df[[cov]] <- meta[rownames(design_df), cov]
-#               }
-#             }
-#
-#             limma_design <- model.matrix(~ 0 + ., data = design_df)
-#             colnames(limma_design) <- make.names(colnames(limma_design))
-#
-#             # -- contrast matrix --
-#             cont.matrix <- limma::makeContrasts(grouptreatment - groupcontrol, levels = limma_design)
-#
-#             # -- limma pipeline --
-#             DT_limma <<- DT_limma
-#             limma_design <<- limma_design
-#
-#
-#             fit <- limma::lmFit(DT_limma, limma_design)
-#             fit2 <- limma::contrasts.fit(fit, cont.matrix)
-#             fit2 <- limma::eBayes(fit2, trend = TRUE)
-#
-#             result_limma <- limma::topTable(fit2, coef = 1, n = Inf)
-#             result_limma <- merge(DT[, c(meta_cols, treatment_samples, control_samples)],
-#                                   result_limma, by.x = 0, by.y = 0)
-#             result_limma$Row.names <- NULL
-#
-#             # sort by adjusted p-value then effect size
-#             result_limma_sorted <- result_limma[order(result_limma$adj.P.Val, -abs(result_limma$logFC)), ]
-#             return(result_limma_sorted)
-#           })
-
 #' Perform limma differential expression for a continuous outcome
 #'
 #' This function takes a SummarizedExperiment object, a numeric condition column,
@@ -431,15 +334,14 @@ setMethod("do_limma_binary", "SummarizedExperiment",
 #'
 #' @param object A SummarizedExperiment object
 #' @param condition Column name in colData(object) used as the continuous predictor
-#' @param covariates Optional covariates (must be in colData(object), cannot include `condition`)
 #'
 #' @return A data frame with metadata, intensities, logFC, p-values
 #' @export
 #'
 setGeneric("do_comparison_continuous",
-           function(object, condition, covariates = NULL) standardGeneric("do_comparison_continuous"))
+           function(object, condition) standardGeneric("do_comparison_continuous"))
 setMethod("do_comparison_continuous", "SummarizedExperiment",
-          function(object, condition, covariates = NULL) {
+          function(object, condition) {
 
             # -- Prepare assay data --
             meta_cols <- names(rowData(object))
@@ -472,11 +374,12 @@ setMethod("do_comparison_continuous", "SummarizedExperiment",
               c(rho = unname(test$estimate), pval = test$p.value)
             })
 
-            cor_df <- as.data.frame(t(cor_results))
+            cor_df <- as.data.frame(t(cor_results)) %>%
+              dplyr::rename(P.Value = pval)
             cor_df$protein <- rownames(cor_df)
 
             # -- Add adjusted p-values --
-            cor_df$adj.P.Val <- p.adjust(cor_df$pval, method = "BH")
+            cor_df$adj.P.Val <- p.adjust(cor_df$P.Value, method = "BH")
 
             # -- Merge with metadata (if needed) --
             cor_df <- merge(DT, cor_df, by.x = "row.names", by.y = "protein", all.x = TRUE)
@@ -514,25 +417,35 @@ setMethod("do_comparison_continuous", "SummarizedExperiment",
 #'        Genes with an adjusted p-value greater than or equal to this threshold will be labeled as "Others".
 #' @param labelgene A character vector of gene names to be labeled in the plot (default is `NULL`).
 #'        If provided, only these genes will be labeled in the plot.
-#'
+#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to 
+#'        use P.value. 
 #' @return A `ggplot2` object representing the volcano plot.
 #' @export
 #'
-plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_threshold=0.01, labelgene=NULL) {
+plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_threshold=0.01, labelgene=NULL, adj=T) {
+  
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
   }
+  
   options(ggrepel.max.overlaps = Inf)
   DT <- DT.original
-
+  
+  # 1. Determine which column to use based on the 'adj' parameter
+  target_p_col <- if(adj) "adj.P.Val" else "P.Value"
+  
+  # Check if column exists to prevent crashing
+  if(!target_p_col %in% names(DT)) stop(paste("Column", target_p_col, "not found in input data."))
+  
   # Set initial group to 'Others' and update based on thresholds
   DT <- DT %>%
     dplyr::mutate(Group = 'Others',
-           Group = dplyr::if_else(logFC >= lfc_threshold, 'UP', Group),
-           Group = dplyr::if_else(logFC <= -lfc_threshold, 'DOWN', Group),
-           Group = dplyr::if_else(adj.P.Val >= fdr_threshold, 'Others', Group),
-           labeltext = '')
-
+                  Group = dplyr::if_else(logFC >= lfc_threshold, 'UP', Group),
+                  Group = dplyr::if_else(logFC <= -lfc_threshold, 'DOWN', Group),
+                  # 2. Use .data[[target_p_col]] to dynamically access the p-value column
+                  Group = dplyr::if_else(.data[[target_p_col]] >= fdr_threshold, 'Others', Group),
+                  labeltext = '')
+  
   # If labelgene is provided, update labeltext accordingly
   if (!is.null(labelgene)) {
     DT <- DT %>%
@@ -542,18 +455,21 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
     up_rows <- which(DT$Group == "UP")
     sorted_up_indices <- up_rows[order(DT$logFC[up_rows], decreasing = TRUE)]
     top_up_indices <- head(sorted_up_indices, 5)
+    
     down_rows <- which(DT$Group == "DOWN")
     sorted_down_indices <- down_rows[order(DT$logFC[down_rows], decreasing = FALSE)]
     top_down_indices <- head(sorted_down_indices, 5)
+    
     top_indices <- c(top_up_indices, top_down_indices)
     DT$labeltext[top_indices] <- DT[top_indices, label_col]
   }
-
-  #plot
-  g <- ggplot2::ggplot(DT, ggplot2::aes(x = logFC, y = -log10(adj.P.Val))) +
+  
+  # plot
+  # 3. Updated y mapping to use the dynamic column
+  g <- ggplot2::ggplot(DT, ggplot2::aes(x = logFC, y = -log10(.data[[target_p_col]]))) +
     ggplot2::geom_point(ggplot2::aes(color = Group)) +
     ggplot2::scale_color_manual(breaks = c("DOWN", "Others", "UP"),
-                       values = c("#67a9cf", "#969696", "#ef8a62")) +
+                                values = c("#67a9cf", "#969696", "#ef8a62")) +
     ggplot2::theme_bw(base_size = 12) +
     ggplot2::theme(legend.position = "bottom") +
     ggrepel::geom_label_repel(
@@ -565,8 +481,10 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
     ggplot2::geom_hline(yintercept = -log10(fdr_threshold), linetype = "dashed") +
     ggplot2::geom_vline(xintercept = lfc_threshold, linetype = "dashed") +
     ggplot2::geom_vline(xintercept = -lfc_threshold, linetype = "dashed") +
-    ggplot2::theme_classic()
-  print(g)
+    ggplot2::theme_classic() +
+    # 4. Optional: Update label so you know what you are looking at
+    ggplot2::ylab(paste0("-log10(", target_p_col, ")"))
+  
   return(g)
 }
 
@@ -589,43 +507,54 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
 #'        Genes with an adjusted p-value greater than or equal to this threshold will be labeled as "Others".
 #' @param labelgene A character vector of gene names to be labeled in the plot (default is `NULL`).
 #'        If provided, only these genes will be labeled in the plot.
-#'
+#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to 
+#'        use P.value. 
 #' @return A `ggplot2` object representing the volcano plot.
 #' @export
 #'
-plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshold=.35, fdr_threshold=0.01, labelgene=NULL) {
+plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshold = 0.35, fdr_threshold = 0.01, labelgene = NULL, adj = T) {
+  
+  # 1. Select the column to use based on the 'adj' parameter
+  target_p_col <- if (adj) "adj.P.Val" else "P.Value"
+  
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
   }
+  
   options(ggrepel.max.overlaps = Inf)
   DT <- DT.original
-
-  # Set initial group to 'Others' and update based on thresholds
+  
+  # 2. Update Grouping logic to use the dynamic 'target_p_col'
+  # We use .data[[target_p_col]] to access the column by string name within dplyr
   DT <- DT %>%
     dplyr::mutate(Group = 'Others',
                   Group = dplyr::if_else(rho >= rho_threshold, "Positive", Group),
                   Group = dplyr::if_else(rho <= -rho_threshold, "Negative", Group),
-                  Group = dplyr::if_else(adj.P.Val >= fdr_threshold, 'Others', Group),
+                  Group = dplyr::if_else(.data[[target_p_col]] >= fdr_threshold, 'Others', Group),
                   labeltext = '')
-
+  
   # If labelgene is provided, update labeltext accordingly
   if (!is.null(labelgene)) {
     DT <- DT %>%
       dplyr::mutate(labeltext = dplyr::if_else(!!rlang::sym(label_col) %in% labelgene, !!rlang::sym(label_col), labeltext))
-  } else{
+  } else {
     # Select top 5 genes for UP and DOWN groups
     up_rows <- which(DT$Group == "Positive")
     sorted_up_indices <- up_rows[order(DT$rho[up_rows], decreasing = TRUE)]
     top_up_indices <- head(sorted_up_indices, 5)
+    
     down_rows <- which(DT$Group == "Negative")
     sorted_down_indices <- down_rows[order(DT$rho[down_rows], decreasing = FALSE)]
     top_down_indices <- head(sorted_down_indices, 5)
+    
     top_indices <- c(top_up_indices, top_down_indices)
     DT$labeltext[top_indices] <- DT[top_indices, label_col]
   }
-
-  #plot
-  g <- ggplot2::ggplot(DT, ggplot2::aes(x = rho, y = -log10(adj.P.Val))) +
+  
+  # 3. Plot update:
+  # - Y-axis uses the dynamic column
+  # - Added labs(y=...) to change the label text
+  g <- ggplot2::ggplot(DT, ggplot2::aes(x = rho, y = -log10(.data[[target_p_col]]))) +
     ggplot2::geom_point(ggplot2::aes(color = Group)) +
     ggplot2::scale_color_manual(breaks = c("Negative", "Others", "Positive"),
                                 values = c("#67a9cf", "#969696", "#ef8a62")) +
@@ -640,8 +569,8 @@ plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshol
     ggplot2::geom_hline(yintercept = -log10(fdr_threshold), linetype = "dashed") +
     ggplot2::geom_vline(xintercept = rho_threshold, linetype = "dashed") +
     ggplot2::geom_vline(xintercept = -rho_threshold, linetype = "dashed") +
+    ggplot2::labs(y = paste0("-log10(", target_p_col, ")")) + # Dynamic Label
     ggplot2::theme_classic()
-  print(g)
   return(g)
 }
 
@@ -956,7 +885,7 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
 #'   }
 #' }
 #' }
-enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalue=0.05, go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes"){
+enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalue=0.05, go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes", adj = TRUE){
   datas <- list()
   plots <- list()
 
@@ -989,8 +918,14 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
 
 
   ## up and down regulated genes
-  up_genes=DT[which(DT$logFC>=lfc_threshold&DT$adj.P.Val<=fdr_threshold),]
-  down_genes=DT[which(DT$logFC<=(-lfc_threshold)&DT$adj.P.Val<=fdr_threshold),]
+  if(adj){
+    up_genes=DT[which(DT$logFC>=lfc_threshold&DT$adj.P.Val<=fdr_threshold),]
+    down_genes=DT[which(DT$logFC<=(-lfc_threshold)&DT$adj.P.Val<=fdr_threshold),]
+  }else{
+    up_genes=DT[which(DT$logFC>=lfc_threshold&DT$P.Value<=fdr_threshold),]
+    down_genes=DT[which(DT$logFC<=(-lfc_threshold)&DT$P.Value<=fdr_threshold),]
+  }
+  
 
   # over representation enrichment for upregulated genes ###############################
   if (length(up_genes)>0){

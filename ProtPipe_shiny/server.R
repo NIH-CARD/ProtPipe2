@@ -783,128 +783,6 @@ server <- function(input, output, session) {
     }
   )
 
-  #### Heatmap ############################################################################################
-
-
-  #select condition
-  output$protein_label <- renderUI({
-    req(intensity_file())
-    choices <- names(rowData(prot_data()))
-    selectInput("protein_label", "select the column used to label proteins:", choices = choices)
-  })
-
-  #heatmap subset
-  prot_labels <- reactive({
-    req(intensity_file())  # Ensure file is uploaded
-    req(input$protein_label)  # Ensure file is uploaded
-    if(is.null(heatmap_labels())){
-      return(NULL)
-    }
-    dat <- data.table::fread(heatmap_labels()$datapath, data.table=FALSE)
-    if('Gene' %in% names(dat)){
-      print("The csv must contain a column called Gene containing the labels")
-    }
-    return(dat$Gene)
-  })
-
-  #complete heatmap
-  output$h_map <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-    p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
-    }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Plotting heatmap failed:", e$message)))
-    })
-
-    #save to zip
-    add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
-
-    print(p)
-    # grid::grid.newpage()
-    # grid::grid.draw(p$gtable)
-  })
-
-  output$download_hmap <- downloadHandler(
-    filename = function(){
-      paste("heatmap.pdf")
-    },
-    content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
-      ggsave(file, plot=p, device = "pdf")
-    }
-  )
-
-  #### Protein Barchart ############################################################################################
-
-
-  #select condition
-  output$pv_prot_meta <- renderUI({
-    req(intensity_file())
-    choices <- names(rowData(prot_data()))
-    selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
-  })
-
-  #select condition
-  output$pv_protein <- renderUI({
-    req(intensity_file())
-    req(input$pv_prot_meta)
-    choices <- rowData(prot_data())[[input$pv_prot_meta]]
-    selectInput("pv_protein", "select a protein:", choices = choices)
-  })
-
-  #select condition
-  output$pv_condition <- renderUI({
-    req(intensity_file())
-    choices <- c("No grouping", names(colData(prot_data())))
-    selectInput("pv_condition", "select the column used to group samples:", choices = choices)
-  })
-
-  pv_selected_condition <-reactive({
-    if(input$pv_condition == "No grouping"){
-      NULL
-    }else{
-      input$pv_condition
-    }
-  })
-
-  output$barchart_selected_groups <- renderUI({
-    req(intensity_file())
-    req(pv_selected_condition())
-    choices <- colData(prot_data())[[pv_selected_condition()]]
-    selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
-  })
-
-  #complete barchart
-  output$protein_barchart <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-    p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
-    }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Plotting barchart failed:", e$message)))
-    })
-    #save to zip
-    add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
-
-    print(p)
-  })
-
-  output$download_protein_barchart <- downloadHandler(
-    filename = function(){
-      paste(input$pv_protein, "_levels.pdf")
-    },
-    content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
-      ggsave(file, plot=p, device = "pdf")
-    }
-  )
   #### Differential Intensity ############################################################################################
 
   #select condition
@@ -929,6 +807,7 @@ server <- function(input, output, session) {
 
   output$de_covariates <- renderUI({
     req(intensity_file())
+    req(input$outcome_type == "binary")
     choices <- names(colData(prot_data()))
     selectInput("de_covariates", "select the covariates:", choices = choices,multiple = TRUE,selected = NULL)
   })
@@ -978,8 +857,7 @@ server <- function(input, output, session) {
         # This is the "try" block. R will attempt to run this code.
       if (input$outcome_type == "continuous"){
         (ProtPipe::do_comparison_continuous(prot_data()
-                                   ,condition = condition,
-                                   covariates = covariates))
+                                   ,condition = condition))
       }else{(ProtPipe::do_limma_binary(prot_data()
                                        ,condition = condition,
                                        control_group = control_group,
@@ -1000,12 +878,14 @@ server <- function(input, output, session) {
         ProtPipe::plot_correlation_volcano(dea(), label_col = input$label_col,
                                  labelgene = gene_labels(),
                                  fdr_threshold = input$pvalue,
-                                 rho_threshold = input$logfc)
+                                 rho_threshold = input$logfc,
+                                 adj = input$use_adj_pval)
       }else{
         ProtPipe::plot_volcano(dea(), label_col = input$label_col,
                                labelgene = gene_labels(),
                                fdr_threshold = input$pvalue,
-                               lfc_threshold = input$logfc)}
+                               lfc_threshold = input$logfc,
+                               adj = input$use_adj_pval)}
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -1065,7 +945,10 @@ server <- function(input, output, session) {
       showNotification("Running enrichment analysis, please wait...", duration = NULL, id = "enrich_msg")
 
       # Run the long function (blocking)
-      result <- ProtPipe::enrich_pathways(dea(), lfc_threshold=input$logfc, fdr_threshold=input$pvalue, enrich_pvalue=input$enrich_pval, go_org = selected_org()$OrgDb, kegg_org = selected_org()$kegg, gene_col = input$gene_col)
+      result <- ProtPipe::enrich_pathways(dea(), lfc_threshold=input$logfc, fdr_threshold=input$pvalue,
+                                          enrich_pvalue=input$enrich_pval, go_org = selected_org()$OrgDb,
+                                          kegg_org = selected_org()$kegg, gene_col = input$gene_col,
+                                          adj = input$use_adj_pval)
       enrichment_result(result)
 
       # Remove notification
@@ -1156,6 +1039,129 @@ server <- function(input, output, session) {
       )
     },
     contentType = "application/zip"
+  )
+  
+  #### Heatmap ############################################################################################
+  
+  
+  #select condition
+  output$protein_label <- renderUI({
+    req(intensity_file())
+    choices <- names(rowData(prot_data()))
+    selectInput("protein_label", "select the column used to label proteins:", choices = choices)
+  })
+  
+  #heatmap subset
+  prot_labels <- reactive({
+    req(intensity_file())  # Ensure file is uploaded
+    req(input$protein_label)  # Ensure file is uploaded
+    if(is.null(heatmap_labels())){
+      return(NULL)
+    }
+    dat <- data.table::fread(heatmap_labels()$datapath, data.table=FALSE)
+    if('Gene' %in% names(dat)){
+      print("The csv must contain a column called Gene containing the labels")
+    }
+    return(dat$Gene)
+  })
+  
+  #complete heatmap
+  output$h_map <- renderPlot({
+    req(intensity_file())  # Ensure file is uploaded
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting heatmap failed:", e$message)))
+    })
+    
+    #save to zip
+    add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
+    
+    print(p)
+    # grid::grid.newpage()
+    # grid::grid.draw(p$gtable)
+  })
+  
+  output$download_hmap <- downloadHandler(
+    filename = function(){
+      paste("heatmap.pdf")
+    },
+    content = function(file){
+      req(intensity_file())  # Ensure file is uploaded
+      p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+      ggsave(file, plot=p, device = "pdf")
+    }
+  )
+  
+  #### Protein Barchart ############################################################################################
+  
+  
+  #select condition
+  output$pv_prot_meta <- renderUI({
+    req(intensity_file())
+    choices <- names(rowData(prot_data()))
+    selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
+  })
+  
+  #select condition
+  output$pv_protein <- renderUI({
+    req(intensity_file())
+    req(input$pv_prot_meta)
+    choices <- rowData(prot_data())[[input$pv_prot_meta]]
+    selectInput("pv_protein", "select a protein:", choices = choices)
+  })
+  
+  #select condition
+  output$pv_condition <- renderUI({
+    req(intensity_file())
+    choices <- c("No grouping", names(colData(prot_data())))
+    selectInput("pv_condition", "select the column used to group samples:", choices = choices)
+  })
+  
+  pv_selected_condition <-reactive({
+    if(input$pv_condition == "No grouping"){
+      NULL
+    }else{
+      input$pv_condition
+    }
+  })
+  
+  output$barchart_selected_groups <- renderUI({
+    req(intensity_file())
+    req(pv_selected_condition())
+    choices <- colData(prot_data())[[pv_selected_condition()]]
+    selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
+  })
+  
+  #complete barchart
+  output$protein_barchart <- renderPlot({
+    req(intensity_file())  # Ensure file is uploaded
+    p <- tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Plotting barchart failed:", e$message)))
+    })
+    #save to zip
+    add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
+    
+    print(p)
+  })
+  
+  output$download_protein_barchart <- downloadHandler(
+    filename = function(){
+      paste(input$pv_protein, "_levels.pdf")
+    },
+    content = function(file){
+      req(intensity_file())  # Ensure file is uploaded
+      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
+      ggsave(file, plot=p, device = "pdf")
+    }
   )
 
 
