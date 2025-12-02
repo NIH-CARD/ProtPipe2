@@ -142,12 +142,8 @@ ui <- page_sidebar(
                             downloadButton("download_pca_sum", "Download PCA summary as tsv")
                      ),card(card_header("UMAP (requires condition file)"),
                             fluidRow(
-                              column(width = 3, div(style = "display: flex; align-items: center; height: 100%;",
-                                                    sliderInput("neighbors", label = h3("Select number of neighbors for UMAP"),
-                                                                min = 2, max = 100, value = 15))
-                              ),column(width = 9,
-                                       plotOutput("umap")
-                              )
+                              column(width = 3, uiOutput("neighbors_slider")),
+                              column(width = 9, plotOutput("umap"))
                             ),
                             downloadButton("download_umap", "Download Plot as PDF"),
                             downloadButton("download_umap_tsv", "Download UMAP as tsv")

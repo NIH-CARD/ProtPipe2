@@ -684,6 +684,14 @@ server <- function(input, output, session) {
       data.table::fwrite(get_PCs(prot_data(), condition = input$cluster_condition)$summary, file, sep = "\t")
     }
   )
+  output$neighbors_slider <- renderUI({
+    req(intensity_file())
+    max = ncol(prot_data())
+    default = min(15, (max+2)/2)
+    div(style = "display: flex; align-items: center; height: 100%;",
+        sliderInput("neighbors", label = h3("Select number of neighbors for UMAP"),
+                    min = 2, max = max, step = 1, value = default))
+  })
 
   # 1. Create a reactive to handle the calculation and saving.
   #    This only runs when 'input$neighbors' or 'input$cluster_condition' changes,
