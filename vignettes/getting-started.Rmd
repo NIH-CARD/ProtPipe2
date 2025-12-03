@@ -38,15 +38,15 @@ Our analysis begins with two primary data frames:
 # - 40 genes that are stable (no change between conditions)
 # - 5 genes that are up-regulated in the Treatment group
 # - 5 genes that are down-regulated in the Treatment group
-n_stable <- 40
-n_up <- 5
-n_down <- 5
+n_stable <- 400
+n_up <- 50
+n_down <- 50
 n_total <- n_stable + n_up + n_down
 
 # Set means for each group for log2-scale data
 mean_stable <- 25
-mean_up <- 28  # Higher expression
-mean_down <- 22 # Lower expression
+mean_up <- 51  # Higher expression
+mean_down <- 12 # Lower expression
 
 # Note: set.seed() makes the random data reproducible
 set.seed(123) 
@@ -147,6 +147,13 @@ any(is.na(assay(pd_obj_imputed)))
 
 With a clean, complete dataset, we can now explore the relationships between samples and proteins.
 
+### Hierarchial Clustering (PCA)
+
+```{r hc-plot}
+# The plot_pca function is a convenient wrapper that calculates and plots the results
+ProtPipe::plot_hierarchical_cluster(pd_obj_imputed) +
+  labs(title = "HC of Samples by Group")
+```
 ### Principal Component Analysis (PCA)
 
 PCA is a powerful tool for visualizing the primary sources of variation in the data and assessing sample clustering.
@@ -156,6 +163,38 @@ PCA is a powerful tool for visualizing the primary sources of variation in the d
 ProtPipe::plot_PCs(pd_obj_imputed, condition = "group") +
   labs(title = "PCA of Samples by Group")
 ```
+
+### UMAP
+
+Lets plot a UMAP.
+
+```{r umap-plot}
+# The plot_pca function is a convenient wrapper that calculates and plots the results
+ProtPipe::plot_umap(pd_obj_imputed, condition = "group", neighbors = 4) +
+  labs(title = "UMAP of Samples by Group")
+```
+### Differential Expression
+
+Lets figure out which proteins are altered by the treatment.
+
+```{r volcano plot}
+DE <- ProtPipe::do_limma_binary(pd_obj_imputed, condition = "group", control_group = "Control", treatment_group = "Treatment")
+
+# Or, filter to a specific subset of genes of interest
+ProtPipe::plot_volcano(
+  DE, 
+  label_col = "Gene"
+)
+```
+### Protein Barchart
+
+Lets take a closer look at some of the differentially expressed proteins
+
+```{r barchart}
+# Plot a heatmap of all proteins, with columns ordered by clustering
+ProtPipe::compare_protein(pd_obj_imputed, prot = "GENE465", prot_meta_col = "Gene", condition = "group")
+```
+
 
 ### Protein Expression Heatmap
 
