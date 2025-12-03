@@ -31,7 +31,27 @@ create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
 }
 
 
-olink_sample_out=function(my_npx, filter){
+#' Title
+#'
+#' @param my_npx 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+olink_all_output <- function(my_npx){
+  npx_wide <- my_npx |>
+    # dplyr::filter(AssayType == "assay") |>
+    dplyr::select(SampleID, LOD, UniProt,Assay, OlinkID, NPX) |>
+    tidyr::pivot_wider(names_from = SampleID, values_from = NPX,values_fn = mean) |>
+    dplyr::rename(Protein_Group = UniProt, Genes = Assay) %>%
+    as.data.frame()
+  number_samples <- ncol(npx_wide)-4
+  condition = NULL
+  return(list(data = npx_wide, condition = condition, number_samples = number_samples))
+}
+
+olink_sample_out=function(my_npx, filter = T){
   if(filter){
     npx_wide <- my_npx |>
       dplyr::mutate(NPX = ifelse(NPX < LOD, NA, NPX)) |>

@@ -4,14 +4,12 @@
 \alias{do_comparison_continuous}
 \title{Perform limma differential expression for a continuous outcome}
 \usage{
-do_comparison_continuous(object, condition, covariates = NULL)
+do_comparison_continuous(object, condition)
 }
 \arguments{
 \item{object}{A SummarizedExperiment object}
 
 \item{condition}{Column name in colData(object) used as the continuous predictor}
-
-\item{covariates}{Optional covariates (must be in colData(object), cannot include \code{condition})}
 }
 \value{
 A data frame with metadata, intensities, logFC, p-values

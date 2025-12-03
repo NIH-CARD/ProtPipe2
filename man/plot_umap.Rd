@@ -7,7 +7,7 @@
 \usage{
 plot_umap(object, condition = NA, neighbors = 15, ...)
 
-\S4method{plot_umap}{SummarizedExperiment}(object, condition = NA, neighbors = 15, ...)
+\S4method{plot_umap}{SummarizedExperiment}(object, condition, neighbors)
 }
 \arguments{
 \item{object}{A \code{SummarizedExperiment} object. The data should be imputed.}

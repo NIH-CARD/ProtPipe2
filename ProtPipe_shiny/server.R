@@ -78,6 +78,8 @@ server <- function(input, output, session) {
   # This is the correct way to manage variables like data frames and their types.
   rv <- reactiveValues(
     data = NULL,
+    condition = NULL,
+    number_samples = NULL,
     type = "upload file first"
   )
 
@@ -109,12 +111,18 @@ server <- function(input, output, session) {
       # --- Simplified and Corrected Logic ---
       if (ext == "adat") {
         rv$type <- "SomaScan"
-        rv$data <- SomaDataIO::read_adat(file_info$datapath)
+        out <- SomaDataIO::read_adat(file_info$datapath) %>%
+          ProtPipe::soma_all_output()
+        rv$data <- out$data
+        rv$condition <- out$condition
+        rv$number_samples <- out$number_samples
       } else if (detect_olink_npx(file_info$datapath)) {
         rv$type <- "Olink"
-        # **CORRECTED**: Use an Olink reader or a generic one.
-        # olinkanalyze::read_npx is the standard for Olink files.
-        rv$data <- OlinkAnalyze::read_NPX(file_info$datapath)
+        out <- OlinkAnalyze::read_NPX(file_info$datapath) %>%
+          ProtPipe::olink_all_output()
+        rv$data <- out$data
+        rv$condition <- out$condition
+        rv$number_samples <- out$number_samples
       } else {
         # Fallback for standard CSV, TSV, or Excel files
         rv$type <- "Standard Matrix"
@@ -133,18 +141,28 @@ server <- function(input, output, session) {
       rv$type <- "error"
     })
   })
+  
+  
 
-  # 3. Create simple reactive expressions to safely access the results.
-  #    Your original `intensity_file` now just returns the data.
+  # simple reactive expressions to safely access the results.
   intensity_file <- reactive({
     req(rv$data) # Require data to be non-NULL
     rv$data
   })
 
-  # A new reactive to access the type
   data_type <- reactive({
     rv$type
   })
+  
+  intermediate_condition <- reactive({
+    rv$condition
+  })
+  
+  number_samples <- reactive({
+    rv$number_samples
+  })
+  
+  
 
   output$file_type_output <- renderText({
     # The output will display the string returned by the reactive
@@ -170,16 +188,21 @@ server <- function(input, output, session) {
   # Dynamically generate dropdowns for column range selection
   output$column_range_ui <- renderUI({
     req(intensity_file())
-    req(data_type() == "Standard Matrix")
+    #req(data_type() == "Standard Matrix")
     df <- intensity_file() %>%
       ProtPipe::convert_numeric_cols()
     choices <- names(df)
 
     # get default intensity columns
-    intensity_cols <- ProtPipe::detect_intensity_cols(df)
-    #intensity_cols <<- intensity_cols
-    first <- intensity_cols[[1]]
-    last <- intensity_cols[[length(intensity_cols)]]
+    if(data_type() == "Standard Matrix"){
+      intensity_cols <- ProtPipe::detect_intensity_cols(df)
+      first <- intensity_cols[[1]]
+      last <- intensity_cols[[length(intensity_cols)]]
+    }else{
+      num_cols <- length(choices)
+      first <- num_cols-number_samples()+1
+      last <- num_cols
+    }
 
     tagList(
       selectInput("lower_col", "Intensity columns start at:", choices = choices, selected = choices[first]),
@@ -187,23 +210,6 @@ server <- function(input, output, session) {
     )
   })
 
-  output$imputation_parameters <- renderUI({
-    req(intensity_file())
-    if(input$imputation_method == "fixed value"){
-      tagList(
-        numericInput("impute_fixed_value", "value:", value = 0)
-      )
-    }else if(input$imputation_method == "minimum"){
-      tagList(
-        numericInput("impute_min_value", "scale minimum by:", value = 1)
-      )
-    }else if(input$imputation_method == "left-shifted distribution"){
-      tagList(
-        numericInput("impute_left_dist_shift", "shift mean of distribution by n standard deviations:", value = 1.8),
-        numericInput("impute_left_dist_scale", "scale standard deviation of distribution by:", value = 0.3)
-      )
-    }
-  })
 
   # Validate and report selection
   output$range_result <- renderPrint({
@@ -260,10 +266,15 @@ server <- function(input, output, session) {
 
     if (data_type == "Standard Matrix") {
       PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition_file())
-    } else if(data_type == "SomaScan"){
-      PD <- ProtPipe::create_se_from_soma(adat = intensity_file(), condition = condition_file(), filter = T)
-    } else if(data_type == "Olink"){
-      PD <- ProtPipe::create_se_from_olink(npx = intensity_file(), condition = condition_file(), filter = T)
+    } else {
+      if(is.null(condition_file())){
+        condition <-intermediate_condition() 
+      }else if(is.null(intermediate_condition())){
+        condition <-condition_file()
+      }else{
+        condition <- dplyr::left_join(intermediate_condition(), condition_file(), by = "SampleID")
+      }
+      PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition)
     }
     return(PD)
   })
@@ -272,7 +283,19 @@ server <- function(input, output, session) {
   prot_data <- reactive({
     req(raw_prot_data())
     PD <- raw_prot_data()
-    #1 outlier removal
+    
+    #1 min intensity filtering
+    if(isTRUE(input$lod_filter)){
+      if(data_type() == "Olink"){
+        lod_col <- "LOD"
+      }
+      if(data_type() == "SomaScan"){
+        lod_col <- "Buffer"
+      }
+      PD <- ProtPipe::lod_filter(PD, lod_col)
+    }
+    
+    #2 outlier removal
     if(input$remove_outliers == TRUE){
       PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds)
     }
@@ -280,7 +303,7 @@ server <- function(input, output, session) {
       PD <- ProtPipe::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent)
     }
 
-    #2 transformation
+    #3 transformation
     if(input$log2_transform == TRUE){
       print(paste("Perform", input$normalize_method))
       tryCatch({
@@ -291,7 +314,7 @@ server <- function(input, output, session) {
       })
     }
 
-    #3 normalization
+    #4 normalization
     if(input$normalize == TRUE){
       print(paste("Normalizing using", input$normalize_method))
       tryCatch({
@@ -306,7 +329,7 @@ server <- function(input, output, session) {
       })
     }
 
-    #4 imputation
+    #5 imputation
     if(input$impute == TRUE){
       if(input$imputation_method == "fixed value"){
         PD <- ProtPipe::impute(PD, input$impute_fixed_value)
@@ -317,7 +340,7 @@ server <- function(input, output, session) {
       }
     }
 
-    #5 batch correction
+    #6 batch correction
     if(!is.null(input$batch_correct_column) && input$batch_correct == TRUE){
       PD <- ProtPipe::batch_correct(PD, input$batch_correct_column)
     }
@@ -361,14 +384,37 @@ server <- function(input, output, session) {
   )
 
 
-
-
-
-
-  ### Color Pallete ############################################################################################
-
-
-  ### Batch Correction ############################################################################################
+  ### Pre-processing ############################################################################################
+  
+  output$lod_filtering <- renderUI({
+    req(intensity_file())
+    req(data_type() == "Olink" || data_type() == "SomaScan")
+    if(data_type() == "Olink"){
+      label <- "filter values based on LOD values (if present)"
+    }
+    if(data_type() == "SomaScan"){
+      label <- "filter values based on average buffer values (if present)"
+    }
+    checkboxInput("lod_filter", label = label, value = FALSE)
+  })
+  
+  output$imputation_parameters <- renderUI({
+    req(intensity_file())
+    if(input$imputation_method == "fixed value"){
+      tagList(
+        numericInput("impute_fixed_value", "value:", value = 0)
+      )
+    }else if(input$imputation_method == "minimum"){
+      tagList(
+        numericInput("impute_min_value", "scale minimum by:", value = 1)
+      )
+    }else if(input$imputation_method == "left-shifted distribution"){
+      tagList(
+        numericInput("impute_left_dist_shift", "shift mean of distribution by n standard deviations:", value = 1.8),
+        numericInput("impute_left_dist_scale", "scale standard deviation of distribution by:", value = 0.3)
+      )
+    }
+  })
 
   output$batch_correct_column <- renderUI({
     req(intensity_file())

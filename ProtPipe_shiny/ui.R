@@ -47,8 +47,7 @@ ui <- page_sidebar(
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",
                    fluidPage(
-                     card(
-                       h3("Upload Data"),
+                       h2("Input"),
                        card(
                          card_header(h4("Protein Intensity File")),
                          fluidRow(
@@ -64,7 +63,6 @@ ui <- page_sidebar(
                          p("make sure row names match the column names of the intensity file exactly"),
                          fileUploadUI("sample_condition", label = NULL)
                        )
-                     )
                    )
   ),
 
@@ -98,22 +96,23 @@ ui <- page_sidebar(
   ),
   ### Pre Processing Screen ############################################################################################
   conditionalPanel(condition = "input.select == 2",
-                   fluidPage(card(
-                     h3("Pre-processing"),
-                     card(card_header(h4("1. Outlier Removal")),
-                          fluidRow(
+                   fluidPage(
+                     h2("Pre-processing"),
+                          card(card_header("1. Minimum Intensity Filtering"), uiOutput("lod_filtering")),
+                          card(card_header("2. Outlier Removal"),
+                            fluidRow(
                             column(width = 6,
                                    checkboxInput("remove_outliers", label = "remove outlier samples", value = FALSE),
                                    numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
                             column(width = 6,
                                    checkboxInput("remove_sparse_proteins", label = "remove outlier proteins", value = FALSE),
-                                   numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30))),
-                          card(card_header(h4("2. Transformation")),
+                                   numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30)))),
+                          card(card_header("3. Transformation"),
                                checkboxInput("log2_transform", label = "log2_transform", value = FALSE)),
-                          card(card_header(h4("3. Normalization")),
+                          card(card_header("4. Normalization"),
                                checkboxInput("normalize", label = "normalize", value = FALSE),
                                selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
-                          card(card_header(h4("4. Imputation")),
+                          card(card_header("5. Imputation"),
                                fluidRow(
                                  column(width = 6,
                                         checkboxInput("impute", label = "impute", value = FALSE),
@@ -121,12 +120,13 @@ ui <- page_sidebar(
                                  column(width = 6,
                                         uiOutput("imputation_parameters")
                                  ))),
-                          card(card_header(h4("5. Batch Correction")),
+                          card(card_header("6. Batch Correction"),
                                checkboxInput("batch_correct", label = "batch correct", value = FALSE),
                                uiOutput("batch_correct_column")),
-                          downloadButton("download_data", "Download pre-processed data"),
-                          downloadButton("download_preprocessing_report", "Download pre-processing report")
-                     )))),
+                          card(
+                            downloadButton("download_data", "Download pre-processed data"),
+                            downloadButton("download_preprocessing_report", "Download pre-processing report"))
+                    )),
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",
                    h2("Clustering Information"),
@@ -223,25 +223,24 @@ ui <- page_sidebar(
 
   ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
-                   h2("Heatmap"),
-                   fluidPage(
+                   h2("Protein View"),
+                   card(card_header("Heatmap"),
                      uiOutput("protein_label"),
                      p("optional: upload csv file with genes to include in heatmap subset.
                                    Make sure column name is Genes"),
                      fileUploadUI("heatmap_labels", label = NULL),
-                     card(card_header("Heatmap"),
+                     card(
                           plotOutput("h_map"),
                           downloadButton("download_hmap", "Download Plot as PDF")
                      )
                    ),
 
-                   h2("View single protein"),
-                   fluidPage(
+                   card(card_header("Protein Barchart"),
                      uiOutput("pv_prot_meta"),
                      uiOutput("pv_protein"),
                      uiOutput("pv_condition"),
                      uiOutput("barchart_selected_groups"),
-                     card(card_header("protein barchart"),
+                     card(
                           plotOutput("protein_barchart"),
                           downloadButton("download_protein_barchart", "Download Plot as PDF")
                      )

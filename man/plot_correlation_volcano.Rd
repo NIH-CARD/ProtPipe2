@@ -9,7 +9,8 @@ plot_correlation_volcano(
   label_col = NULL,
   rho_threshold = 0.35,
   fdr_threshold = 0.01,
-  labelgene = NULL
+  labelgene = NULL,
+  adj = T
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ Genes with an adjusted p-value greater than or equal to this threshold will be l
 
 \item{labelgene}{A character vector of gene names to be labeled in the plot (default is \code{NULL}).
 If provided, only these genes will be labeled in the plot.}
+
+\item{adj}{A boolean. Set to true to use adj.P.val for the y axis (default) and false to
+use P.value.}
 }
 \value{
 A \code{ggplot2} object representing the volcano plot.

@@ -6,6 +6,7 @@ metafile <- "EXAMPLES/olink/manifest.tsv"
 
 npx <- OlinkAnalyze::read_NPX(file)
 meta <- read.delim(metafile, sep = "\t")
+out <- olink_all_output(npx)
 
 test_that("correctly make a prot_data object from Olink without LOD filtering", {
   dat_pro <- create_se_from_olink(npx, meta, filter = T)

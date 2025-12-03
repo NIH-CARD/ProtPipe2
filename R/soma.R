@@ -30,9 +30,6 @@ create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
   }
 
   # combine condition with soma sample metadata
-  soma_condition <- soma_condition %>%
-    dplyr::rename(SampleID = SampleId)
-  soma_condition$SampleID <- as.character(soma_condition$SampleID)
   if(!is.null(condition)){
     condition$SampleID <- as.character(condition$SampleID)
     soma_condition <- soma_condition %>%
@@ -77,8 +74,16 @@ create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
 #   return(list(data = DT_dat, condition = condition))
 # }
 
-##format data
-soma_all_output=function(DT){
+
+#' format soma adat into data and condition dataframes
+#'
+#' @param DT 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+soma_all_output <- function(DT){
   anno=SomaDataIO::getAnalyteInfo(DT)
   DT=data.frame(DT)
   DT_dat=data.frame(DT)%>%
@@ -94,7 +99,10 @@ soma_all_output=function(DT){
 
   rownames(DT_dat)=DT_dat$SampleId
   condition=DT_dat %>%
-    dplyr::select(-matches("seq\\.", ignore.case = TRUE))
+    dplyr::select(-matches("seq\\.", ignore.case = TRUE))%>%
+    dplyr::rename(SampleID = SampleId)
+  condition$SampleID <- as.character(condition$SampleID)
+  
   DT_dat = DT_dat[, grep('seq\\.', colnames(DT_dat))] %>%
     t() %>%
     as.data.frame()
@@ -133,5 +141,61 @@ Buffer_filter=function(DT){
       .fns = ~ ifelse(. < Buffer, NA, .)  # Apply the condition
     ))
   return(DT_filter)
+}
+
+
+#' Filter SummarizedExperiment based on Limit of Detection (LOD)
+#'
+#' This function filters a SummarizedExperiment object by setting values to NA
+#' if they fall below a specified Limit of Detection (LOD). It searches for the
+#' LOD values first in the rowData, and then in the assay columns (samples).
+#'
+#' @param se A SummarizedExperiment object (e.g., proteomics data).
+#' @param lod_col A character string specifying the name of the LOD column.
+#'                Defaults to "Buffer".
+#'
+#' @return The modified SummarizedExperiment object with values < LOD set to NA.
+#' @export
+lod_filter <- function(se, lod_col = "Buffer") {
+  
+  # 1. Input Validation
+  if (!is(se, "SummarizedExperiment")) {
+    stop("Input 'se' must be a SummarizedExperiment object.")
+  }
+  
+  lod_values <- NULL
+  source_found <- "none"
+  
+  # 2. Search in rowData (metadata for rows/proteins)
+  if (lod_col %in% colnames(rowData(se))) {
+    lod_values <- rowData(se)[[lod_col]]
+    source_found <- "rowData"
+  } 
+  # 3. Search in Assay Columns (specific sample acting as LOD, e.g., Buffer)
+  else if (lod_col %in% colnames(se)) {
+    lod_values <- assay(se, 1)[, lod_col]
+    source_found <- "assay"
+  } 
+  else {
+    stop(paste("Could not find", lod_col, "in rowData or assay columns of the SummarizedExperiment."))
+  }
+  
+  # Check if lod_values is numeric
+  if (!is.numeric(lod_values)) {
+    stop(paste("The values in", lod_col, "are not numeric and cannot be used for filtering."))
+  }
+  
+  # 4. Apply Filter to all assays
+  # We iterate through all assays in the object (e.g., counts, log-intensities)
+  assay_names <- assayNames(se)
+  if (is.null(assay_names)) assay_names <- paste0("assay_", seq_along(assays(se)))
+  
+  mat <- assay(se)
+  mask <- mat < lod_values
+  mask[is.na(mask)] <- FALSE
+  mat[mask] <- NA
+  assay(se) <- mat
+  
+  return(se)
 }
 
