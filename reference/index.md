@@ -6,6 +6,8 @@
   : ProtData Class
 - [`add_entrez()`](https://nih-card.github.io/ProtPipe2/reference/add_entrez.md)
   : Add Entrez Gene IDs to a Data Frame
+- [`apply_min_intenisty()`](https://nih-card.github.io/ProtPipe2/reference/apply_min_intenisty.md)
+  : Apply Limit of Detection Threshold
 - [`batch_correct()`](https://nih-card.github.io/ProtPipe2/reference/batch_correct.md)
   : Correct for Batch Effects
 - [`compare_protein()`](https://nih-card.github.io/ProtPipe2/reference/compare_protein.md)
@@ -78,7 +80,7 @@
 - [`impute_min()`](https://nih-card.github.io/ProtPipe2/reference/impute_min-ProtData.md)
   : Impute Missing Values with the Row Minimum
 - [`lod_filter()`](https://nih-card.github.io/ProtPipe2/reference/lod_filter.md)
-  : Filter SummarizedExperiment based on Limit of Detection (LOD)
+  : Filter Assay Based on Limit of Detection (LOD)
 - [`log2_transform()`](https://nih-card.github.io/ProtPipe2/reference/log2_transform.md)
   : Performs a log2 transform of protein intensity values
 - [`mean_normalize()`](https://nih-card.github.io/ProtPipe2/reference/mean_normalize-ProtData.md)

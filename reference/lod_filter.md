@@ -1,13 +1,16 @@
-# Filter SummarizedExperiment based on Limit of Detection (LOD)
+# Filter Assay Based on Limit of Detection (LOD)
 
-This function filters a SummarizedExperiment object by setting values to
-NA if they fall below a specified Limit of Detection (LOD). It searches
-for the LOD values first in the rowData, and then in the assay columns
-(samples).
+Filters the assay data of a SummarizedExperiment by comparing
+intensities against a specific Limit of Detection (LOD). The LOD values
+can be sourced either from a metadata column (rowData) or a specific
+reference sample (e.g., a Buffer column in the assay).
 
 ## Usage
 
 ``` r
+lod_filter(se, lod_col = "Buffer")
+
+# S4 method for class 'SummarizedExperiment'
 lod_filter(se, lod_col = "Buffer")
 ```
 
@@ -15,13 +18,20 @@ lod_filter(se, lod_col = "Buffer")
 
 - se:
 
-  A SummarizedExperiment object (e.g., proteomics data).
+  A `SummarizedExperiment` object.
 
 - lod_col:
 
-  A character string specifying the name of the LOD column. Defaults to
-  "Buffer".
+  A character string indicating where to find the LOD values. The
+  function first searches `rowData(se)`, then searches the column names
+  of the assay (e.g., a specific buffer sample). Defaults to "Buffer".
 
 ## Value
 
-The modified SummarizedExperiment object with values \< LOD set to NA.
+A `SummarizedExperiment` object where values below the defined LOD are
+replaced with `NA`.
+
+## Functions
+
+- `lod_filter(SummarizedExperiment)`: Method for SummarizedExperiment
+  objects
