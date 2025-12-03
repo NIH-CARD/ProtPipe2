@@ -98,7 +98,13 @@ ui <- page_sidebar(
   conditionalPanel(condition = "input.select == 2",
                    fluidPage(
                      h2("Pre-processing"),
-                          card(card_header("1. Minimum Intensity Filtering"), uiOutput("lod_filtering")),
+                          card(card_header("1. Minimum Intensity Filtering"),
+                               fluidRow(
+                                  column(width=6,
+                                      checkboxInput("min_int_filter", label = "set minimum intensity", value = FALSE),
+                                      numericInput("min_int_filter_lod", label="min: ", value = 0)),
+                                  column(width=6,uiOutput("lod_filtering"))
+                               )),
                           card(card_header("2. Outlier Removal"),
                             fluidRow(
                             column(width = 6,
@@ -226,6 +232,7 @@ ui <- page_sidebar(
                    h2("Protein View"),
                    card(card_header("Heatmap"),
                      uiOutput("protein_label"),
+                     uiOutput("heatmap_condition"),
                      p("optional: upload csv file with genes to include in heatmap subset.
                                    Make sure column name is Genes"),
                      fileUploadUI("heatmap_labels", label = NULL),

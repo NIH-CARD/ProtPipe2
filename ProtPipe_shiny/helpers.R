@@ -56,41 +56,21 @@ add_zip_tabular <- function(data, filename, subfolder, zip_workspace, zip_file){
   # file.remove(file_path)
 }
 
+library(OlinkAnalyze)
+
 detect_olink_npx <- function(file_path) {
-
-  # 2. Validate that the file exists
-  if (!file.exists(file_path)) {
-    warning("File does not exist: ", file_path)
-    return(FALSE)
-  }
-
-  # 3. Read only the header based on the file extension
-  ext <- tolower(tools::file_ext(file_path))
-
-  header_df <- tryCatch({
-    if (ext %in% c("xls", "xlsx")) {
-      # For Excel files, use readxl to read zero rows
-      readxl::read_excel(file_path, n_max = 0)
-    } else if (ext %in% c("csv", "tsv", "txt")) {
-      # For text files, use data.table::fread to read zero rows
-      data.table::fread(file_path, nrows = 0)
-    } else {
-      warning("Unsupported file extension: ", ext)
-      return(NULL)
-    }
+  # Attempt to read the file using the official Olink loader
+  # We suppress warnings to keep the output clean if the read fails
+  tryCatch({
+    # Try reading just a small subset if possible, but OlinkAnalyze usually needs to
+    # parse the whole format to validate. The key is that read_NPX handles zip/csv/txt automatically.
+    data <- suppressWarnings(OlinkAnalyze::read_NPX(filename = file_path))
+    
+    # Check if the result is a valid tibble/data.frame and has content
+    return(is.data.frame(data) && nrow(data) > 0)
+    
   }, error = function(e) {
-    warning("Failed to read file header. Error: ", e$message)
-    return(NULL)
-  })
-
-  # 4. If reading the header failed, it's not a valid file
-  if (is.null(header_df)) {
+    # If read_NPX throws an error, it is not a valid Olink file
     return(FALSE)
-  }
-
-  # 5. Check for the Olink signature columns
-  file_colnames <- colnames(header_df)
-  olink_signature_cols <- c("OlinkID", "Panel", "NPX")
-
-  return(all(olink_signature_cols %in% file_colnames))
+  })
 }

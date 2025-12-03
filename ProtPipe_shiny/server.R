@@ -295,6 +295,10 @@ server <- function(input, output, session) {
       PD <- ProtPipe::lod_filter(PD, lod_col)
     }
     
+    if(isTRUE(input$min_int_filter)){
+      PD <- ProtPipe::apply_min_intenisty(PD, input$min_int_filter_lod)
+    }
+    
     #2 outlier removal
     if(input$remove_outliers == TRUE){
       PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds)
@@ -1119,12 +1123,27 @@ server <- function(input, output, session) {
     return(dat$Gene)
   })
   
+  output$heatmap_condition <- renderUI({
+    req(intensity_file())
+    choices <- c("no goruping", names(colData(prot_data())))
+    selectInput("heatmap_condition", "Select condition to group samples:", choices = choices)
+  })
+  
+  heatmap_condition <- reactive({
+    req(intensity_file())  # Ensure file is uploaded
+    req(input$heatmap_condition)  # Ensure file is uploaded
+    if(is.null(input$heatmap_condition) || input$heatmap_condition == "no goruping"){
+      return(NULL)
+    }
+    return(input$heatmap_condition)
+  })
+  
   #complete heatmap
   output$h_map <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
+      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels(), condition = heatmap_condition())
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -1151,7 +1170,6 @@ server <- function(input, output, session) {
   )
   
   #### Protein Barchart ############################################################################################
-  
   
   #select condition
   output$pv_prot_meta <- renderUI({

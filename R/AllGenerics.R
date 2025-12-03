@@ -152,7 +152,55 @@ setGeneric("plot_correlation_heatmap",
            }
 )
 
-## Data Processing ############################################################
+## preprocessing ############################################################
+
+#' Filter Assay Based on Limit of Detection (LOD)
+#'
+#' Filters the assay data of a SummarizedExperiment by comparing intensities 
+#' against a specific Limit of Detection (LOD). The LOD values can be sourced 
+#' either from a metadata column (rowData) or a specific reference sample 
+#' (e.g., a Buffer column in the assay).
+#'
+#' @param se A \code{SummarizedExperiment} object.
+#' @param lod_col A character string indicating where to find the LOD values. 
+#'   The function first searches \code{rowData(se)}, then searches the 
+#'   column names of the assay (e.g., a specific buffer sample). 
+#'   Defaults to "Buffer".
+#'
+#' @return A \code{SummarizedExperiment} object where values below the 
+#'   defined LOD are replaced with \code{NA}.
+#'
+#' @export
+setGeneric("lod_filter", function(se, lod_col = "Buffer") {
+  standardGeneric("lod_filter")
+})
+
+#' Apply Limit of Detection Threshold
+#'
+#' Filters assay data by converting values below a specified Limit of Detection 
+#' (LOD) to \code{NA}.
+#'
+#' @param object A \code{SummarizedExperiment} object containing a single 
+#'   proteomics assay.
+#' @param lod A single numeric value representing the Limit of Detection. 
+#'   Intensities below this value will be replaced with \code{NA}.
+#'
+#' @return The original \code{object} with the assay matrix updated to contain 
+#'   \code{NA} values where intensities were below the \code{lod}.
+#'
+#' @export
+#'
+#' @examples
+#' # Create a mock SummarizedExperiment
+#' counts <- matrix(c(10, 5, 2, 8, 1, 15), nrow = 3, ncol = 2)
+#' se <- SummarizedExperiment(assays = list(counts = counts))
+#' 
+#' # Apply LOD of 6
+#' se_filtered <- applyLOD(se, lod = 6)
+#' assay(se_filtered)
+setGeneric("apply_min_intenisty", function(object, lod) {
+  standardGeneric("apply_min_intenisty")
+})
 
 #' @title Filter Proteins by Percentage of Valid Values
 #'

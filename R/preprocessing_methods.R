@@ -84,8 +84,69 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
   invisible(output_file)
 }
 
+### minimum intensity filtering #################################################################
 
-### Filtering #################################################################
+#' @describeIn lod_filter Method for SummarizedExperiment objects
+#' @export
+setMethod("lod_filter", signature(se = "SummarizedExperiment"),
+          function(se, lod_col = "Buffer") {
+            
+            # 1. Input Validation
+            # (Note: The S4 signature handles class checking, but we keep your logic as requested)
+            if (!is(se, "SummarizedExperiment")) {
+              stop("Input 'se' must be a SummarizedExperiment object.")
+            }
+            
+            lod_values <- NULL
+            source_found <- "none"
+            
+            # 2. Search in rowData (metadata for rows/proteins)
+            if (lod_col %in% colnames(rowData(se))) {
+              lod_values <- rowData(se)[[lod_col]]
+              source_found <- "rowData"
+            } 
+            # 3. Search in Assay Columns (specific sample acting as LOD, e.g., Buffer)
+            else if (lod_col %in% colnames(se)) {
+              lod_values <- assay(se, 1)[, lod_col]
+              source_found <- "assay"
+            } 
+            else {
+              stop(paste("Could not find", lod_col, "in rowData or assay columns of the SummarizedExperiment."))
+            }
+            
+            # Check if lod_values is numeric
+            if (!is.numeric(lod_values)) {
+              stop(paste("The values in", lod_col, "are not numeric and cannot be used for filtering."))
+            }
+            
+            # 4. Apply Filter to all assays
+            # We iterate through all assays in the object (e.g., counts, log-intensities)
+            assay_names <- assayNames(se)
+            if (is.null(assay_names)) assay_names <- paste0("assay_", seq_along(assays(se)))
+            
+            mat <- assay(se)
+            mask <- mat < lod_values
+            mask[is.na(mask)] <- FALSE
+            mat[mask] <- NA
+            assay(se) <- mat
+            
+            return(se)
+          }
+)
+
+#' @describeIn apply_min_intenisty Method for SummarizedExperiment objects
+#' @export
+setMethod("apply_min_intenisty", signature(object = "SummarizedExperiment"),
+          function(object, lod) {
+            
+            mat <- assay(object)
+            mat[mat < lod] <- NA
+            assay(object) <- mat
+            return(object)
+          }
+)
+
+### outlier removal #################################################################
 
 #' @describeIn filter_proteins_by_percent
 #' @export
