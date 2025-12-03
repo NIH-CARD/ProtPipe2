@@ -11,7 +11,7 @@ relationships. This is a convenient wrapper function that first calls
 plot_umap(object, condition = NA, neighbors = 15, ...)
 
 # S4 method for class 'SummarizedExperiment'
-plot_umap(object, condition = NA, neighbors = 15, ...)
+plot_umap(object, condition, neighbors)
 ```
 
 ## Arguments

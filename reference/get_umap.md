@@ -11,7 +11,7 @@ for the [`umap::umap`](https://rdrr.io/pkg/umap/man/umap.html) function.
 get_umap(object, condition = NA, neighbors = 15, ...)
 
 # S4 method for class 'SummarizedExperiment'
-get_umap(object, condition = NA, neighbors = 15, ...)
+get_umap(object, condition, neighbors)
 ```
 
 ## Arguments

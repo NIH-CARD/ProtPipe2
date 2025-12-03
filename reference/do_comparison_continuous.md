@@ -7,7 +7,7 @@ expression.
 ## Usage
 
 ``` r
-do_comparison_continuous(object, condition, covariates = NULL)
+do_comparison_continuous(object, condition)
 ```
 
 ## Arguments
@@ -19,11 +19,6 @@ do_comparison_continuous(object, condition, covariates = NULL)
 - condition:
 
   Column name in colData(object) used as the continuous predictor
-
-- covariates:
-
-  Optional covariates (must be in colData(object), cannot include
-  `condition`)
 
 ## Value
 

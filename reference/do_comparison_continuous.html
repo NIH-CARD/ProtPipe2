@@ -44,7 +44,7 @@ and optional covariates, and performs limma-based differential expression.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">do_comparison_continuous</span><span class="op">(</span><span class="va">object</span>, <span class="va">condition</span>, covariates <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">do_comparison_continuous</span><span class="op">(</span><span class="va">object</span>, <span class="va">condition</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -57,10 +57,6 @@ and optional covariates, and performs limma-based differential expression.</p>
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
 <dd><p>Column name in colData(object) used as the continuous predictor</p></dd>
-
-
-<dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>
-<dd><p>Optional covariates (must be in colData(object), cannot include <code>condition</code>)</p></dd>
 
 </dl></div>
     <div class="section level2">

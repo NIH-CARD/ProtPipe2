@@ -9,7 +9,9 @@
 - [`batch_correct()`](https://nih-card.github.io/ProtPipe2/reference/batch_correct.md)
   : Correct for Batch Effects
 - [`compare_protein()`](https://nih-card.github.io/ProtPipe2/reference/compare_protein.md)
-  : Generate a bar chart of protein intensity values
+  : — 1. Required Packages —Make sure you have these packages installed
+  for the function to workinstall.packages(c("dplyr", "ggplot2",
+  "ggpubr", "rlang"))
 - [`convert_numeric_cols()`](https://nih-card.github.io/ProtPipe2/reference/convert_numeric_cols.md)
   : Safely Convert Character Columns to Numeric Type
 - [`create_protdata()`](https://nih-card.github.io/ProtPipe2/reference/create_protdata.md)
@@ -75,6 +77,8 @@
   : Impute from a Down-Shifted Normal Distribution
 - [`impute_min()`](https://nih-card.github.io/ProtPipe2/reference/impute_min-ProtData.md)
   : Impute Missing Values with the Row Minimum
+- [`lod_filter()`](https://nih-card.github.io/ProtPipe2/reference/lod_filter.md)
+  : Filter SummarizedExperiment based on Limit of Detection (LOD)
 - [`log2_transform()`](https://nih-card.github.io/ProtPipe2/reference/log2_transform.md)
   : Performs a log2 transform of protein intensity values
 - [`mean_normalize()`](https://nih-card.github.io/ProtPipe2/reference/mean_normalize-ProtData.md)
@@ -83,6 +87,8 @@
   : Median Normalization of Proteomics Data
 - [`num_samples()`](https://nih-card.github.io/ProtPipe2/reference/num_samples.md)
   : Number of samples
+- [`olink_all_output()`](https://nih-card.github.io/ProtPipe2/reference/olink_all_output.md)
+  : Title
 - [`plot_CVs()`](https://nih-card.github.io/ProtPipe2/reference/plot_CVs.md)
   : Plot Coefficient of Variation (CV) Distributions
 - [`plot_PCs()`](https://nih-card.github.io/ProtPipe2/reference/plot_PCs.md)
@@ -107,3 +113,5 @@
   : Plot a Volcano Plot for Differential Expression Results
 - [`z_score()`](https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.md)
   : Z-Score Normalization for Proteins Across Samples
+- [`soma_all_output()`](https://nih-card.github.io/ProtPipe2/reference/soma_all_output.md)
+  : format soma adat into data and condition dataframes

@@ -55,7 +55,8 @@ Optionally, it can label genes of interest or the top up/downregulated genes.</p
 <span>  label_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rho_threshold <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>  fdr_threshold <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>  labelgene <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  labelgene <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  adj <span class="op">=</span> <span class="cn">T</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,6 +88,11 @@ Genes with an adjusted p-value greater than or equal to this threshold will be l
 <dt id="arg-labelgene">labelgene<a class="anchor" aria-label="anchor" href="#arg-labelgene"></a></dt>
 <dd><p>A character vector of gene names to be labeled in the plot (default is <code>NULL</code>).
 If provided, only these genes will be labeled in the plot.</p></dd>
+
+
+<dt id="arg-adj">adj<a class="anchor" aria-label="anchor" href="#arg-adj"></a></dt>
+<dd><p>A boolean. Set to true to use adj.P.val for the y axis (default) and false to
+use P.value.</p></dd>
 
 </dl></div>
     <div class="section level2">

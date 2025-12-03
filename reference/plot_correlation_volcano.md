@@ -13,7 +13,8 @@ plot_correlation_volcano(
   label_col = NULL,
   rho_threshold = 0.35,
   fdr_threshold = 0.01,
-  labelgene = NULL
+  labelgene = NULL,
+  adj = T
 )
 ```
 
@@ -48,6 +49,11 @@ plot_correlation_volcano(
 
   A character vector of gene names to be labeled in the plot (default is
   `NULL`). If provided, only these genes will be labeled in the plot.
+
+- adj:
+
+  A boolean. Set to true to use adj.P.val for the y axis (default) and
+  false to use P.value.
 
 ## Value
 

@@ -17,7 +17,8 @@ enrich_pathways(
   enrich_pvalue = 0.05,
   go_org = org.Hs.eg.db,
   kegg_org = "hsa",
-  gene_col = "Genes"
+  gene_col = "Genes",
+  adj = TRUE
 )
 ```
 
