@@ -42,6 +42,7 @@ Imports:
     SomaDataIO,
     mixOmics,
     Hmisc,
-    magrittr
+    magrittr,
+    ggpubr
 URL: https://nih-card.github.io/ProtPipe2/
 VignetteBuilder: knitr
