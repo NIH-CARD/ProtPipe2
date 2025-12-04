@@ -168,15 +168,15 @@ mapping each sample to its condition.</li>
 <span><span class="co"># - 40 genes that are stable (no change between conditions)</span></span>
 <span><span class="co"># - 5 genes that are up-regulated in the Treatment group</span></span>
 <span><span class="co"># - 5 genes that are down-regulated in the Treatment group</span></span>
-<span><span class="va">n_stable</span> <span class="op">&lt;-</span> <span class="fl">40</span></span>
-<span><span class="va">n_up</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
-<span><span class="va">n_down</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
+<span><span class="va">n_stable</span> <span class="op">&lt;-</span> <span class="fl">400</span></span>
+<span><span class="va">n_up</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
+<span><span class="va">n_down</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
 <span><span class="va">n_total</span> <span class="op">&lt;-</span> <span class="va">n_stable</span> <span class="op">+</span> <span class="va">n_up</span> <span class="op">+</span> <span class="va">n_down</span></span>
 <span></span>
 <span><span class="co"># Set means for each group for log2-scale data</span></span>
 <span><span class="va">mean_stable</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
-<span><span class="va">mean_up</span> <span class="op">&lt;-</span> <span class="fl">28</span>  <span class="co"># Higher expression</span></span>
-<span><span class="va">mean_down</span> <span class="op">&lt;-</span> <span class="fl">22</span> <span class="co"># Lower expression</span></span>
+<span><span class="va">mean_up</span> <span class="op">&lt;-</span> <span class="fl">51</span>  <span class="co"># Higher expression</span></span>
+<span><span class="va">mean_down</span> <span class="op">&lt;-</span> <span class="fl">12</span> <span class="co"># Lower expression</span></span>
 <span></span>
 <span><span class="co"># Note: set.seed() makes the random data reproducible</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> </span>
@@ -221,7 +221,7 @@ mapping each sample to its condition.</li>
 <span><span class="co"># We can inspect the created object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; class: SummarizedExperiment </span></span>
-<span><span class="co">#&gt; dim: 50 6 </span></span>
+<span><span class="co">#&gt; dim: 500 6 </span></span>
 <span><span class="co">#&gt; metadata(2): creation_method processing_log</span></span>
 <span><span class="co">#&gt; assays(1): intensities</span></span>
 <span><span class="co">#&gt; rownames: NULL</span></span>
@@ -243,12 +243,12 @@ visualize the intensity distributions with boxplots.</p>
 <code class="sourceCode R"><span><span class="co"># Get the number of identified proteins per sample</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/get_pg_counts.html">get_pg_counts</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Sample Protein_Groups</span></span>
-<span><span class="co">#&gt; Ctrl_1   Ctrl_1             48</span></span>
-<span><span class="co">#&gt; Ctrl_2   Ctrl_2             47</span></span>
-<span><span class="co">#&gt; Ctrl_3   Ctrl_3             47</span></span>
-<span><span class="co">#&gt; Treat_1 Treat_1             44</span></span>
-<span><span class="co">#&gt; Treat_2 Treat_2             50</span></span>
-<span><span class="co">#&gt; Treat_3 Treat_3             49</span></span>
+<span><span class="co">#&gt; Ctrl_1   Ctrl_1            478</span></span>
+<span><span class="co">#&gt; Ctrl_2   Ctrl_2            482</span></span>
+<span><span class="co">#&gt; Ctrl_3   Ctrl_3            471</span></span>
+<span><span class="co">#&gt; Treat_1 Treat_1            469</span></span>
+<span><span class="co">#&gt; Treat_2 Treat_2            477</span></span>
+<span><span class="co">#&gt; Treat_3 Treat_3            473</span></span>
 <span></span>
 <span><span class="co"># Plot the counts for each sample</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_counts.html">plot_pg_counts</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
@@ -326,15 +326,49 @@ this is a stochastic method, we set a seed for reproducibility.</p>
 <p>With a clean, complete dataset, we can now explore the relationships
 between samples and proteins.</p>
 <div class="section level3">
-<h3 id="principal-component-analysis-pca">Principal Component Analysis (PCA)<a class="anchor" aria-label="anchor" href="#principal-component-analysis-pca"></a>
+<h3 id="hierarchial-clustering-pca">Hierarchial Clustering (PCA)<a class="anchor" aria-label="anchor" href="#hierarchial-clustering-pca"></a>
 </h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
+<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_hierarchical_cluster.html">plot_hierarchical_cluster</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"HC of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/hc-plot-1.png" class="r-plt" width="700">
+### Principal Component Analysis (PCA)</p>
 <p>PCA is a powerful tool for visualizing the primary sources of
 variation in the data and assessing sample clustering.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_PCs.html">plot_PCs</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, condition <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"PCA of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/pca-plot-1.png" class="r-plt" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="umap">UMAP<a class="anchor" aria-label="anchor" href="#umap"></a>
+</h3>
+<p>Lets plot a UMAP.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
+<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_umap.html">plot_umap</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, condition <span class="op">=</span> <span class="st">"group"</span>, neighbors <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"UMAP of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/umap-plot-1.png" class="r-plt" width="700">
+### Differential Expression</p>
+<p>Lets figure out which proteins are altered by the treatment.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">DE</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/do_limma_binary.html">do_limma_binary</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, condition <span class="op">=</span> <span class="st">"group"</span>, control_group <span class="op">=</span> <span class="st">"Control"</span>, treatment_group <span class="op">=</span> <span class="st">"Treatment"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Or, filter to a specific subset of genes of interest</span></span>
+<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span></span>
+<span>  <span class="va">DE</span>, </span>
+<span>  label_col <span class="op">=</span> <span class="st">"Gene"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/volcano%20plot-1.png" class="r-plt" width="700">
+### Protein Barchart</p>
+<p>Lets take a closer look at some of the differentially expressed
+proteins</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Plot a heatmap of all proteins, with columns ordered by clustering</span></span>
+<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_protein.html">compare_protein</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, prot <span class="op">=</span> <span class="st">"GENE465"</span>, prot_meta_col <span class="op">=</span> <span class="st">"Gene"</span>, condition <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/barchart-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="protein-expression-heatmap">Protein Expression Heatmap<a class="anchor" aria-label="anchor" href="#protein-expression-heatmap"></a>
@@ -342,11 +376,11 @@ variation in the data and assessing sample clustering.</p>
 <p>Finally, we can visualize the expression patterns of the proteins
 across our samples using a heatmap. The data is automatically Z-scored
 by row to highlight relative expression changes.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot a heatmap of all proteins, with columns ordered by clustering</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, protmeta_col <span class="op">=</span> <span class="st">"Gene"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/final-heatmap-1.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Or, filter to a specific subset of genes of interest</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>

@@ -106,15 +106,15 @@ Our analysis begins with two primary data frames:
 # - 40 genes that are stable (no change between conditions)
 # - 5 genes that are up-regulated in the Treatment group
 # - 5 genes that are down-regulated in the Treatment group
-n_stable <- 40
-n_up <- 5
-n_down <- 5
+n_stable <- 400
+n_up <- 50
+n_down <- 50
 n_total <- n_stable + n_up + n_down
 
 # Set means for each group for log2-scale data
 mean_stable <- 25
-mean_up <- 28  # Higher expression
-mean_down <- 22 # Lower expression
+mean_up <- 51  # Higher expression
+mean_down <- 12 # Lower expression
 
 # Note: set.seed() makes the random data reproducible
 set.seed(123) 
@@ -159,7 +159,7 @@ pd_obj <- ProtPipe::create_se(data = raw_data, sample_metadata = cond_df)
 # We can inspect the created object
 print(pd_obj)
 #> class: SummarizedExperiment 
-#> dim: 50 6 
+#> dim: 500 6 
 #> metadata(2): creation_method processing_log
 #> assays(1): intensities
 #> rownames: NULL
@@ -182,12 +182,12 @@ visualize the intensity distributions with boxplots.
 # Get the number of identified proteins per sample
 ProtPipe::get_pg_counts(pd_obj)
 #>          Sample Protein_Groups
-#> Ctrl_1   Ctrl_1             48
-#> Ctrl_2   Ctrl_2             47
-#> Ctrl_3   Ctrl_3             47
-#> Treat_1 Treat_1             44
-#> Treat_2 Treat_2             50
-#> Treat_3 Treat_3             49
+#> Ctrl_1   Ctrl_1            478
+#> Ctrl_2   Ctrl_2            482
+#> Ctrl_3   Ctrl_3            471
+#> Treat_1 Treat_1            469
+#> Treat_2 Treat_2            477
+#> Treat_3 Treat_3            473
 
 # Plot the counts for each sample
 ProtPipe::plot_pg_counts(pd_obj)
@@ -271,7 +271,16 @@ any(is.na(assay(pd_obj_imputed)))
 With a clean, complete dataset, we can now explore the relationships
 between samples and proteins.
 
-### Principal Component Analysis (PCA)
+### Hierarchial Clustering (PCA)
+
+``` r
+# The plot_pca function is a convenient wrapper that calculates and plots the results
+ProtPipe::plot_hierarchical_cluster(pd_obj_imputed) +
+  labs(title = "HC of Samples by Group")
+```
+
+![](getting-started_files/figure-html/hc-plot-1.png) \### Principal
+Component Analysis (PCA)
 
 PCA is a powerful tool for visualizing the primary sources of variation
 in the data and assessing sample clustering.
@@ -283,6 +292,43 @@ ProtPipe::plot_PCs(pd_obj_imputed, condition = "group") +
 ```
 
 ![](getting-started_files/figure-html/pca-plot-1.png)
+
+### UMAP
+
+Lets plot a UMAP.
+
+``` r
+# The plot_pca function is a convenient wrapper that calculates and plots the results
+ProtPipe::plot_umap(pd_obj_imputed, condition = "group", neighbors = 4) +
+  labs(title = "UMAP of Samples by Group")
+```
+
+![](getting-started_files/figure-html/umap-plot-1.png) \### Differential
+Expression
+
+Lets figure out which proteins are altered by the treatment.
+
+``` r
+DE <- ProtPipe::do_limma_binary(pd_obj_imputed, condition = "group", control_group = "Control", treatment_group = "Treatment")
+
+# Or, filter to a specific subset of genes of interest
+ProtPipe::plot_volcano(
+  DE, 
+  label_col = "Gene"
+)
+```
+
+![](getting-started_files/figure-html/volcano%20plot-1.png) \### Protein
+Barchart
+
+Lets take a closer look at some of the differentially expressed proteins
+
+``` r
+# Plot a heatmap of all proteins, with columns ordered by clustering
+ProtPipe::compare_protein(pd_obj_imputed, prot = "GENE465", prot_meta_col = "Gene", condition = "group")
+```
+
+![](getting-started_files/figure-html/barchart-1.png)
 
 ### Protein Expression Heatmap
 
