@@ -175,8 +175,8 @@ ui <- page_sidebar(
                             column(width = 4,
                                    # this is called logfc but can be spearman coef if outcome is continuous
                                    uiOutput("logfc"),
-                                   checkboxInput(inputId = "use_adj_pval", 
-                                                 label = "Use Adjusted P-value (FDR)", 
+                                   checkboxInput(inputId = "use_adj_pval",
+                                                 label = "Use Adjusted P-value (FDR)",
                                                  value = TRUE),
                                    numericInput("pvalue", label = "Enter P-value cutoff", value = 0.01)),
                             column(width = 4,
@@ -233,6 +233,8 @@ ui <- page_sidebar(
                    card(card_header("Heatmap"),
                      uiOutput("protein_label"),
                      uiOutput("heatmap_condition"),
+                     checkboxInput(inputId = "cluster_cols_heatmap", label = "Cluster Columns", value = FALSE),
+                     checkboxInput(inputId = "cluster_rows_heatmap", label = "Cluster Rows", value = FALSE),
                      p("optional: upload csv file with genes to include in heatmap subset.
                                    Make sure column name is Genes"),
                      fileUploadUI("heatmap_labels", label = NULL),

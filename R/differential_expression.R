@@ -417,26 +417,26 @@ setMethod("do_comparison_continuous", "SummarizedExperiment",
 #'        Genes with an adjusted p-value greater than or equal to this threshold will be labeled as "Others".
 #' @param labelgene A character vector of gene names to be labeled in the plot (default is `NULL`).
 #'        If provided, only these genes will be labeled in the plot.
-#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to 
-#'        use P.value. 
+#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to
+#'        use P.value.
 #' @return A `ggplot2` object representing the volcano plot.
 #' @export
 #'
 plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_threshold=0.01, labelgene=NULL, adj=T) {
-  
+
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
   }
-  
+
   options(ggrepel.max.overlaps = Inf)
   DT <- DT.original
-  
+
   # 1. Determine which column to use based on the 'adj' parameter
   target_p_col <- if(adj) "adj.P.Val" else "P.Value"
-  
+
   # Check if column exists to prevent crashing
   if(!target_p_col %in% names(DT)) stop(paste("Column", target_p_col, "not found in input data."))
-  
+
   # Set initial group to 'Others' and update based on thresholds
   DT <- DT %>%
     dplyr::mutate(Group = 'Others',
@@ -445,7 +445,7 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
                   # 2. Use .data[[target_p_col]] to dynamically access the p-value column
                   Group = dplyr::if_else(.data[[target_p_col]] >= fdr_threshold, 'Others', Group),
                   labeltext = '')
-  
+
   # If labelgene is provided, update labeltext accordingly
   if (!is.null(labelgene)) {
     DT <- DT %>%
@@ -455,15 +455,15 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
     up_rows <- which(DT$Group == "UP")
     sorted_up_indices <- up_rows[order(DT$logFC[up_rows], decreasing = TRUE)]
     top_up_indices <- head(sorted_up_indices, 5)
-    
+
     down_rows <- which(DT$Group == "DOWN")
     sorted_down_indices <- down_rows[order(DT$logFC[down_rows], decreasing = FALSE)]
     top_down_indices <- head(sorted_down_indices, 5)
-    
+
     top_indices <- c(top_up_indices, top_down_indices)
     DT$labeltext[top_indices] <- DT[top_indices, label_col]
   }
-  
+
   # plot
   # 3. Updated y mapping to use the dynamic column
   g <- ggplot2::ggplot(DT, ggplot2::aes(x = logFC, y = -log10(.data[[target_p_col]]))) +
@@ -483,8 +483,9 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
     ggplot2::geom_vline(xintercept = -lfc_threshold, linetype = "dashed") +
     ggplot2::theme_classic() +
     # 4. Optional: Update label so you know what you are looking at
-    ggplot2::ylab(paste0("-log10(", target_p_col, ")"))
-  
+    ggplot2::ylab(paste0("-log10(", target_p_col, ")"))+
+    ggplot2::xlab(paste0("log2FC"))
+
   return(g)
 }
 
@@ -507,23 +508,23 @@ plot_volcano <- function(DT.original, label_col = NULL, lfc_threshold=1, fdr_thr
 #'        Genes with an adjusted p-value greater than or equal to this threshold will be labeled as "Others".
 #' @param labelgene A character vector of gene names to be labeled in the plot (default is `NULL`).
 #'        If provided, only these genes will be labeled in the plot.
-#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to 
-#'        use P.value. 
+#' @param adj A boolean. Set to true to use adj.P.val for the y axis (default) and false to
+#'        use P.value.
 #' @return A `ggplot2` object representing the volcano plot.
 #' @export
 #'
 plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshold = 0.35, fdr_threshold = 0.01, labelgene = NULL, adj = T) {
-  
+
   # 1. Select the column to use based on the 'adj' parameter
   target_p_col <- if (adj) "adj.P.Val" else "P.Value"
-  
+
   if(is.null(label_col)){
     label_col = names(DT.original)[1]
   }
-  
+
   options(ggrepel.max.overlaps = Inf)
   DT <- DT.original
-  
+
   # 2. Update Grouping logic to use the dynamic 'target_p_col'
   # We use .data[[target_p_col]] to access the column by string name within dplyr
   DT <- DT %>%
@@ -532,7 +533,7 @@ plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshol
                   Group = dplyr::if_else(rho <= -rho_threshold, "Negative", Group),
                   Group = dplyr::if_else(.data[[target_p_col]] >= fdr_threshold, 'Others', Group),
                   labeltext = '')
-  
+
   # If labelgene is provided, update labeltext accordingly
   if (!is.null(labelgene)) {
     DT <- DT %>%
@@ -542,15 +543,15 @@ plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshol
     up_rows <- which(DT$Group == "Positive")
     sorted_up_indices <- up_rows[order(DT$rho[up_rows], decreasing = TRUE)]
     top_up_indices <- head(sorted_up_indices, 5)
-    
+
     down_rows <- which(DT$Group == "Negative")
     sorted_down_indices <- down_rows[order(DT$rho[down_rows], decreasing = FALSE)]
     top_down_indices <- head(sorted_down_indices, 5)
-    
+
     top_indices <- c(top_up_indices, top_down_indices)
     DT$labeltext[top_indices] <- DT[top_indices, label_col]
   }
-  
+
   # 3. Plot update:
   # - Y-axis uses the dynamic column
   # - Added labs(y=...) to change the label text
@@ -925,7 +926,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
     up_genes=DT[which(DT$logFC>=lfc_threshold&DT$P.Value<=fdr_threshold),]
     down_genes=DT[which(DT$logFC<=(-lfc_threshold)&DT$P.Value<=fdr_threshold),]
   }
-  
+
 
   # over representation enrichment for upregulated genes ###############################
   if (length(up_genes)>0){

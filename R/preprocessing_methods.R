@@ -51,7 +51,7 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
     step <- log[[i]]
 
     # Step title
-    step_title <- paste0("### Step ", i, ": ", step$name, "\n")
+    step_title <- paste0("### Step ", i, ": ", step$name, "\n\n")
 
     # Parameters (formatted as list)
     if (!is.null(step$parameters) && length(step$parameters) > 0) {
@@ -59,26 +59,36 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
         names(step$parameters),
         ": ",
         unlist(step$parameters),
-        collapse = "\n- "
+        collapse = "\n\n- "
       )
       param_lines <- paste0("- ", param_lines)
+      param_lines <- c("**Parameters:\n\n", param_lines)
     } else {
-      param_lines <- "_No parameters recorded._"
+      param_lines <- ""
+    }
+
+    if (!is.null(step$details) && length(step$details) > 0) {
+      detail_lines <- paste(
+        unlist(step$details),
+        collapse = "\n\n- "
+      )
+      detail_lines <- paste0("- ", detail_lines)
+      detail_lines <- c("**Details:\n\n", detail_lines)
+    } else {
+      detail_lines <- ""
     }
 
     # Details
-    details <- if (!is.null(step$details)) step$details else "_No details provided._"
+    #details <- if (!is.null(step$details)) paste0( "**Details:\n\n", step$details) else ""
 
     lines <- c(lines,
                step_title,
-               "**Parameters:",
                param_lines,
-               "**Details:",
-               details)
+               detail_lines)
   }
 
   # --- Write Markdown file ---
-  cat(paste(lines, collapse = "\n"), file = output_file)
+  cat(paste(lines, collapse = "\n\n"), file = output_file)
 
   message("Preprocessing report written to: ", output_file)
   invisible(output_file)
@@ -90,46 +100,46 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
 #' @export
 setMethod("lod_filter", signature(se = "SummarizedExperiment"),
           function(se, lod_col = "Buffer") {
-            
+
             # 1. Input Validation
             # (Note: The S4 signature handles class checking, but we keep your logic as requested)
             if (!is(se, "SummarizedExperiment")) {
               stop("Input 'se' must be a SummarizedExperiment object.")
             }
-            
+
             lod_values <- NULL
             source_found <- "none"
-            
+
             # 2. Search in rowData (metadata for rows/proteins)
             if (lod_col %in% colnames(rowData(se))) {
               lod_values <- rowData(se)[[lod_col]]
               source_found <- "rowData"
-            } 
+            }
             # 3. Search in Assay Columns (specific sample acting as LOD, e.g., Buffer)
             else if (lod_col %in% colnames(se)) {
               lod_values <- assay(se, 1)[, lod_col]
               source_found <- "assay"
-            } 
+            }
             else {
               stop(paste("Could not find", lod_col, "in rowData or assay columns of the SummarizedExperiment."))
             }
-            
+
             # Check if lod_values is numeric
             if (!is.numeric(lod_values)) {
               stop(paste("The values in", lod_col, "are not numeric and cannot be used for filtering."))
             }
-            
+
             # 4. Apply Filter to all assays
             # We iterate through all assays in the object (e.g., counts, log-intensities)
             assay_names <- assayNames(se)
             if (is.null(assay_names)) assay_names <- paste0("assay_", seq_along(assays(se)))
-            
+
             mat <- assay(se)
             mask <- mat < lod_values
             mask[is.na(mask)] <- FALSE
             mat[mask] <- NA
             assay(se) <- mat
-            
+
             return(se)
           }
 )
@@ -138,7 +148,7 @@ setMethod("lod_filter", signature(se = "SummarizedExperiment"),
 #' @export
 setMethod("apply_min_intenisty", signature(object = "SummarizedExperiment"),
           function(object, lod) {
-            
+
             mat <- assay(object)
             mat[mat < lod] <- NA
             assay(object) <- mat

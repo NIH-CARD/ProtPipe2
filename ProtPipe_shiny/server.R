@@ -141,8 +141,8 @@ server <- function(input, output, session) {
       rv$type <- "error"
     })
   })
-  
-  
+
+
 
   # simple reactive expressions to safely access the results.
   intensity_file <- reactive({
@@ -153,16 +153,16 @@ server <- function(input, output, session) {
   data_type <- reactive({
     rv$type
   })
-  
+
   intermediate_condition <- reactive({
     rv$condition
   })
-  
+
   number_samples <- reactive({
     rv$number_samples
   })
-  
-  
+
+
 
   output$file_type_output <- renderText({
     # The output will display the string returned by the reactive
@@ -268,7 +268,7 @@ server <- function(input, output, session) {
       PD <- ProtPipe::create_se(dat = intensity_file(), intensity_cols = c(lower_idx:upper_idx), sample_metadata = condition_file())
     } else {
       if(is.null(condition_file())){
-        condition <-intermediate_condition() 
+        condition <-intermediate_condition()
       }else if(is.null(intermediate_condition())){
         condition <-condition_file()
       }else{
@@ -283,7 +283,7 @@ server <- function(input, output, session) {
   prot_data <- reactive({
     req(raw_prot_data())
     PD <- raw_prot_data()
-    
+
     #1 min intensity filtering
     if(isTRUE(input$lod_filter)){
       if(data_type() == "Olink"){
@@ -294,11 +294,11 @@ server <- function(input, output, session) {
       }
       PD <- ProtPipe::lod_filter(PD, lod_col)
     }
-    
+
     if(isTRUE(input$min_int_filter)){
       PD <- ProtPipe::apply_min_intenisty(PD, input$min_int_filter_lod)
     }
-    
+
     #2 outlier removal
     if(input$remove_outliers == TRUE){
       PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds)
@@ -389,7 +389,7 @@ server <- function(input, output, session) {
 
 
   ### Pre-processing ############################################################################################
-  
+
   output$lod_filtering <- renderUI({
     req(intensity_file())
     req(data_type() == "Olink" || data_type() == "SomaScan")
@@ -401,7 +401,7 @@ server <- function(input, output, session) {
     }
     checkboxInput("lod_filter", label = label, value = FALSE)
   })
-  
+
   output$imputation_parameters <- renderUI({
     req(intensity_file())
     if(input$imputation_method == "fixed value"){
@@ -1098,17 +1098,17 @@ server <- function(input, output, session) {
     },
     contentType = "application/zip"
   )
-  
+
   #### Heatmap ############################################################################################
-  
-  
+
+
   #select condition
   output$protein_label <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
     selectInput("protein_label", "select the column used to label proteins:", choices = choices)
   })
-  
+
   #heatmap subset
   prot_labels <- reactive({
     req(intensity_file())  # Ensure file is uploaded
@@ -1122,13 +1122,13 @@ server <- function(input, output, session) {
     }
     return(dat$Gene)
   })
-  
+
   output$heatmap_condition <- renderUI({
     req(intensity_file())
     choices <- c("no goruping", names(colData(prot_data())))
     selectInput("heatmap_condition", "Select condition to group samples:", choices = choices)
   })
-  
+
   heatmap_condition <- reactive({
     req(intensity_file())  # Ensure file is uploaded
     req(input$heatmap_condition)  # Ensure file is uploaded
@@ -1137,27 +1137,30 @@ server <- function(input, output, session) {
     }
     return(input$heatmap_condition)
   })
-  
+
   #complete heatmap
   output$h_map <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels(), condition = heatmap_condition())
+      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label,
+                                        genes = prot_labels(), condition = heatmap_condition(),
+                                        cluster_cols = input$cluster_cols_heatmap,
+                                        cluster_rows = input$cluster_rows_heatmap)
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Plotting heatmap failed:", e$message)))
     })
-    
+
     #save to zip
     add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
-    
+
     print(p)
     # grid::grid.newpage()
     # grid::grid.draw(p$gtable)
   })
-  
+
   output$download_hmap <- downloadHandler(
     filename = function(){
       paste("heatmap.pdf")
@@ -1168,16 +1171,16 @@ server <- function(input, output, session) {
       ggsave(file, plot=p, device = "pdf")
     }
   )
-  
+
   #### Protein Barchart ############################################################################################
-  
+
   #select condition
   output$pv_prot_meta <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
     selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
   })
-  
+
   #select condition
   output$pv_protein <- renderUI({
     req(intensity_file())
@@ -1185,14 +1188,14 @@ server <- function(input, output, session) {
     choices <- rowData(prot_data())[[input$pv_prot_meta]]
     selectInput("pv_protein", "select a protein:", choices = choices)
   })
-  
+
   #select condition
   output$pv_condition <- renderUI({
     req(intensity_file())
     choices <- c("No grouping", names(colData(prot_data())))
     selectInput("pv_condition", "select the column used to group samples:", choices = choices)
   })
-  
+
   pv_selected_condition <-reactive({
     if(input$pv_condition == "No grouping"){
       NULL
@@ -1200,14 +1203,14 @@ server <- function(input, output, session) {
       input$pv_condition
     }
   })
-  
+
   output$barchart_selected_groups <- renderUI({
     req(intensity_file())
     req(pv_selected_condition())
     choices <- colData(prot_data())[[pv_selected_condition()]]
     selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
   })
-  
+
   #complete barchart
   output$protein_barchart <- renderPlot({
     req(intensity_file())  # Ensure file is uploaded
@@ -1221,17 +1224,17 @@ server <- function(input, output, session) {
     })
     #save to zip
     add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
-    
+
     print(p)
   })
-  
+
   output$download_protein_barchart <- downloadHandler(
     filename = function(){
       paste(input$pv_protein, "_levels.pdf")
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_condition())
+      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
       ggsave(file, plot=p, device = "pdf")
     }
   )

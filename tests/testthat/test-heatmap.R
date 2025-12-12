@@ -17,3 +17,22 @@ test_that("heatmap subset with condition", {
   p <- plot_proteomics_heatmap(dat_pro, protmeta_col = "PG.Genes", genes = ipsc_genes, condition = 'base_condition')
   expect_s3_class(p, "ggplot")
 })
+
+test_that("heatmap subset with condition and row clustering", {
+  p <- plot_proteomics_heatmap(dat_pro, protmeta_col = "PG.Genes", genes = ipsc_genes,
+                               condition = 'base_condition', cluster_rows = T)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("heatmap subset with condition and col clustering", {
+  p <- plot_proteomics_heatmap(dat_pro, protmeta_col = "PG.Genes", genes = ipsc_genes,
+                               condition = 'base_condition', cluster_cols = T)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("heatmap subset with condition and col and row clustering", {
+  p <- plot_proteomics_heatmap(dat_pro, protmeta_col = "PG.Genes", genes = ipsc_genes,
+                               condition = 'base_condition', cluster_cols = T,
+                               cluster_rows = T)
+  expect_s3_class(p, "ggplot")
+})
