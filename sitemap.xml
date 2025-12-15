@@ -3,6 +3,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/LICENSE-text.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/articles/getting-started.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/articles/index.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/articles/running-shiny-locally.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/authors.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/downstream_analysis.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/index.html</loc></url>
@@ -63,6 +64,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_proteomics_heatmap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_umap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/plot_volcano.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/reference/run_protpipe_shiny.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/reference/soma_all_output.html</loc></url>
 </urlset>

@@ -11,9 +11,8 @@
 - [`batch_correct()`](https://nih-card.github.io/ProtPipe2/reference/batch_correct.md)
   : Correct for Batch Effects
 - [`compare_protein()`](https://nih-card.github.io/ProtPipe2/reference/compare_protein.md)
-  : — 1. Required Packages —Make sure you have these packages installed
-  for the function to workinstall.packages(c("dplyr", "ggplot2",
-  "ggpubr", "rlang"))
+  : Creates a ggplot bar chart comparing the intensity of a single
+  protein either across all samples or grouped by a condition.
 - [`convert_numeric_cols()`](https://nih-card.github.io/ProtPipe2/reference/convert_numeric_cols.md)
   : Safely Convert Character Columns to Numeric Type
 - [`create_protdata()`](https://nih-card.github.io/ProtPipe2/reference/create_protdata.md)
@@ -113,6 +112,8 @@
   : Plot UMAP Dimensionality Reduction Results
 - [`plot_volcano()`](https://nih-card.github.io/ProtPipe2/reference/plot_volcano.md)
   : Plot a Volcano Plot for Differential Expression Results
+- [`run_protpipe_shiny()`](https://nih-card.github.io/ProtPipe2/reference/run_protpipe_shiny.md)
+  : Run the protpipe Shiny App
 - [`z_score()`](https://nih-card.github.io/ProtPipe2/reference/scale-ProtData.md)
   : Z-Score Normalization for Proteins Across Samples
 - [`soma_all_output()`](https://nih-card.github.io/ProtPipe2/reference/soma_all_output.md)
