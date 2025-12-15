@@ -136,11 +136,19 @@ setMethod("lod_filter", signature(se = "SummarizedExperiment"),
 
             mat <- assay(se)
             mask <- mat < lod_values
+            num_low <- sum(mask, na.rm = TRUE)
             mask[is.na(mask)] <- FALSE
             mat[mask] <- NA
             assay(se) <- mat
 
-            return(se)
+            # Log the Operation ---
+            log_entry <- list(
+              name = "lod_filter",
+              details = paste(num_low, "proteins removed.")
+            )
+
+            object <- add_processing_step(se, log_entry)
+            return(object)
           }
 )
 
@@ -150,8 +158,18 @@ setMethod("apply_min_intenisty", signature(object = "SummarizedExperiment"),
           function(object, lod) {
 
             mat <- assay(object)
+            num_low <- sum(mat < lod, na.rm = TRUE)
             mat[mat < lod] <- NA
             assay(object) <- mat
+
+            # Log the Operation ---
+            log_entry <- list(
+              name = "apply_min_intenisty",
+              parameters = list(LOD = lod),
+              details = paste(num_low, "proteins removed.")
+            )
+
+            object <- add_processing_step(object, log_entry)
             return(object)
           }
 )

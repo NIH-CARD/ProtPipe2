@@ -4,6 +4,12 @@ setwd("../../..")
 dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
 dat_pro <- create_se(dat)
 
+test_that("filter min intensity values", {
+
+  dat_pro_min_filtered <- ProtPipe::apply_min_intenisty(dat_pro, 1000)
+  expect_true(ProtPipe::has_step(dat_pro_min_filtered, "apply_min_intenisty"))
+  expect_equal(nrow(dat_pro) - nrow(dat_pro_no_duplicates), 260)
+})
 
 test_that("correctly filter proteins and samples", {
 

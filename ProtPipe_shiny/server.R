@@ -13,7 +13,7 @@ server <- function(input, output, session) {
   # Create a temp working directory for this zip session
   zip_workspace <- file.path(tempdir(), "zip_workspace")
   dir.create(zip_workspace, showWarnings = FALSE, recursive = TRUE)
-  plot_dirs <- c("quality_control", "clustering", "differential_expression", "pathway_enrichment")
+  plot_dirs <- c("quality_control", "clustering", "differential_expression", "pathway_enrichment", "protein_view")
 
   # Subfolders inside workspace
   subfolders <- file.path(zip_workspace, plot_dirs)
@@ -442,13 +442,10 @@ server <- function(input, output, session) {
     selectInput("qc_condition", "select condition to group by:", choices = choices)
   })
 
-  # CV plot
-  output$cv_graph <- renderPlot({
+  #compute CVs
+  cvs_reactive <- reactive({
     req(intensity_file())
-    #req(sample_condition())
     req(input$qc_condition)
-
-    #save tabular data
     cvs <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
@@ -458,19 +455,6 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Calculating CVs failed:", e$message)))
     })
-
-    tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      add_zip_tabular(cvs, "CVs.tsv", "quality_control", zip_workspace, "output.zip")
-
-    }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Calculating CVs failed:", e$message)))
-    })
-
-
-    #save plot
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
@@ -480,11 +464,20 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Plotting CVs failed:", e$message)))
     })
+    return(list(cvs = cvs, plot = p))
+  })
 
-    add_zip_plot(p, "CV_plot.pdf", "quality_control", zip_workspace, "output.zip")
+  # CV plot
+  output$cv_graph <- renderPlot({
+
+    cv_data <- cvs_reactive()
+
+    #save data
+    add_zip_tabular(cv_data$cvs, "CVs.tsv", "quality_control", zip_workspace, "output.zip")
+    add_zip_plot(cv_data$plot, "CV_plot.pdf", "quality_control", zip_workspace, "output.zip")
 
     #print
-    print(p)
+    print(cv_data$plot)
   })
 
   output$download_cv <- downloadHandler(
@@ -492,7 +485,7 @@ server <- function(input, output, session) {
       paste("cv_plot.pdf")
     },
     content = function(file){
-      p <- ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+      p <- cvs_reactive()$plot
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -502,17 +495,15 @@ server <- function(input, output, session) {
       paste("cv.tsv")
     },
     content = function(file){
-      cvs <- ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
+      cvs <- cvs_reactive()$cvs
       write.table(cvs, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
 
-  # intensity graph
-  output$intensity_graph <- renderPlot({
+  #compute protein intensities
+  intensities_reactive <- reactive({
     req(intensity_file())
-
-    #save plot
-    p <- tryCatch({
+    tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::plot_pg_intensities(prot_data())
 
@@ -521,7 +512,12 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Plotting intensity failed:", e$message)))
     })
+  })
 
+  # intensity graph
+  output$intensity_graph <- renderPlot({
+    #save plot
+    p <-intensities_reactive()
     add_zip_plot(p, "intensities_plot.pdf", "quality_control", zip_workspace, "output.zip")
 
     #print
@@ -533,16 +529,13 @@ server <- function(input, output, session) {
       paste("intensities.pdf")
     },
     content = function(file){
-      p <- ProtPipe::plot_pg_intensities(prot_data())
+      p <- intensities_reactive()
       ggsave(file, plot=p, device = "pdf")
     }
   )
 
-  # protein group counts
-  output$pgroup_graph <- renderPlot({
+  protein_group_counts_reactive <- reactive({
     req(intensity_file())
-
-    #save tabular data
     pgcounts <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
       get_pg_counts(prot_data())
@@ -552,21 +545,26 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Calculating counts failed:", e$message)))
     })
-
-    add_zip_tabular(pgcounts, "pg_counts.tsv", "quality_control", zip_workspace, "output.zip")
-
-    #save plot
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_pg_counts(prot_data())
+      ProtPipe::plot_pg_counts(prot_data(), condition = input$qc_condition)
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Plotting counts failed:", e$message)))
+      validate(need(FALSE, paste("Plotting protein counts failed:", e$message)))
     })
+    return(list(counts = pgcounts, plot = p))
+  })
 
-    add_zip_plot(p, "pg_groups_plot.pdf", "quality_control", zip_workspace, "output.zip")
-    print(p)
+  # protein group counts
+  output$pgroup_graph <- renderPlot({
+    req(intensity_file())
+    pg_counts <- protein_group_counts_reactive()
+
+    #save data
+    add_zip_tabular(pg_counts$counts, "pg_counts.tsv", "quality_control", zip_workspace, "output.zip")
+    add_zip_plot(pg_counts$plot, "pg_groups_plot.pdf", "quality_control", zip_workspace, "output.zip")
+    print(pg_counts$plot)
   })
 
   output$download_pg <- downloadHandler(
@@ -574,7 +572,7 @@ server <- function(input, output, session) {
       paste("protein_groups_nonzero_counts.pdf")
     },
     content = function(file){
-      p <- ProtPipe::plot_pg_counts(prot_data())
+      p <- protein_group_counts_reactive()$plot
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -584,16 +582,14 @@ server <- function(input, output, session) {
       paste("protein_group_nonzero_counts.tsv")
     },
     content = function(file){
-      pgcounts <- get_pg_counts(prot_data())
+      pgcounts <- protein_group_counts_reactive()$counts
       write.table(pgcounts, file = file, sep = "\t", row.names = FALSE, quote = FALSE)
     }
   )
 
-  #correlation heatmap
-  output$correlation_graph <- renderPlot({
+  #compute sample correlations
+  correlation_heatmap_reactive <- reactive({
     req(intensity_file())
-
-    #save tabular data
     dat.correlations <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::get_sample_correlation(prot_data())
@@ -602,9 +598,6 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Calculating sample correlation failed:", e$message)))
     })
-    add_zip_tabular(dat.correlations, "sample_correlations.tsv", "quality_control", zip_workspace, "output.zip")
-
-    #save plot
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::plot_correlation_heatmap(prot_data())
@@ -613,9 +606,19 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Plotting sample correlation failed:", e$message)))
     })
-    add_zip_plot(p, "sample_correlation_heatmap.pdf", "quality_control", zip_workspace, "output.zip")
+    return(list(correlations = dat.correlations, plot = p))
+  })
 
-    print(p)
+  #correlation heatmap
+  output$correlation_graph <- renderPlot({
+    req(intensity_file())
+    sample_correlations <- correlation_heatmap_reactive()
+
+    #save data
+    add_zip_tabular(sample_correlations$correlations, "sample_correlations.tsv", "quality_control", zip_workspace, "output.zip")
+    add_zip_plot(sample_correlations$plot, "sample_correlation_heatmap.pdf", "quality_control", zip_workspace, "output.zip")
+
+    print(sample_correlations$plot)
   })
 
   output$download_cor <- downloadHandler(
@@ -623,7 +626,7 @@ server <- function(input, output, session) {
       paste("sample_correlation.pdf")
     },
     content = function(file){
-      p<-ProtPipe::plot_correlation_heatmap(prot_data())
+      p<-correlation_heatmap_reactive()$plot
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -633,7 +636,7 @@ server <- function(input, output, session) {
       paste("sample_correlation.tsv")
     },
     content = function(file){
-      dat.correlations <- ProtPipe::get_sample_correlation(prot_data())
+      dat.correlations <- correlation_heatmap_reactive()$correlations
       write.table(dat.correlations , file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )
@@ -652,11 +655,9 @@ server <- function(input, output, session) {
     selectInput("cluster_condition", "select condition to group by:", choices = choices)
   })
 
-  #hierarchical clustering
-  output$hcluster <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-
-    p <- tryCatch({
+  hcluster_reactive <- reactive({
+    req(intensity_file())
+    tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::plot_hierarchical_cluster(prot_data())
 
@@ -665,7 +666,12 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Clustering failed:", e$message)))
     })
+  })
 
+  #hierarchical clustering
+  output$hcluster <- renderPlot({
+    req(intensity_file())  # Ensure file is uploaded
+    p <- hcluster_reactive()
 
     #save data to zip
     add_zip_plot(p, "hierarchical_clustering.pdf", "clustering", zip_workspace, "output.zip")
@@ -678,17 +684,14 @@ server <- function(input, output, session) {
       paste("hierarchical_clustering.pdf")
     },
     content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <-  ProtPipe::plot_hierarchical_cluster(prot_data())
+      p <-  hcluster_reactive()
       ggsave(file, plot=p, device = "pdf")
     }
   )
 
-  #PCA
-  output$pca <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-
-    p <- tryCatch({
+  pca_reactive <- reactive({
+    req(intensity_file())
+    tryCatch({
       # This is the "try" block. R will attempt to run this code.
       ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
 
@@ -697,10 +700,32 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Clustering failed:", e$message)))
     })
+  })
+
+  pca_data_reactive <- reactive({
+    req(intensity_file())
+    tryCatch({
+      # This is the "try" block. R will attempt to run this code.
+      get_PCs(prot_data(), condition = input$cluster_condition)
+
+    }, error = function(e) {
+      # This is the "catch" block. It only runs if an error occurs.
+      # We use validate() to display a user-friendly message in the plot area.
+      validate(need(FALSE, paste("Computing PCA failed:", e$message)))
+    })
+  })
+
+  #PCA
+  output$pca <- renderPlot({
+    req(intensity_file())  # Ensure file is uploaded
+
+    p <- pca_reactive()
+    components <- pca_data_reactive()$components
+    summary <- pca_data_reactive()$summary
     #save data to zip
     add_zip_plot(p, "PCA.pdf", "clustering", zip_workspace, "output.zip")
-    add_zip_tabular(get_PCs(prot_data(), condition = input$cluster_condition)$components, "pca_components.tsv", "clustering", zip_workspace, "output.zip")
-    add_zip_tabular(get_PCs(prot_data(), condition = input$cluster_condition)$summary, "pca_summary.tsv", "clustering", zip_workspace, "output.zip")
+    add_zip_tabular(components, "pca_components.tsv", "clustering", zip_workspace, "output.zip")
+    add_zip_tabular(summary, "pca_summary.tsv", "clustering", zip_workspace, "output.zip")
     #print plot
     print(p)
 
@@ -711,7 +736,7 @@ server <- function(input, output, session) {
       paste("PCA.pdf")
     },
     content = function(file){
-      p <- ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition)
+      p <- pca_reactive()
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -722,7 +747,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      data.table::fwrite(get_PCs(prot_data(), condition = input$cluster_condition)$components, file, sep = "\t")
+      data.table::fwrite(pca_data_reactive()$components, file, sep = "\t")
     }
   )
   output$download_pca_sum <- downloadHandler(
@@ -731,7 +756,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      data.table::fwrite(get_PCs(prot_data(), condition = input$cluster_condition)$summary, file, sep = "\t")
+      data.table::fwrite(pca_data_reactive()$summary, file, sep = "\t")
     }
   )
   output$neighbors_slider <- renderUI({
@@ -797,29 +822,6 @@ server <- function(input, output, session) {
 
     print(result$plot)
   })
-
-  # #UMAP
-  # output$umap <- renderPlot({
-  #   req(intensity_file())  # Ensure file is uploaded'
-  #   req(input$neighbors)
-  #
-  #   p <- tryCatch({
-  #     # This is the "try" block. R will attempt to run this code.
-  #     ProtPipe::plot_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition)
-  #
-  #   }, error = function(e) {
-  #     # This is the "catch" block. It only runs if an error occurs.
-  #     # We use validate() to display a user-friendly message in the plot area.
-  #     validate(need(FALSE, paste("Clustering failed:", e$message)))
-  #   })
-  #
-  #   #save data to zip
-  #   add_zip_plot(p, "umap.pdf", "clustering", zip_workspace, "output.zip")
-  #   add_zip_tabular(get_umap(prot_data(), neighbors = input$neighbors, condition = input$cluster_condition), "umap_summary.tsv", "clustering", zip_workspace, "output.zip")
-  #
-  #   #plot data
-  #   print(p)
-  # })
 
   output$download_umap <- downloadHandler(
     filename = function(){
@@ -888,6 +890,15 @@ server <- function(input, output, session) {
     numericInput("logfc", label = label, value = x)
   })
 
+  output$pvalue <- renderUI({
+    if (isTRUE(input$use_adj_pval)){
+      label <- "Enter adjusted P-value cutoff"
+    }else{
+      label <- "Enter P-value cutoff"
+    }
+    numericInput("pvalue", label = label, value = 0.01)
+  })
+
 
   #custom labels for volcano
   gene_labels <- reactive({
@@ -928,16 +939,16 @@ server <- function(input, output, session) {
       })
   })
 
-  #volcano plot
-  output$volcano <- renderPlot({
+  # compute volcano plot
+  volcano_reactive <- reactive({
     req(intensity_file())
-    p <- tryCatch({
+    tryCatch({
       if (input$outcome_type == "continuous"){
         ProtPipe::plot_correlation_volcano(dea(), label_col = input$label_col,
-                                 labelgene = gene_labels(),
-                                 fdr_threshold = input$pvalue,
-                                 rho_threshold = input$logfc,
-                                 adj = input$use_adj_pval)
+                                           labelgene = gene_labels(),
+                                           fdr_threshold = input$pvalue,
+                                           rho_threshold = input$logfc,
+                                           adj = input$use_adj_pval)
       }else{
         ProtPipe::plot_volcano(dea(), label_col = input$label_col,
                                labelgene = gene_labels(),
@@ -949,7 +960,13 @@ server <- function(input, output, session) {
       # We use validate() to display a user-friendly message in the plot area.
       validate(need(FALSE, paste("Plotting vocano failed:", e$message)))
     })
+  })
 
+
+  #render volcano plot
+  output$volcano <- renderPlot({
+    req(intensity_file())
+    p <- volcano_reactive()
     #save data to zip
     add_zip_plot(p, "volcano_plot.pdf", "differential_expression", zip_workspace, "output.zip")
     add_zip_tabular(dea(), "differential_expression.tsv", "differential_expression", zip_workspace, "output.zip")
@@ -957,13 +974,13 @@ server <- function(input, output, session) {
     print(p)
   })
 
+  #download volcano plot
   output$download_volcano <- downloadHandler(
     filename = function(){
       paste("volcano.pdf")
     },
     content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::plot_volcano(dea(), label_col = input$label_col, labelgene = gene_labels(), fdr_threshold = input$pvalue, lfc_threshold = input$logfc)
+      p <- volcano_reactive()
       ggsave(file, plot=p, device = "pdf")
     }
   )
@@ -1138,37 +1155,42 @@ server <- function(input, output, session) {
     return(input$heatmap_condition)
   })
 
-  #complete heatmap
-  output$h_map <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-    p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label,
-                                        genes = prot_labels(), condition = heatmap_condition(),
-                                        cluster_cols = input$cluster_cols_heatmap,
-                                        cluster_rows = input$cluster_rows_heatmap)
+  #compute plot reactively
+  heatmap_reactive <- reactive({
+    req(intensity_file())
+
+    tryCatch({
+      ProtPipe::plot_proteomics_heatmap(
+        object = prot_data(),
+        protmeta_col = input$protein_label,
+        genes = prot_labels(),
+        condition = heatmap_condition(),
+        cluster_cols = input$cluster_cols_heatmap,
+        cluster_rows = input$cluster_rows_heatmap
+      )
     }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
+      # If this fails, it stops here and sends the message to any output using it
       validate(need(FALSE, paste("Plotting heatmap failed:", e$message)))
     })
-
-    #save to zip
-    add_zip_plot(p, "heatmap.pdf", "quality_control", zip_workspace, "output.zip")
-
-    print(p)
-    # grid::grid.newpage()
-    # grid::grid.draw(p$gtable)
   })
 
+  # Render the Plot (Calls the reactive)
+  output$h_map <- renderPlot({
+    p <- heatmap_reactive() # Retrieves the cached plot
+
+    # Save to zip (Side effect)
+    add_zip_plot(p, "heatmap.pdf", "protein_view", zip_workspace, "output.zip")
+    print(p)
+  })
+
+  #Download Handler (Calls the SAME reactive)
   output$download_hmap <- downloadHandler(
     filename = function(){
       paste("heatmap.pdf")
     },
     content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::plot_proteomics_heatmap(prot_data(), protmeta_col = input$protein_label, genes = prot_labels())
-      ggsave(file, plot=p, device = "pdf")
+      p <- heatmap_reactive() # Retrieves the cached plot
+      ggsave(file, plot = p, device = "pdf")
     }
   )
 
@@ -1211,20 +1233,27 @@ server <- function(input, output, session) {
     selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
   })
 
+  protein_barchart_reactive <- reactive({
+    req(intensity_file())
+
+    tryCatch({
+      ProtPipe::compare_protein(prot_data(),
+                                prot = input$pv_protein,
+                                prot_meta_col = input$pv_prot_meta,
+                                condition = pv_selected_condition(),
+                                selected_groups = input$barchart_selected_groups
+                                )
+    }, error = function(e) {
+      # If this fails, it stops here and sends the message to any output using it
+      validate(need(FALSE, paste("Plotting protein barchart failed:", e$message)))
+    })
+  })
+
   #complete barchart
   output$protein_barchart <- renderPlot({
-    req(intensity_file())  # Ensure file is uploaded
-    p <- tryCatch({
-      # This is the "try" block. R will attempt to run this code.
-      ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
-    }, error = function(e) {
-      # This is the "catch" block. It only runs if an error occurs.
-      # We use validate() to display a user-friendly message in the plot area.
-      validate(need(FALSE, paste("Plotting barchart failed:", e$message)))
-    })
+    p <- protein_barchart_reactive()
     #save to zip
-    add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "quality_control", zip_workspace, "output.zip")
-
+    add_zip_plot(p, paste(input$pv_protein, "_levels.pdf"), "protein_view", zip_workspace, "output.zip")
     print(p)
   })
 
@@ -1233,8 +1262,7 @@ server <- function(input, output, session) {
       paste(input$pv_protein, "_levels.pdf")
     },
     content = function(file){
-      req(intensity_file())  # Ensure file is uploaded
-      p <- ProtPipe::compare_protein(prot_data(), prot = input$pv_protein, prot_meta_col = input$pv_prot_meta, condition = pv_selected_condition(), selected_groups = input$barchart_selected_groups)
+      p <- protein_barchart_reactive()
       ggsave(file, plot=p, device = "pdf")
     }
   )

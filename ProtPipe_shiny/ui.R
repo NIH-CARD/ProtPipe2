@@ -178,7 +178,8 @@ ui <- page_sidebar(
                                    checkboxInput(inputId = "use_adj_pval",
                                                  label = "Use Adjusted P-value (FDR)",
                                                  value = TRUE),
-                                   numericInput("pvalue", label = "Enter P-value cutoff", value = 0.01)),
+                                   uiOutput("pvalue")),
+                                   #numericInput("pvalue", label = "Enter P-value cutoff", value = 0.01)),
                             column(width = 4,
                                    uiOutput("label_col"),
                                    p("optional: upload csv file with genes to label in volcano plot.
