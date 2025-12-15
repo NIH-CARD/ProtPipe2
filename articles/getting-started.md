@@ -264,6 +264,10 @@ pd_obj_imputed <- ProtPipe::impute_left_dist(pd_obj_normalized)
 # The object should no longer have missing values
 any(is.na(assay(pd_obj_imputed)))
 #> [1] FALSE
+
+# Create a preprocessing report 
+report <- generate_preprocessing_report(pd_obj_imputed)
+#> Preprocessing report written to: preprocessing_report.md
 ```
 
 ## Downstream Analysis and Visualization

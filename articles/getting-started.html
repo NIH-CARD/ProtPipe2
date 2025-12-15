@@ -317,7 +317,11 @@ this is a stochastic method, we set a seed for reproducibility.</p>
 <span></span>
 <span><span class="co"># The object should no longer have missing values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span></span>
+<span><span class="co"># Create a preprocessing report </span></span>
+<span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_preprocessing_report.html">generate_preprocessing_report</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Preprocessing report written to: preprocessing_report.md</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
