@@ -1,0 +1,20 @@
+---
+title: "Running the protpipe Shiny Application"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Running the protpipe Shiny Application}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{running shiny}
+# ProtPipe has a convinent function avaliable to run the shiny app locally
+ProtPipe::run_protpipe_shiny()
+```

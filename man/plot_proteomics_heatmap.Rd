@@ -10,7 +10,9 @@ plot_proteomics_heatmap(
   protmeta_col = NULL,
   genes = NULL,
   title = NULL,
-  condition = NULL
+  condition = NULL,
+  cluster_cols = FALSE,
+  cluster_rows = FALSE
 )
 
 \S4method{plot_proteomics_heatmap}{SummarizedExperiment}(
@@ -18,7 +20,9 @@ plot_proteomics_heatmap(
   protmeta_col = NULL,
   genes = NULL,
   title = NULL,
-  condition = NULL
+  condition = NULL,
+  cluster_cols = FALSE,
+  cluster_rows = FALSE
 )
 }
 \arguments{
