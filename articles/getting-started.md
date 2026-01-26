@@ -223,7 +223,7 @@ ProtPipe::plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the ProtPipe package.
 #>   Please report the issue to the authors.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```

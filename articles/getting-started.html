@@ -257,14 +257,14 @@ visualize the intensity distributions with boxplots.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `Protein_Groups` instead.</span></span>
 <span><span class="co">#&gt; Ignoring unknown labels:</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">fill</span> : <span style="color: #0000BB;">""</span></span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/qc-plots-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/qc-plots-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot the intensity distributions for each sample</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Ignoring unknown labels:</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">fill</span> : <span style="color: #0000BB;">""</span></span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/qc-plots-2.png" class="r-plt" width="700">
+<p><img src="getting-started_files/figure-html/qc-plots-2.png" class="r-plt" alt="" width="700">
 These plots help us identify any samples that behave as strong
 outliers.</p>
 </div>
@@ -281,10 +281,10 @@ generally cluster together.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ProtPipe</span> package.</span></span>
 <span><span class="co">#&gt;   Please report the issue to the authors.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/correlation-heatmap-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/correlation-heatmap-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -304,7 +304,7 @@ distributions across all samples.</p>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">pd_obj_normalized</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Ignoring unknown labels:</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">fill</span> : <span style="color: #0000BB;">""</span></span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/normalization-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/normalization-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="imputation">Imputation<a class="anchor" aria-label="anchor" href="#imputation"></a>
@@ -337,7 +337,7 @@ between samples and proteins.</p>
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_hierarchical_cluster.html">plot_hierarchical_cluster</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"HC of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/hc-plot-1.png" class="r-plt" width="700">
+<p><img src="getting-started_files/figure-html/hc-plot-1.png" class="r-plt" alt="" width="700">
 ### Principal Component Analysis (PCA)</p>
 <p>PCA is a powerful tool for visualizing the primary sources of
 variation in the data and assessing sample clustering.</p>
@@ -345,7 +345,7 @@ variation in the data and assessing sample clustering.</p>
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_PCs.html">plot_PCs</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, condition <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"PCA of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/pca-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/pca-plot-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="umap">UMAP<a class="anchor" aria-label="anchor" href="#umap"></a>
@@ -355,7 +355,7 @@ variation in the data and assessing sample clustering.</p>
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_umap.html">plot_umap</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, condition <span class="op">=</span> <span class="st">"group"</span>, neighbors <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"UMAP of Samples by Group"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/umap-plot-1.png" class="r-plt" width="700">
+<p><img src="getting-started_files/figure-html/umap-plot-1.png" class="r-plt" alt="" width="700">
 ### Differential Expression</p>
 <p>Lets figure out which proteins are altered by the treatment.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -366,14 +366,14 @@ variation in the data and assessing sample clustering.</p>
 <span>  <span class="va">DE</span>, </span>
 <span>  label_col <span class="op">=</span> <span class="st">"Gene"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/volcano%20plot-1.png" class="r-plt" width="700">
+<p><img src="getting-started_files/figure-html/volcano%20plot-1.png" class="r-plt" alt="" width="700">
 ### Protein Barchart</p>
 <p>Lets take a closer look at some of the differentially expressed
 proteins</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot a heatmap of all proteins, with columns ordered by clustering</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_protein.html">compare_protein</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, prot <span class="op">=</span> <span class="st">"GENE465"</span>, prot_meta_col <span class="op">=</span> <span class="st">"Gene"</span>, condition <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/barchart-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/barchart-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="protein-expression-heatmap">Protein Expression Heatmap<a class="anchor" aria-label="anchor" href="#protein-expression-heatmap"></a>
@@ -384,7 +384,7 @@ by row to highlight relative expression changes.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot a heatmap of all proteins, with columns ordered by clustering</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span>, protmeta_col <span class="op">=</span> <span class="st">"Gene"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/final-heatmap-1.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/final-heatmap-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Or, filter to a specific subset of genes of interest</span></span>
@@ -393,7 +393,7 @@ by row to highlight relative expression changes.</p>
 <span>  protmeta_col <span class="op">=</span> <span class="st">"Gene"</span>, </span>
 <span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GENE1"</span>, <span class="st">"GENE2"</span>, <span class="st">"GENE3"</span>, <span class="st">"GENE4"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/final-heatmap-2.png" class="r-plt" width="700"></p>
+<p><img src="getting-started_files/figure-html/final-heatmap-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
