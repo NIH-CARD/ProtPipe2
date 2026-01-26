@@ -1076,21 +1076,23 @@ server <- function(input, output, session) {
 
     # Save data frames
     for (name in names(enrichment_result()$results)) {
-      #df <- enrichment_result()$results[[name]]
-      if (!is.null(df)) {
-        add_zip_tabular(enrichment_result()$results[[name]], paste0(name, ".tsv"), "pathway_enrichment", zip_workspace, "output.zip")
-        #add_zip_tabular(enrichment_result()$results[[name]], paste0(name, ".tsv"), "pathway_enrichment", zip_workspace, "pathways.zip")
+      df <- enrichment_result()$results[[name]]
+      if (!is.null(df) && nrow(df) > 0) {
+        add_zip_tabular(df, paste0(name, ".tsv"), "pathway_enrichment", zip_workspace, "output.zip")
         gc()
+      } else {
+        message(paste("Skipping empty or null dataframe:", name))
       }
     }
 
     # Save plots
     for (name in names(enrichment_result()$plots)) {
-      #p <- enrichment_result()$plots[[name]]
-      if (!is.null(p)) {
-        add_zip_plot(enrichment_result()$plots[[name]], paste0(name, ".pdf"), "pathway_enrichment", zip_workspace, "output.zip")
-        #add_zip_plot(enrichment_result()$plots[[name]], paste0(name, ".pdf"), "pathway_enrichment", zip_workspace, "pathways.zip")
+      p <- enrichment_result()$plots[[name]]
+      if (!is.null(p) && nrow(p$data) > 0) {
+        add_zip_plot(p, paste0(name, ".pdf"), "pathway_enrichment", zip_workspace, "output.zip")
         gc()
+      } else {
+        message(paste("Skipping empty or null plot:", name))
       }
     }
   })

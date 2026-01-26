@@ -123,7 +123,7 @@ This panel allows you to clean, transform, and correct your data.
 
 ---
 
-## 4. Clustering
+## 4. Clustering / Dimensionality Reduction
 
 This panel provides visual methods to see how your samples group together based on their protein expression.
 
@@ -173,7 +173,7 @@ This panel identifies proteins that are significantly different between your exp
 
 ---
 
-## 6. Protein View
+## 6. Abundance Profiling
 
 This panel allows you to "zoom in" on specific proteins of interest from your DE results or from prior knowledge.
 

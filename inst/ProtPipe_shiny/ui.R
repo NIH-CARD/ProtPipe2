@@ -23,9 +23,9 @@ ui <- page_sidebar(
     actionButton("view_0", "Input parameters", class = "btn-block btn-primary mb-2"),
     actionButton("view_1", "Quality Control", class = "btn-block btn-primary mb-2"),
     actionButton("view_2", "Pre-Processing", class = "btn-block btn-primary mb-2"),
-    actionButton("view_3", "Clustering", class = "btn-block btn-primary mb-2"),
+    actionButton("view_3", "Clustering / Dimensionality Reduction", class = "btn-block btn-primary mb-2"),
     actionButton("view_4", "Differential Intensity", class = "btn-block btn-primary mb-2"),
-    actionButton("view_5", "Protein View", class = "btn-block btn-primary mb-2"),
+    actionButton("view_5", "Abundance Profiling", class = "btn-block btn-primary mb-2"),
     actionButton("view_6", "Help", class = "btn-block btn-primary mb-2"),
 
     hr(),
@@ -135,7 +135,7 @@ ui <- page_sidebar(
                     )),
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",
-                   h2("Clustering Information"),
+                   h2("Clustering / Dimensionality Reduction"),
                    fluidPage(
                      uiOutput("clustering_condition"),
                      card(card_header("heirarchial clustering"),
@@ -230,7 +230,7 @@ ui <- page_sidebar(
 
   ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
-                   h2("Protein View"),
+                   h2("Abundance Profiling"),
                    card(card_header("Heatmap"),
                      uiOutput("protein_label"),
                      uiOutput("heatmap_condition"),
