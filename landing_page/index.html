@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ProtPipe: Protein Pipeline Analysis Tool (R Shiny)</title>
+    <meta name="description" content="ProtPipe is a web-based tool for protein data analysis, visualization, and pipeline processing. Built with R Shiny for researchers and bioinformaticians.">
+    <meta name="keywords" content="ProtPipe, Protein Analysis, Bioinformatics, R Shiny, Proteomics, Data Visualization, Pipeline">
+    <meta name="author" content="Niacard">
+
+    <meta property="og:title" content="ProtPipe Analysis Tool">
+    <meta property="og:description" content="Free online tool for protein pipeline analysis and visualization.">
+    <meta property="og:url" content="https://your-username.github.io/ProtPipe-Landing/">
+    <meta property="og:type" content="website">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --accent-color: #3498db;  /* Bright Blue */
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .content-section {
+            padding: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .cta-button:hover {
+            background-color: #2980b9;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ProtPipe</h1>
+        <p>Advanced Protein Pipeline Analysis & Visualization</p>
+    </header>
+
+    <div class="container">
+        <div class="content-section" style="text-align: center;">
+            <h2>Welcome to ProtPipe</h2>
+            <p>
+                ProtPipe is an interactive R Shiny application designed to streamline the analysis
+                of proteomics data. Upload your datasets, perform statistical analysis, and generate
+                publication-ready visualizations instantly.
+            </p>
+
+            <a href="https://niacard.shinyapps.io/ProtPipe_shiny/" class="cta-button" target="_blank">
+                Launch ProtPipe App &rarr;
+            </a>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">(Opens in a new tab)</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee;">
+
+        <div class="content-section">
+            <h3>Key Features</h3>
+            <div class="features">
+                <div class="feature-box">
+                    <h4>📊 Data Visualization</h4>
+                    <p>Interactive heatmaps, volcano plots, and PCA plots designed for exploring complex protein datasets.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>🧬 Pipeline Processing</h4>
+                    <p>Automated workflows for normalization, imputation, and statistical testing.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>📂 Export Results</h4>
+                    <p>Download your processed data and figures directly for use in presentations and papers.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>ProtPipe is built with R Shiny. <br> Maintained by niacard.</p>
+    </footer>
+
+</body>
+</html>
