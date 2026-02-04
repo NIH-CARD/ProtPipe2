@@ -13,7 +13,7 @@ ui <- page_sidebar(
 
   # Title and subtitle
   title = tagList(
-    h1("ProtPipe", style = "margin-bottom: 0;"),
+    h1("ProtPipe2", style = "margin-bottom: 0;"),
     tags$div("This website is free and open to all users. Shiny app made by Jacob Epstein", style = "font-size: 0.9em; color: #666; margin-top: 0.2em;")
   ),
 
