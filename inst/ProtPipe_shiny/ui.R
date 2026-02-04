@@ -6,6 +6,11 @@ source("helpers.R")
 ui <- page_sidebar(
   useShinyjs(),
 
+  tags$head(
+    # 2. Add the meta tag
+    tags$meta(name="google-site-verification", content="_Y-vcB0obJKbpSV7gjLqwfiS-lPu-EYNaFJyFjsQUSk")
+  ),
+
   # Title and subtitle
   title = tagList(
     h1("ProtPipe", style = "margin-bottom: 0;"),
