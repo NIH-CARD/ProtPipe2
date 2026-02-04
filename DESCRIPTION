@@ -1,5 +1,5 @@
 Package: ProtPipe
-Title: What the Package Does (One Line, Title Case)
+Title: ProtPipe2: the proteomics analysis tool
 Version: 0.0.0.9000
 Authors@R: 
     person("Jacob", "Epstein", , "jacobepstein02@gmail.com", role = c("aut", "cre"),
