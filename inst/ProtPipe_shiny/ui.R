@@ -199,7 +199,9 @@ ui <- page_sidebar(
                         downloadButton("download_volcano", "Download Plot as PDF"),
                         downloadButton("download_DE_tsv", "Download differential expression results as tsv")
                    ),
-                   card(card_header("Pathway Enrichment Options"),
+                   conditionalPanel(
+                     condition = "output.dea_ready",
+                     card(card_header("Pathway Enrichment Options"),
                         fluidRow(
                           column(width=3,
                                  numericInput("enrich_pval", label = "Enter enrichment pvalue cutoff", value = 0.05)
@@ -208,27 +210,43 @@ ui <- page_sidebar(
                                  selectInput("organism", "Select Organism:", choices = names(organism_map), selected = "Human")
                           ),
                           column(width=3,
-                                 uiOutput("gene_col")
+                                 uiOutput("gene_col"),
+                                 selectInput("pathway_source", "Ontology source:", choices = c("GO", "Custom ontology"), selected = "GO")
                           ),
                           column(width=3,
-                                 checkboxInput("run_enrichment", "Perform GO and KEGG enrichment (this may take a few minutes)", value = FALSE)
+                                 checkboxInput("run_ora", "Run over-representation analysis", value = TRUE),
+                                 checkboxInput("run_gsea", "Run gene set enrichment analysis", value = TRUE),
+                                 checkboxInput("run_enrichment", "Run pathway enrichment", value = FALSE)
+                          )
+                        ),
+                        fluidRow(
+                          column(width=6,
+                                 conditionalPanel(
+                                   condition = "input.pathway_source == 'GO'",
+                                   selectInput("go_ontology", "GO ontology:", choices = c("BP", "MF", "CC"), selected = "BP")
+                                 )
+                          ),
+                          column(width=6,
+                                 conditionalPanel(
+                                   condition = "input.pathway_source == 'Custom ontology'",
+                                   p("Upload a GMT, TSV, or CSV ontology file using Entrez gene IDs."),
+                                   p("Required formats: GMT with term, name, then genes; TSV/CSV with either term/gene or term/name/gene columns."),
+                                   p("Gene IDs in the uploaded ontology must match the IDs used for enrichment. ProtPipe currently uses Entrez IDs for custom ontology analysis."),
+                                   fileUploadUI("ontology_file", label = NULL)
+                                 )
                           )
                         )
                    ),
                    card(card_header("Pathway Enrichment"),
                         fluidRow(
-                          column(width=6 ,card(card_header("Upregulated GO Pathways"),plotOutput("go_up_enrich"))),
-                          column(width=6 ,card(card_header("Upregulated KEGG Pathways"),plotOutput("kegg_up_enrich")))
+                          column(width=6 ,card(card_header("Upregulated Pathways"),plotOutput("ora_up_enrich"))),
+                          column(width=6 ,card(card_header("Downregulated Pathways"),plotOutput("ora_down_enrich")))
                         ),
                         fluidRow(
-                          column(width=6 ,card(card_header("Downregulated GO Pathways"),plotOutput("go_down_enrich"))),
-                          column(width=6 ,card(card_header("Downregulated KEGG Pathways"),plotOutput("kegg_down_enrich")))
-                        ),
-                        fluidRow(
-                          column(width=6 ,card(card_header("GO Gene Set Enrichment"),plotOutput("go_gsea"))),
-                          column(width=6 ,card(card_header("KEGG Gene Set Enrichment"),plotOutput("kegg_gsea")))
+                          column(width=12 ,card(card_header("Gene Set Enrichment"),plotOutput("gsea_enrich")))
                         ),
                         downloadButton("download_enrichment", "Download pathway enrichment results")
+                     )
                    )
 
   ),
@@ -270,4 +288,3 @@ ui <- page_sidebar(
                    )
   )
 )
-

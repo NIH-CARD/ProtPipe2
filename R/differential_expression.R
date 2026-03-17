@@ -632,6 +632,188 @@ add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes")
   )
 }
 
+#' Read a Custom Ontology File
+#'
+#' @description
+#' Reads a user-supplied ontology into the `TERM2GENE` and optional `TERM2NAME`
+#' structures required by `clusterProfiler::enricher()` and
+#' `clusterProfiler::GSEA()`.
+#'
+#' Supported formats are:
+#' - GMT files, where each line is `term`, `name`, then one or more gene IDs
+#' - Delimited text files (`csv` or `tsv`) with either:
+#'   - 2 columns: `term`, `gene`
+#'   - 3 columns: `term`, `name`, `gene`
+#'
+#' Gene identifiers in uploaded ontologies must match the identifiers used for
+#' enrichment. In the ProtPipe Shiny app, this currently means Entrez gene IDs.
+#'
+#' @param file Path to a `.gmt`, `.csv`, or `.tsv` ontology file.
+#'
+#' @return A named list with `term2gene` and `term2name`.
+#' @export
+read_ontology <- function(file) {
+  ext <- tolower(tools::file_ext(file))
+
+  if (ext == "gmt") {
+    lines <- readLines(file, warn = FALSE)
+    lines <- lines[nzchar(lines)]
+
+    parsed <- lapply(lines, function(line) strsplit(line, "\t", fixed = TRUE)[[1]])
+    parsed <- parsed[lengths(parsed) >= 3]
+
+    if (length(parsed) == 0) {
+      stop("The ontology file did not contain any valid GMT records.")
+    }
+
+    term2gene <- do.call(rbind, lapply(parsed, function(x) {
+      data.frame(term = x[[1]], gene = x[-c(1, 2)], stringsAsFactors = FALSE)
+    }))
+    term2name <- unique(do.call(rbind, lapply(parsed, function(x) {
+      data.frame(term = x[[1]], name = x[[2]], stringsAsFactors = FALSE)
+    })))
+  } else if (ext %in% c("csv", "tsv")) {
+    sep <- if (ext == "csv") "," else "\t"
+    dat <- data.table::fread(file, sep = sep, data.table = FALSE)
+
+    if (ncol(dat) < 2) {
+      stop("Delimited ontology files must contain at least 2 columns.")
+    }
+
+    if (ncol(dat) == 2) {
+      term2gene <- dat[, 1:2, drop = FALSE]
+      colnames(term2gene) <- c("term", "gene")
+      term2name <- NULL
+    } else {
+      term2gene <- dat[, c(1, 3), drop = FALSE]
+      colnames(term2gene) <- c("term", "gene")
+      term2name <- unique(dat[, 1:2, drop = FALSE])
+      colnames(term2name) <- c("term", "name")
+    }
+  } else {
+    stop("Unsupported ontology format. Use .gmt, .csv, or .tsv.")
+  }
+
+  term2gene <- unique(term2gene[!is.na(term2gene$term) & !is.na(term2gene$gene), , drop = FALSE])
+  if (nrow(term2gene) == 0) {
+    stop("The ontology file did not contain any valid term-to-gene mappings.")
+  }
+
+  if (!is.null(term2name)) {
+    term2name <- unique(term2name[!is.na(term2name$term) & !is.na(term2name$name), , drop = FALSE])
+    if (nrow(term2name) == 0) {
+      term2name <- NULL
+    }
+  }
+
+  list(term2gene = term2gene, term2name = term2name)
+}
+
+#' Run Over-Representation Analysis for Custom Gene Sets
+#'
+#' @description
+#' A thin wrapper around `clusterProfiler::enricher()` for user-supplied gene
+#' sets represented as `TERM2GENE` and optional `TERM2NAME` tables.
+#'
+#' @param gene_id A character vector of significant gene IDs.
+#' @param all_gene_vector A character vector containing the background universe.
+#' @param term2gene A two-column data frame with term IDs in the first column and
+#'   gene IDs in the second.
+#' @param term2name An optional two-column data frame with term IDs and readable
+#'   term names.
+#' @param enrich_pvalue The p-value and q-value cutoff. Defaults to `1`.
+#'
+#' @return An `enrichResult` object, or `NULL` if no terms are enriched.
+#' @export
+enrich_terms <- function(gene_id, all_gene_vector, term2gene, term2name = NULL, enrich_pvalue = 1) {
+  enrichment <- tryCatch({
+    clusterProfiler::enricher(
+      gene = gene_id,
+      universe = unique(all_gene_vector),
+      TERM2GENE = term2gene,
+      TERM2NAME = term2name,
+      pAdjustMethod = "BH",
+      pvalueCutoff = enrich_pvalue,
+      qvalueCutoff = enrich_pvalue
+    )
+  }, error = function(e) {
+    warning("Custom enrichment failed: ", conditionMessage(e))
+    return(NULL)
+  })
+
+  if (!is.null(enrichment) && !is.null(enrichment@result) && nrow(enrichment@result) > 0) {
+    return(enrichment)
+  }
+
+  NULL
+}
+
+#' Run GSEA for Custom Gene Sets
+#'
+#' @description
+#' A thin wrapper around `clusterProfiler::GSEA()` for user-supplied gene sets
+#' represented as `TERM2GENE` and optional `TERM2NAME` tables.
+#'
+#' @param gene_list A named numeric vector of ranked genes.
+#' @param term2gene A two-column data frame with term IDs in the first column and
+#'   gene IDs in the second.
+#' @param term2name An optional two-column data frame with term IDs and readable
+#'   term names.
+#' @param enrich_pvalue The p-value cutoff. Defaults to `1`.
+#'
+#' @return A `gseaResult` object, or `NULL` if no terms are enriched.
+#' @export
+gse_terms <- function(gene_list, term2gene, term2name = NULL, enrich_pvalue = 1) {
+  enrichment <- tryCatch({
+    clusterProfiler::GSEA(
+      geneList = gene_list,
+      TERM2GENE = term2gene,
+      TERM2NAME = term2name,
+      pvalueCutoff = enrich_pvalue,
+      verbose = FALSE
+    )
+  }, error = function(e) {
+    warning("Custom GSEA failed: ", conditionMessage(e))
+    return(NULL)
+  })
+
+  if (!is.null(enrichment) && !is.null(enrichment@result) && nrow(enrichment@result) > 0) {
+    return(enrichment)
+  }
+
+  NULL
+}
+
+has_valid_gsea_ranking <- function(gene_list) {
+  stats <- as.numeric(gene_list)
+  stats <- stats[!is.na(stats)]
+
+  if (length(stats) < 2) {
+    return(FALSE)
+  }
+
+  if (length(unique(stats)) < 2) {
+    return(FALSE)
+  }
+
+  if (!any(stats > 0) || !any(stats < 0)) {
+    return(FALSE)
+  }
+
+  TRUE
+}
+
+has_enrichment_signal <- function(stats) {
+  stats <- as.numeric(stats)
+  stats <- stats[!is.na(stats)]
+
+  if (length(stats) == 0) {
+    return(FALSE)
+  }
+
+  length(unique(stats)) > 1 && any(stats != 0)
+}
+
 
 #' Perform Gene Ontology (GO) Over-Representation Analysis (ORA)
 #'
@@ -643,6 +825,7 @@ add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes")
 #'   gene IDs against which to test.
 #' @param enrich_pvalue The p-value and q-value cutoff for enrichment. Defaults to 1.
 #' @param org An organism annotation database (e.g., org.Hs.eg.db).
+#' @param ont GO ontology to test. One of `"BP"`, `"MF"`, `"CC"`, or `"ALL"`.
 #'
 #' @return An enrichResult object if the analysis is successful and finds
 #'   enriched terms, otherwise NULL.
@@ -651,15 +834,15 @@ add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes")
 #'
 #' @importFrom clusterProfiler enrichGO
 #'
-enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db) {
+enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, ont = "BP") {
   cat("Processing GO\n")
 
   GO <- tryCatch({
     clusterProfiler::enrichGO(
       gene          = gene_id,
-      universe      = names(all_gene_vector),
+      universe      = unique(all_gene_vector),
       OrgDb         = org,
-      ont           = "ALL",
+      ont           = ont,
       pAdjustMethod = "BH",
       pvalueCutoff  = enrich_pvalue,
       qvalueCutoff  = enrich_pvalue,
@@ -734,6 +917,7 @@ enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.H
 #'   and values should be the ranking metric (e.g., log2 fold change).
 #' @param enrich_pvalue The p-value cutoff for enrichment. Defaults to 1 (no cutoff).
 #' @param org An organism annotation database (e.g., org.Hs.eg.db).
+#' @param ont GO ontology to test. One of `"BP"`, `"MF"`, `"CC"`, or `"ALL"`.
 #'
 #' @return A gseResult object if the analysis is successful and finds
 #'   enriched terms, otherwise NULL.
@@ -743,14 +927,14 @@ enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.H
 #' @importFrom clusterProfiler gseGO
 #' @importFrom DOSE setReadable
 #'
-gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db) {
+gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, ont = "BP") {
   cat("Processing GSEA GO\n")
 
   GO <- tryCatch({
     clusterProfiler::gseGO(
       geneList     = gene_list,
       OrgDb        = org,
-      ont          = "ALL",
+      ont          = ont,
       pAdjustMethod = "BH",
       pvalueCutoff  = enrich_pvalue,
       verbose       = FALSE
@@ -839,6 +1023,17 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
 #'   `'hsa'` for Homo sapiens).
 #' @param gene_col A character string indicating the name of the column in the `DE`
 #'   data frame that contains the gene symbols/identifiers. Defaults to `"Genes"`.
+#' @param source Pathway source. Use `"go"` for Gene Ontology or `"custom"` for
+#'   user-supplied ontologies.
+#' @param go_ont GO ontology to test when `source = "go"`. Defaults to `"BP"`.
+#' @param term2gene Optional two-column data frame of term-to-gene mappings for
+#'   custom ontologies. Gene IDs must match the IDs used for enrichment,
+#'   currently Entrez IDs in the Shiny app workflow.
+#' @param term2name Optional two-column data frame of term-to-name mappings for
+#'   custom ontologies.
+#' @param run_ora Logical; run over-representation analysis.
+#' @param run_gsea Logical; run gene set enrichment analysis.
+#' @param run_kegg Logical; also run KEGG analyses. Defaults to `FALSE`.
 #'
 #' @return
 #' A list containing two named elements:
@@ -886,12 +1081,23 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
 #'   }
 #' }
 #' }
-enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalue=0.05, go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes", adj = TRUE){
+enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalue=0.05,
+                           go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes", adj = TRUE,
+                           source = c("go", "custom"), go_ont = "BP", term2gene = NULL,
+                           term2name = NULL, run_ora = TRUE, run_gsea = TRUE, run_kegg = FALSE){
+  source <- match.arg(source)
   datas <- list()
   plots <- list()
 
-
-
+  stat_col <- if ("rho" %in% names(DE)) "rho" else "logFC"
+  if (!stat_col %in% names(DE) || !has_enrichment_signal(DE[[stat_col]])) {
+    datas$message <- data.frame(
+      message = "Pathway enrichment was skipped because the comparison had no effect-size signal.",
+      stringsAsFactors = FALSE
+    )
+    plots$ora_up_dotplot <- plots$ora_down_dotplot <- plots$gsea_dotplot <- NULL
+    return(list(results = datas, plots = plots))
+  }
   DT <- ProtPipe::add_entrez(DE, org = go_org, gene_col = gene_col)
 
   if("rho" %in% names(DT)){
@@ -905,17 +1111,8 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   }
 
   #initialize all plots and dataframes
-  datas$go_up <- datas$go_down <- datas$kegg_up <- datas$kegg_down <- datas$gse_go <- datas$gse_kegg <- NULL
-  plots$go_up_dotplot <- plots$go_up_barplot <- plots$go_down_dotplot <- plots$go_down_barplot <- NULL
-  plots$kegg_up_dotplot <- plots$kegg_up_barplot <- plots$kegg_down_dotplot <- plots$kegg_down_barplot <- NULL
-  plots[["gse_go_dotplot"]] <- plots[["gse_go_emapplot"]] <- plots[["gse_kegg_dotplot"]] <- plots[["gse_kegg_emapplot"]] <- NULL
-  expected_ontologies <- c("BP", "MF", "CC")
-  for (ont in expected_ontologies) {
-    plots[[paste0("go_up_dotplot_", tolower(ont))]] <- NULL
-    plots[[paste0("go_up_barplot_", tolower(ont))]] <- NULL
-    plots[[paste0("go_down_dotplot_", tolower(ont))]] <- NULL
-    plots[[paste0("go_down_barplot_", tolower(ont))]] <- NULL
-  }
+  datas$ora_up <- datas$ora_down <- datas$gsea <- NULL
+  plots$ora_up_dotplot <- plots$ora_down_dotplot <- plots$gsea_dotplot <- NULL
 
 
   ## up and down regulated genes
@@ -929,134 +1126,82 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
 
 
   # over representation enrichment for upregulated genes ###############################
-  if (length(up_genes)>0){
-    go_up <- ProtPipe::enrich_go(up_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue)
-    kegg_up <- ProtPipe::enrich_kegg(up_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
-
-    if(!is.null(go_up)){
-      datas$go_up <- go_up@result
-
-      p <- enrichplot::dotplot(go_up, showCategory = 10, split = "ONTOLOGY") +
-        ggplot2::facet_grid(ONTOLOGY ~ ., scales = "free", space = "free")
-      plots$go_up_dotplot <- p
-
-      g <- barplot(go_up, showCategory = 10, split = "ONTOLOGY") +
-        ggplot2::facet_grid(ONTOLOGY ~ ., scales = "free", space = "free")
-      plots$go_up_barplot <- g
-
-      #individual GO ontolgies
-      ontologies <- unique(go_up@result$ONTOLOGY)
-
-      # Loop over ontologies and generate separate plots
-      for (ont in ontologies) {
-        # Subset the go_up object by ontology
-        go_up_subset <- clusterProfiler::filter(go_up, ONTOLOGY == ont)
-        if(nrow(go_up_subset) > 0){
-          # Create dotplot
-          dp <- enrichplot::dotplot(go_up_subset, showCategory = 10) +
-            ggplot2::ggtitle(paste("GO Dotplot -", ont))
-          plots[[paste0("go_up_dotplot_", tolower(ont))]] <- dp
-
-          # Create barplot
-          bp <- barplot(go_up_subset, showCategory = 10) +
-            ggplot2::ggtitle(paste("GO Barplot -", ont))
-          plots[[paste0("go_up_barplot_", tolower(ont))]] <- bp
-        }
-      }
+  if (run_ora && nrow(up_genes) > 0){
+    ora_up <- if (source == "go") {
+      ProtPipe::enrich_go(up_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+    } else {
+      ProtPipe::enrich_terms(up_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
     }
-    if(!is.null(kegg_up)){
-      datas$kegg_up <- kegg_up@result
 
-      p <- enrichplot::dotplot(kegg_up, showCategory = 10)
-      plots$kegg_up_dotplot <- p
+    if(!is.null(ora_up)){
+      datas$ora_up <- ora_up@result
+      plots$ora_up_dotplot <- enrichplot::dotplot(ora_up, showCategory = 10)
+    }
 
-      g <- barplot(kegg_up, showCategory = 10)
-      plots$kegg_up_barplot <- g
+    if (run_kegg) {
+      kegg_up <- ProtPipe::enrich_kegg(up_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+      if(!is.null(kegg_up)){
+        datas$kegg_up <- kegg_up@result
+        plots$kegg_up_dotplot <- enrichplot::dotplot(kegg_up, showCategory = 10)
+      }
     }
   }
-    # over representation enrichment for downregulated genes ###############################
-    if (length(down_genes)>0){
-      go_down <- ProtPipe::enrich_go(down_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue)
+  # over representation enrichment for downregulated genes ###############################
+  if (run_ora && nrow(down_genes) > 0){
+    ora_down <- if (source == "go") {
+      ProtPipe::enrich_go(down_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+    } else {
+      ProtPipe::enrich_terms(down_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
+    }
+
+    if(!is.null(ora_down)){
+      datas$ora_down <- ora_down@result
+      plots$ora_down_dotplot <- enrichplot::dotplot(ora_down, showCategory = 10)
+    }
+
+    if (run_kegg) {
       kegg_down <- ProtPipe::enrich_kegg(down_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
-
-      # check if enriched pathways exist
-      if(!is.null(go_down)){
-        datas$go_down <- go_down@result
-
-        p <- enrichplot::dotplot(go_down, showCategory = 10, split = "ONTOLOGY") +
-          ggplot2::facet_grid(ONTOLOGY ~ ., scales = "free", space = "free")
-        plots$go_down_dotplot <- p
-        g <- barplot(go_down, showCategory = 10, split = "ONTOLOGY") +
-          ggplot2::facet_grid(ONTOLOGY ~ ., scales = "free", space = "free")
-        plots$go_down_barplot <- g
-
-        #individual GO ontolgies
-        ontologies <- unique(go_down@result$ONTOLOGY)
-
-        # Loop over ontologies and generate separate plots
-        for (ont in ontologies) {
-          # Subset the go_up object by ontology
-          go_down_subset <- clusterProfiler::filter(go_down, ONTOLOGY == ont)
-          if(nrow(go_down_subset) > 0){
-            # Create dotplot
-            dp <- enrichplot::dotplot(go_down_subset, showCategory = 10) +
-              ggplot2::ggtitle(paste("GO Dotplot -", ont))
-            plots[[paste0("go_down_dotplot_", tolower(ont))]] <- dp
-
-            # Create barplot
-            bp <- barplot(go_down_subset, showCategory = 10) +
-              ggplot2::ggtitle(paste("GO Barplot -", ont))
-            plots[[paste0("go_down_barplot_", tolower(ont))]] <- bp
-          }
-
-        }
-        }
-        if(!is.null(kegg_down)){
-          datas$kegg_down <- kegg_down@result
-
-          p <- enrichplot::dotplot(kegg_down, showCategory = 10)
-          plots$kegg_down_dotplot <- p
-
-          g <- barplot(kegg_down, showCategory = 10)
-          plots$kegg_down_barplot <- g
-        }
+      if(!is.null(kegg_down)){
+        datas$kegg_down <- kegg_down@result
+        plots$kegg_down_dotplot <- enrichplot::dotplot(kegg_down, showCategory = 10)
       }
+    }
+  }
+
   #Gene Set Enrichment ##############
   df_ordered <- DT[order(DT$logFC, decreasing = TRUE), ]
   ordered_genes <- df_ordered$logFC
   names(ordered_genes) <- df_ordered$ENTREZID
   ordered_genes_unique <- ordered_genes[!duplicated(names(ordered_genes))]
 
-  gse_go <- ProtPipe::gse_go(ordered_genes_unique, org = go_org, enrich_pvalue = enrich_pvalue)
-  gse_kegg <- ProtPipe::gse_kegg(ordered_genes_unique, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+  if (run_gsea) {
+    if (!has_valid_gsea_ranking(ordered_genes_unique)) {
+      datas$gsea_message <- data.frame(
+        message = "GSEA was skipped because the ranked statistics had no directional signal.",
+        stringsAsFactors = FALSE
+      )
+    } else {
+      gse_result <- if (source == "go") {
+        ProtPipe::gse_go(ordered_genes_unique, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+      } else {
+        ProtPipe::gse_terms(ordered_genes_unique, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
+      }
 
-  if(!is.null(gse_go)){
-    datas$gse_go <- gse_go@result
-    if (nrow(gse_go) > 0) {
-      p=enrichplot::dotplot(gse_go, showCategory=10, split=".sign") + facet_grid(.~.sign)
-      plots[["gse_go_dotplot"]] <- p
-      x2 <- enrichplot::pairwise_termsim(gse_go)
-      # p=enrichplot::emapplot(x2)
-      # plots[["gse_go_emapplot"]] <- p
-    }
+      if(!is.null(gse_result)){
+        datas$gsea <- gse_result@result
+        plots$gsea_dotplot <- enrichplot::dotplot(gse_result, showCategory=10, split=".sign") + facet_grid(.~.sign)
+      }
 
-  }
-  if(!is.null(gse_kegg)){
-    datas$gse_kegg <- gse_kegg@result
-    if (nrow(gse_kegg) > 0) {
-      p=enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + facet_grid(.~.sign)
-      plots[["gse_kegg_dotplot"]] <- p
-      x2 <- enrichplot::pairwise_termsim(gse_kegg)
-      # p=enrichplot::emapplot(x2)
-      # plots[["gse_kegg_emapplot"]] <- p
+      if (run_kegg) {
+        gse_kegg <- ProtPipe::gse_kegg(ordered_genes_unique, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+        if(!is.null(gse_kegg)){
+          datas$gse_kegg <- gse_kegg@result
+          plots$gse_kegg_dotplot <- enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + facet_grid(.~.sign)
+        }
+      }
     }
   }
   return(list(results = datas, plots = plots))
 }
-
-
-
-
-
 
 

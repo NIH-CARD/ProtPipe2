@@ -68,6 +68,7 @@ server <- function(input, output, session) {
   sample_condition <- fileUploadServer("sample_condition")
   gene_labels_file <- fileUploadServer("gene_labels")
   heatmap_labels <- fileUploadServer("heatmap_labels")
+  ontology_file <- fileUploadServer("ontology_file")
 
   #### Reactive functions ############################################################################################
 
@@ -916,28 +917,39 @@ server <- function(input, output, session) {
     return(dat$Genes)
   })
 
+  dea_result <- reactiveVal(NULL)
+
   dea <- reactive({
     condition <- input$de_condition
     control_group <- input$control_condition
     treatment_group <- input$treatment_condition
     covariates <- input$de_covariates
 
-    dea <-tryCatch({
-        # This is the "try" block. R will attempt to run this code.
-      if (input$outcome_type == "continuous"){
-        (ProtPipe::do_comparison_continuous(prot_data()
-                                   ,condition = condition))
-      }else{(ProtPipe::do_limma_binary(prot_data()
-                                       ,condition = condition,
-                                       control_group = control_group,
-                                       treatment_group = treatment_group,
-                                       covariates = covariates))}
-      }, error = function(e) {
-        # This is the "catch" block. It only runs if an error occurs.
-        # We use validate() to display a user-friendly message in the plot area.
-        validate(need(FALSE, paste("Calculating limma failed:", e$message)))
-      })
+    result <- tryCatch({
+      if (input$outcome_type == "continuous") {
+        ProtPipe::do_comparison_continuous(prot_data(), condition = condition)
+      } else {
+        ProtPipe::do_limma_binary(
+          prot_data(),
+          condition = condition,
+          control_group = control_group,
+          treatment_group = treatment_group,
+          covariates = covariates
+        )
+      }
+    }, error = function(e) {
+      dea_result(NULL)
+      validate(need(FALSE, paste("Calculating limma failed:", e$message)))
+    })
+
+    dea_result(result)
+    result
   })
+
+  output$dea_ready <- shiny::renderText({
+    !is.null(dea_result())
+  })
+  outputOptions(output, "dea_ready", suspendWhenHidden = FALSE)
 
   # compute volcano plot
   volcano_reactive <- reactive({
@@ -1008,8 +1020,20 @@ server <- function(input, output, session) {
     organism_map[[input$organism]]
   })
 
+  selected_ontology <- reactive({
+    req(input$pathway_source)
+
+    if (identical(input$pathway_source, "GO")) {
+      return(NULL)
+    }
+
+    req(ontology_file())
+    ProtPipe::read_ontology(ontology_file()$datapath)
+  })
+
   # Create a reactiveVal to store pathway enrichment results
   enrichment_result <- reactiveVal(NULL)
+  enrichment_message <- reactiveVal(NULL)
 
   observeEvent(input$run_enrichment, {
     if (isTRUE(input$run_enrichment)) {
@@ -1019,54 +1043,69 @@ server <- function(input, output, session) {
       # Optionally show a notification
       showNotification("Running enrichment analysis, please wait...", duration = NULL, id = "enrich_msg")
 
-      # Run the long function (blocking)
-      result <- ProtPipe::enrich_pathways(dea(), lfc_threshold=input$logfc, fdr_threshold=input$pvalue,
-                                          enrich_pvalue=input$enrich_pval, go_org = selected_org()$OrgDb,
-                                          kegg_org = selected_org()$kegg, gene_col = input$gene_col,
-                                          adj = input$use_adj_pval)
-      enrichment_result(result)
-
-      # Remove notification
-      removeNotification("enrich_msg")
-
-      # Re-enable button so user can rerun if needed
-      shinyjs::enable("run_enrichment")
+      tryCatch({
+        req(dea_result())
+        ontology <- selected_ontology()
+        result <- ProtPipe::enrich_pathways(
+          dea_result(),
+          lfc_threshold = input$logfc,
+          fdr_threshold = input$pvalue,
+          enrich_pvalue = input$enrich_pval,
+          go_org = selected_org()$OrgDb,
+          kegg_org = selected_org()$kegg,
+          gene_col = input$gene_col,
+          adj = input$use_adj_pval,
+          source = if (identical(input$pathway_source, "GO")) "go" else "custom",
+          go_ont = input$go_ontology,
+          term2gene = if (is.null(ontology)) NULL else ontology$term2gene,
+          term2name = if (is.null(ontology)) NULL else ontology$term2name,
+          run_ora = isTRUE(input$run_ora),
+          run_gsea = isTRUE(input$run_gsea)
+        )
+        enrichment_result(result)
+        if (is.null(result)) {
+          enrichment_message("No genes were mapped to Entrez IDs. Check that the selected gene column contains official gene symbols.")
+        } else if ("message" %in% names(result$results)) {
+          enrichment_message(result$results$message$message[[1]])
+        } else {
+          enrichment_message(NULL)
+        }
+      }, error = function(e) {
+        enrichment_result(NULL)
+        enrichment_message(paste("Pathway enrichment failed:", e$message))
+      }, finally = {
+        removeNotification("enrich_msg")
+        shinyjs::enable("run_enrichment")
+      })
     }
   })
 
   #pathway enrichment plots
-  output$go_up_enrich <- renderPlot({
+  output$ora_up_enrich <- renderPlot({
     req(intensity_file())
+    validate(need(is.null(enrichment_message()), enrichment_message()))
     req(enrichment_result())
-    enrichment_result()$plots$go_up_dotplot
+    enrichment_result()$plots$ora_up_dotplot
   })
 
-  output$kegg_up_enrich <- renderPlot({
+  output$ora_down_enrich <- renderPlot({
     req(intensity_file())
+    validate(need(is.null(enrichment_message()), enrichment_message()))
     req(enrichment_result())
-    enrichment_result()$plots$kegg_up_dotplot
-  })
-  output$go_down_enrich <- renderPlot({
-    req(intensity_file())
-    req(enrichment_result())
-    enrichment_result()$plots$go_down_dotplot
+    enrichment_result()$plots$ora_down_dotplot
   })
 
-  output$kegg_down_enrich <- renderPlot({
+  output$gsea_enrich <- renderPlot({
     req(intensity_file())
+    validate(need(is.null(enrichment_message()), enrichment_message()))
     req(enrichment_result())
-    enrichment_result()$plots$kegg_down_dotplot
-  })
-  output$go_gsea <- renderPlot({
-    req(intensity_file())
-    req(enrichment_result())
-    enrichment_result()$plots$gse_go_dotplot
-  })
-
-  output$kegg_gsea <- renderPlot({
-    req(intensity_file())
-    req(enrichment_result())
-    enrichment_result()$plots$gse_kegg_dotplot
+    validate(
+      need(
+        !("gsea_message" %in% names(enrichment_result()$results)),
+        enrichment_result()$results$gsea_message$message[[1]]
+      )
+    )
+    enrichment_result()$plots$gsea_dotplot
   })
 
   #save all enrichment results to temp zip
