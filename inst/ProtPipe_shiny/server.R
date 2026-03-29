@@ -1,14 +1,36 @@
 options(shiny.maxRequestSize=5000 * 1024^2)
 server <- function(input, output, session) {
+  workflow_pages <- c("0", "1", "2", "3", "4", "5")
+  workflow_labels <- c(
+    "Input",
+    "Quality Control",
+    "Pre-Processing",
+    "Clustering / Dimensionality Reduction",
+    "Differential Intensity",
+    "Abundance Profiling"
+  )
+  blocked_step_message <- "Load data or choose the example dataset before accessing this step."
+
+  navigate_to_page <- function(page) {
+    if (page %in% c("0", "6") || isTRUE(data_loaded())) {
+      updateTextInput(session, "select", value = page)
+    } else {
+      showNotification(blocked_step_message, type = "message", duration = 4)
+    }
+  }
 
   # Update hidden input$select based on which button was clicked
-  observeEvent(input$view_0, { updateTextInput(session, "select", value = "0") })
-  observeEvent(input$view_1, { updateTextInput(session, "select", value = "1") })
-  observeEvent(input$view_2, { updateTextInput(session, "select", value = "2") })
-  observeEvent(input$view_3, { updateTextInput(session, "select", value = "3") })
-  observeEvent(input$view_4, { updateTextInput(session, "select", value = "4") })
-  observeEvent(input$view_5, { updateTextInput(session, "select", value = "5") })
-  observeEvent(input$view_6, { updateTextInput(session, "select", value = "6") })
+  observeEvent(input$view_0, { navigate_to_page("0") })
+  observeEvent(input$view_1, { navigate_to_page("1") })
+  observeEvent(input$view_2, { navigate_to_page("2") })
+  observeEvent(input$view_3, { navigate_to_page("3") })
+  observeEvent(input$view_4, { navigate_to_page("4") })
+  observeEvent(input$view_5, { navigate_to_page("5") })
+  observeEvent(input$view_6, { navigate_to_page("6") })
+
+  current_workflow_index <- reactive({
+    match(input$select, workflow_pages)
+  })
 
   # Create a temp working directory for this zip session
   zip_workspace <- file.path(tempdir(), "zip_workspace")
@@ -93,7 +115,17 @@ server <- function(input, output, session) {
     if (input$use_example) {
       rv$type <- "Standard Matrix"
       rv$data <- data.table::fread("www/iPSC.csv", data.table = FALSE)
+      rv$condition <- NULL
+      rv$number_samples <- NULL
       return() # Stop execution here
+    }
+
+    if (is.null(intensity())) {
+      rv$data <- NULL
+      rv$condition <- NULL
+      rv$number_samples <- NULL
+      rv$type <- "upload file first"
+      return()
     }
 
     # If not using an example, require a file upload
@@ -155,6 +187,10 @@ server <- function(input, output, session) {
     rv$type
   })
 
+  data_loaded <- reactive({
+    !is.null(rv$data)
+  })
+
   intermediate_condition <- reactive({
     rv$condition
   })
@@ -168,6 +204,25 @@ server <- function(input, output, session) {
   output$file_type_output <- renderText({
     # The output will display the string returned by the reactive
     paste("Detected File Type: ", data_type())
+  })
+
+  observeEvent(input$back_page, {
+    idx <- current_workflow_index()
+    if (!is.na(idx) && idx > 1) {
+      updateTextInput(session, "select", value = workflow_pages[[idx - 1]])
+    }
+  })
+
+  observeEvent(input$next_page, {
+    idx <- current_workflow_index()
+    if (is.na(idx) || idx >= length(workflow_pages)) {
+      return()
+    }
+    if (!isTRUE(data_loaded())) {
+      showNotification(blocked_step_message, type = "message", duration = 4)
+      return()
+    }
+    updateTextInput(session, "select", value = workflow_pages[[idx + 1]])
   })
 
   condition_file <- reactive({
@@ -401,24 +456,6 @@ server <- function(input, output, session) {
       label <- "filter values based on average buffer values (if present)"
     }
     checkboxInput("lod_filter", label = label, value = FALSE)
-  })
-
-  output$imputation_parameters <- renderUI({
-    req(intensity_file())
-    if(input$imputation_method == "fixed value"){
-      tagList(
-        numericInput("impute_fixed_value", "value:", value = 0)
-      )
-    }else if(input$imputation_method == "minimum"){
-      tagList(
-        numericInput("impute_min_value", "scale minimum by:", value = 1)
-      )
-    }else if(input$imputation_method == "left-shifted distribution"){
-      tagList(
-        numericInput("impute_left_dist_shift", "shift mean of distribution by n standard deviations:", value = 1.8),
-        numericInput("impute_left_dist_scale", "scale standard deviation of distribution by:", value = 0.3)
-      )
-    }
   })
 
   output$batch_correct_column <- renderUI({

@@ -2,6 +2,29 @@
 #options(shiny.maxRequestSize=5000 * 1024^2)
 source("helpers.R")
 
+workflow_header <- function(title) {
+  card(
+    card_header(
+      div(
+        style = "width: 100%;",
+        div(
+          style = "display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;",
+          div(
+            actionButton("back_page", "Back", class = "btn-default")
+          ),
+          div(
+            actionButton("next_page", "Next", class = "btn-primary")
+          )
+        ),
+        div(
+          style = "width: 100%; text-align: center; font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin-top: 0.75rem;",
+          title
+        )
+      )
+    )
+  )
+}
+
 
 ui <- page_sidebar(
   useShinyjs(),
@@ -18,23 +41,23 @@ ui <- page_sidebar(
   ),
 
   # SIDEBAR CONTENT GOES HERE
-  sidebar = tagList(
+  sidebar = sidebar(
+    open = "closed",
     h3("Select view"),
 
     # Hidden textInput used for conditionalPanel control
     tags$div(style = "display:none;", textInput("select", label = NULL, value = "0")),
 
     # Block-style buttons
-    actionButton("view_0", "Input parameters", class = "btn-block btn-primary mb-2"),
-    actionButton("view_1", "Quality Control", class = "btn-block btn-primary mb-2"),
-    actionButton("view_2", "Pre-Processing", class = "btn-block btn-primary mb-2"),
-    actionButton("view_3", "Clustering / Dimensionality Reduction", class = "btn-block btn-primary mb-2"),
-    actionButton("view_4", "Differential Intensity", class = "btn-block btn-primary mb-2"),
-    actionButton("view_5", "Abundance Profiling", class = "btn-block btn-primary mb-2"),
+    actionButton("view_0", "1. Input", class = "btn-block btn-primary mb-2"),
+    actionButton("view_1", "2. Quality Control", class = "btn-block btn-primary mb-2"),
+    actionButton("view_2", "3. Pre-Processing", class = "btn-block btn-primary mb-2"),
+    actionButton("view_3", "4. Clustering / Dimensionality Reduction", class = "btn-block btn-primary mb-2"),
+    actionButton("view_4", "5. Differential Intensity", class = "btn-block btn-primary mb-2"),
+    actionButton("view_5", "6. Abundance Profiling", class = "btn-block btn-primary mb-2"),
     actionButton("view_6", "Help", class = "btn-block btn-primary mb-2"),
 
     hr(),
-    verbatimTextOutput("value"),
     downloadButton("downloadZip", "Download All Plots")
   ),
 
@@ -52,7 +75,7 @@ ui <- page_sidebar(
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",
                    fluidPage(
-                       h2("Input"),
+                       workflow_header("Input"),
                        card(
                          card_header(h4("Protein Intensity File")),
                          fluidRow(
@@ -74,8 +97,8 @@ ui <- page_sidebar(
 
   ### Quality control screen ############################################################################################
   conditionalPanel(condition = "input.select == 1",
-                   h2("Quality Control Information"),
                    fluidPage(
+                     workflow_header("Quality Control"),
                      uiOutput("quality_control_condition"),
                      card(card_header("Coefficients of Variation (requires condition file)"),
                           selectInput("cv_plot_type", "Select format:", choices = c("violin", "jitter"), selected = "violin"),
@@ -102,7 +125,7 @@ ui <- page_sidebar(
   ### Pre Processing Screen ############################################################################################
   conditionalPanel(condition = "input.select == 2",
                    fluidPage(
-                     h2("Pre-processing"),
+                     workflow_header("Pre-Processing"),
                           card(card_header("1. Minimum Intensity Filtering"),
                                fluidRow(
                                   column(width=6,
@@ -126,10 +149,22 @@ ui <- page_sidebar(
                           card(card_header("5. Imputation"),
                                fluidRow(
                                  column(width = 6,
-                                        checkboxInput("impute", label = "impute", value = FALSE),
+                                        checkboxInput("impute", label = "impute", value = TRUE),
                                         selectInput("imputation_method", label = "imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
                                  column(width = 6,
-                                        uiOutput("imputation_parameters")
+                                        conditionalPanel(
+                                          condition = "input.imputation_method == 'fixed value'",
+                                          numericInput("impute_fixed_value", "value:", value = 0)
+                                        ),
+                                        conditionalPanel(
+                                          condition = "input.imputation_method == 'minimum'",
+                                          numericInput("impute_min_value", "scale minimum by:", value = 1)
+                                        ),
+                                        conditionalPanel(
+                                          condition = "input.imputation_method == 'left-shifted distribution'",
+                                          numericInput("impute_left_dist_shift", "shift mean of distribution by n standard deviations:", value = 1.8),
+                                          numericInput("impute_left_dist_scale", "scale standard deviation of distribution by:", value = 0.3)
+                                        )
                                  ))),
                           card(card_header("6. Batch Correction"),
                                checkboxInput("batch_correct", label = "batch correct", value = FALSE),
@@ -140,8 +175,8 @@ ui <- page_sidebar(
                     )),
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",
-                   h2("Clustering / Dimensionality Reduction"),
                    fluidPage(
+                     workflow_header("Clustering / Dimensionality Reduction"),
                      uiOutput("clustering_condition"),
                      card(card_header("heirarchial clustering"),
                           plotOutput("hcluster"),
@@ -163,7 +198,7 @@ ui <- page_sidebar(
   ),
   ### Differential Intensity ############################################################################################
   conditionalPanel(condition = "input.select == 4",
-                   h2("Differential Expression"),
+                   workflow_header("Differential Expression"),
                    card(card_header("Options"),
                         fluidPage(
                           radioButtons(
@@ -253,7 +288,7 @@ ui <- page_sidebar(
 
   ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
-                   h2("Abundance Profiling"),
+                   workflow_header("Abundance Profiling"),
                    card(card_header("Heatmap"),
                      uiOutput("protein_label"),
                      uiOutput("heatmap_condition"),
