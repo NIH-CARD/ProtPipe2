@@ -475,7 +475,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     #req(sample_condition())
 
-    choices <- names(colData(prot_data()))
+    choices <- names(colData(raw_prot_data()))
 
     selectInput("qc_condition", "select condition to group by:", choices = choices)
   })
@@ -486,7 +486,7 @@ server <- function(input, output, session) {
     req(input$qc_condition)
     cvs <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::get_CVs(prot_data(), condition = input$qc_condition)
+      ProtPipe::get_CVs(raw_prot_data(), condition = input$qc_condition)
 
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
@@ -495,7 +495,7 @@ server <- function(input, output, session) {
     })
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_CVs(prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
+      ProtPipe::plot_CVs(raw_prot_data(), condition = input$qc_condition, plot_type = input$cv_plot_type)
 
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
@@ -543,7 +543,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_pg_intensities(prot_data())
+      ProtPipe::plot_pg_intensities(raw_prot_data())
 
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
@@ -585,7 +585,7 @@ server <- function(input, output, session) {
     })
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_pg_counts(prot_data(), condition = input$qc_condition)
+      ProtPipe::plot_pg_counts(raw_prot_data(), condition = input$qc_condition)
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -630,7 +630,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     dat.correlations <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::get_sample_correlation(prot_data())
+      ProtPipe::get_sample_correlation(raw_prot_data())
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -638,7 +638,7 @@ server <- function(input, output, session) {
     })
     p <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      ProtPipe::plot_correlation_heatmap(prot_data())
+      ProtPipe::plot_correlation_heatmap(raw_prot_data())
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
       # We use validate() to display a user-friendly message in the plot area.
@@ -1073,48 +1073,45 @@ server <- function(input, output, session) {
   enrichment_message <- reactiveVal(NULL)
 
   observeEvent(input$run_enrichment, {
-    if (isTRUE(input$run_enrichment)) {
-      # Disable the checkbox/button (if checkboxInput used as button, or use actionButton)
-      shinyjs::disable("run_enrichment")  # requires shinyjs package and call to use it in UI
+    # Disable the button while the analysis is running
+    shinyjs::disable("run_enrichment")
 
-      # Optionally show a notification
-      showNotification("Running enrichment analysis, please wait...", duration = NULL, id = "enrich_msg")
+    showNotification("Running enrichment analysis, please wait...", duration = NULL, id = "enrich_msg")
 
-      tryCatch({
-        req(dea_result())
-        ontology <- selected_ontology()
-        result <- ProtPipe::enrich_pathways(
-          dea_result(),
-          lfc_threshold = input$logfc,
-          fdr_threshold = input$pvalue,
-          enrich_pvalue = input$enrich_pval,
-          go_org = selected_org()$OrgDb,
-          kegg_org = selected_org()$kegg,
-          gene_col = input$gene_col,
-          adj = input$use_adj_pval,
-          source = if (identical(input$pathway_source, "GO")) "go" else "custom",
-          go_ont = input$go_ontology,
-          term2gene = if (is.null(ontology)) NULL else ontology$term2gene,
-          term2name = if (is.null(ontology)) NULL else ontology$term2name,
-          run_ora = isTRUE(input$run_ora),
-          run_gsea = isTRUE(input$run_gsea)
-        )
-        enrichment_result(result)
-        if (is.null(result)) {
-          enrichment_message("No genes were mapped to Entrez IDs. Check that the selected gene column contains official gene symbols.")
-        } else if ("message" %in% names(result$results)) {
-          enrichment_message(result$results$message$message[[1]])
-        } else {
-          enrichment_message(NULL)
-        }
-      }, error = function(e) {
-        enrichment_result(NULL)
-        enrichment_message(paste("Pathway enrichment failed:", e$message))
-      }, finally = {
-        removeNotification("enrich_msg")
-        shinyjs::enable("run_enrichment")
-      })
-    }
+    tryCatch({
+      req(dea_result())
+      ontology <- selected_ontology()
+      result <- ProtPipe::enrich_pathways(
+        dea_result(),
+        lfc_threshold = input$logfc,
+        fdr_threshold = input$pvalue,
+        enrich_pvalue = input$enrich_pval,
+        go_org = selected_org()$OrgDb,
+        kegg_org = selected_org()$kegg,
+        gene_col = input$gene_col,
+        adj = input$use_adj_pval,
+        source = if (identical(input$pathway_source, "GO")) "go" else "custom",
+        go_ont = input$go_ontology,
+        term2gene = if (is.null(ontology)) NULL else ontology$term2gene,
+        term2name = if (is.null(ontology)) NULL else ontology$term2name,
+        run_ora = TRUE,
+        run_gsea = TRUE
+      )
+      enrichment_result(result)
+      if (is.null(result)) {
+        enrichment_message("No genes were mapped to Entrez IDs. Check that the selected gene column contains official gene symbols.")
+      } else if ("message" %in% names(result$results)) {
+        enrichment_message(result$results$message$message[[1]])
+      } else {
+        enrichment_message(NULL)
+      }
+    }, error = function(e) {
+      enrichment_result(NULL)
+      enrichment_message(paste("Pathway enrichment failed:", e$message))
+    }, finally = {
+      removeNotification("enrich_msg")
+      shinyjs::enable("run_enrichment")
+    })
   })
 
   #pathway enrichment plots

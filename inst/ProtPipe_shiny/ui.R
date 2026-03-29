@@ -238,30 +238,20 @@ ui <- page_sidebar(
                      condition = "output.dea_ready",
                      card(card_header("Pathway Enrichment Options"),
                         fluidRow(
-                          column(width=3,
-                                 numericInput("enrich_pval", label = "Enter enrichment pvalue cutoff", value = 0.05)
-                          ),
-                          column(width=3,
-                                 selectInput("organism", "Select Organism:", choices = names(organism_map), selected = "Human")
-                          ),
-                          column(width=3,
-                                 uiOutput("gene_col"),
-                                 selectInput("pathway_source", "Ontology source:", choices = c("GO", "Custom ontology"), selected = "GO")
-                          ),
-                          column(width=3,
-                                 checkboxInput("run_ora", "Run over-representation analysis", value = TRUE),
-                                 checkboxInput("run_gsea", "Run gene set enrichment analysis", value = TRUE),
-                                 checkboxInput("run_enrichment", "Run pathway enrichment", value = FALSE)
-                          )
-                        ),
-                        fluidRow(
                           column(width=6,
+                                 numericInput("enrich_pval", label = "Enter enrichment pvalue cutoff", value = 0.05)
+                                 ,
+                                 selectInput("organism", "Select Organism:", choices = names(organism_map), selected = "Human"),
+                                 uiOutput("gene_col")
+                          ),
+                          column(width=6,
+                                 actionButton("run_enrichment", "Run Pathway Analysis", class = "btn-primary"),
+                                 div(style = "margin-top: 0.75rem;"),
+                                 selectInput("pathway_source", "Ontology source:", choices = c("GO", "Custom ontology"), selected = "GO"),
                                  conditionalPanel(
                                    condition = "input.pathway_source == 'GO'",
                                    selectInput("go_ontology", "GO ontology:", choices = c("BP", "MF", "CC"), selected = "BP")
-                                 )
-                          ),
-                          column(width=6,
+                                 ),
                                  conditionalPanel(
                                    condition = "input.pathway_source == 'Custom ontology'",
                                    p("Upload a GMT, TSV, or CSV ontology file using Entrez gene IDs."),
@@ -271,6 +261,7 @@ ui <- page_sidebar(
                                  )
                           )
                         )
+                     )
                    ),
                    card(card_header("Pathway Enrichment"),
                         fluidRow(
@@ -282,9 +273,7 @@ ui <- page_sidebar(
                         ),
                         downloadButton("download_enrichment", "Download pathway enrichment results")
                      )
-                   )
-
-  ),
+                   ),
 
   ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
