@@ -3,21 +3,27 @@
 source("helpers.R")
 
 workflow_header <- function(title) {
-  card(
-    card_header(
+  div(
+    style = "width: 100%; margin-bottom: 1.25rem;",
+    div(
+      style = "display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.75rem; width: 100%; margin-bottom: 0.5rem;",
       div(
-        style = "width: 100%;",
+        style = "justify-self: start;",
+        actionButton("back_page", "Back", class = "btn-default")
+      ),
+      div(
+        style = "justify-self: center;",
+        actionButton("help_page", "Help", class = "btn-info")
+      ),
+      div(
+        style = "justify-self: end;",
+        actionButton("next_page", "Next", class = "btn-primary")
+      )
+    ),
+    card(
+      card_body(
         div(
-          style = "display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%;",
-          div(
-            actionButton("back_page", "Back", class = "btn-default")
-          ),
-          div(
-            actionButton("next_page", "Next", class = "btn-primary")
-          )
-        ),
-        div(
-          style = "width: 100%; text-align: center; font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin-top: 0.75rem;",
+          style = "width: 100%; text-align: center; font-size: 2.15rem; font-weight: 700; line-height: 1.15;",
           title
         )
       )
@@ -62,15 +68,7 @@ ui <- page_sidebar(
   ),
 
   # MAIN PANEL CONTENT
-  main = tagList(
-    conditionalPanel("input.select == '0'", h4("Input parameters content")),
-    conditionalPanel("input.select == '1'", h4("Quality Control content")),
-    conditionalPanel("input.select == '2'", h4("Pre Processing content")),
-    conditionalPanel("input.select == '3'", h4("Clustering content")),
-    conditionalPanel("input.select == '4'", h4("Differential Intensity content")),
-    conditionalPanel("input.select == '5'", h4("Protein content")),
-    conditionalPanel("input.select == '6'", h4("Help content"))
-  ),
+  main = tagList(),
 
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",

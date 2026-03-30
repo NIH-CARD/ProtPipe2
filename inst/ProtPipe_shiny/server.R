@@ -27,6 +27,7 @@ server <- function(input, output, session) {
   observeEvent(input$view_4, { navigate_to_page("4") })
   observeEvent(input$view_5, { navigate_to_page("5") })
   observeEvent(input$view_6, { navigate_to_page("6") })
+  observeEvent(input$help_page, { navigate_to_page("6") })
 
   current_workflow_index <- reactive({
     match(input$select, workflow_pages)
