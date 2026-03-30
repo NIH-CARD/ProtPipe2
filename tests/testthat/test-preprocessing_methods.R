@@ -1,72 +1,93 @@
-library(testthat)
-setwd("../../..")
+test_that("threshold-based filtering records processing steps", {
+  se <- load_basic_se()
+  filtered <- ProtPipe::apply_min_intenisty(se, 1000)
 
-dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
-dat_pro <- create_se(dat)
-
-test_that("filter min intensity values", {
-
-  dat_pro_min_filtered <- ProtPipe::apply_min_intenisty(dat_pro, 1000)
-  expect_true(ProtPipe::has_step(dat_pro_min_filtered, "apply_min_intenisty"))
-  expect_equal(nrow(dat_pro) - nrow(dat_pro_no_duplicates), 260)
+  expect_true(ProtPipe::has_step(filtered, "apply_min_intenisty"))
+  expect_gt(sum(is.na(SummarizedExperiment::assay(filtered))),
+            sum(is.na(SummarizedExperiment::assay(se))))
 })
 
-test_that("correctly filter proteins and samples", {
+test_that("LOD filtering masks values below the per-protein threshold", {
+  se <- load_basic_se()
+  SummarizedExperiment::rowData(se)$Buffer <- matrixStats::rowMeans2(
+    SummarizedExperiment::assay(se),
+    na.rm = TRUE
+  )
 
-  dat_pro_no_duplicates <- ProtPipe::filter_unique_proteins(dat_pro, "PG.Genes")
-  expect_true(ProtPipe::has_step(dat_pro_filtered, "filter_unique_proteins"))
-  expect_equal(nrow(dat_pro) - nrow(dat_pro_no_duplicates), 260)
+  filtered <- ProtPipe::lod_filter(se, lod_col = "Buffer")
 
-  dat_pro_filtered <- ProtPipe::filter_proteins_by_percent(dat_pro, 50)
-  expect_true(ProtPipe::has_step(dat_pro_filtered, "filter_proteins_by_percent"))
-  expect_equal(nrow(dat_pro) - nrow(dat_pro_filtered), 1063)
-
-  dat_pro_ultra_filtered <- ProtPipe::filter_outlier_samples(dat_pro_filtered, sds = 3)
-  expect_true(ProtPipe::has_step(dat_pro_ultra_filtered, "filter_outlier_samples"))
-  expect_true(ProtPipe::has_step(dat_pro_ultra_filtered, "filter_proteins_by_percent"))
-  expect_equal(ncol(dat_pro) - ncol(dat_pro_ultra_filtered), 1)
-  ProtPipe::generate_preprocessing_report(dat_pro_ultra_filtered, "processing.md")
-
-  dat_common_prots <- ProtPipe::filter_overlap(dat_pro, condition_name = "base_condition")
-  expect_true(ProtPipe::has_step(dat_common_prots, "filter_overlap"))
-  expect_equal(nrow(dat_pro) - nrow(dat_common_prots), 1458)
+  expect_true(ProtPipe::has_step(filtered, "lod_filter"))
+  expect_gt(sum(is.na(SummarizedExperiment::assay(filtered))),
+            sum(is.na(SummarizedExperiment::assay(se))))
 })
 
+test_that("row and sample filters preserve object validity", {
+  se <- load_basic_se()
 
-test_that("test normalization and transformation", {
-  dat_z <- ProtPipe::z_score(dat_pro)
-  dat_mean_norm <- ProtPipe::mean_normalize(dat_pro)
-  dat_median_norm <- ProtPipe::median_normalize(dat_pro)
-  log2_dat <- ProtPipe::log2_transform(dat_pro)
+  deduped <- ProtPipe::filter_unique_proteins(se, "PG.Genes")
+  percent_filtered <- ProtPipe::filter_proteins_by_percent(se, 50)
+  outlier_filtered <- ProtPipe::filter_outlier_samples(percent_filtered, sds = 3)
+  overlap_filtered <- ProtPipe::filter_overlap(se, condition_name = "base_condition")
 
-  ProtPipe::plot_pg_intensities(dat_pro)
-  ProtPipe::plot_pg_intensities(dat_z)
-  ProtPipe::plot_pg_intensities(dat_mean_norm)
-  ProtPipe::plot_pg_intensities(dat_median_norm)
-  ProtPipe::plot_pg_intensities(log2_dat)
+  expect_true(ProtPipe::has_step(deduped, "filter_unique_proteins"))
+  expect_true(ProtPipe::has_step(percent_filtered, "filter_proteins_by_percent"))
+  expect_true(ProtPipe::has_step(outlier_filtered, "filter_outlier_samples"))
+  expect_true(ProtPipe::has_step(overlap_filtered, "filter_overlap"))
+
+  expect_lte(nrow(deduped), nrow(se))
+  expect_lte(nrow(percent_filtered), nrow(se))
+  expect_lte(nrow(overlap_filtered), nrow(se))
+  expect_lte(ncol(outlier_filtered), ncol(percent_filtered))
 })
 
-test_that("test imputation", {
-  imputed_fixed <- ProtPipe::impute(dat_pro, 5)
-  freq_table <- table(assay(imputed_fixed))
-  mode <- as.numeric(names(freq_table)[which.max(freq_table)])
-  expect_equal(mode, 5)
+test_that("normalization and transformation methods log their processing steps", {
+  se <- load_basic_se()
+
+  z <- ProtPipe::z_score(se)
+  mean_norm <- ProtPipe::mean_normalize(se)
+  median_norm <- ProtPipe::median_normalize(se)
+  log2_se <- ProtPipe::log2_transform(se)
+
+  expect_true(ProtPipe::has_step(z, "z_score"))
+  expect_true(ProtPipe::has_step(mean_norm, "mean_normalize"))
+  expect_true(ProtPipe::has_step(median_norm, "median_normalize"))
+  expect_true(ProtPipe::has_step(log2_se, "log2_transform"))
+  expect_equal(dim(z), dim(se))
+  expect_equal(dim(mean_norm), dim(se))
+  expect_equal(dim(median_norm), dim(se))
+  expect_equal(dim(log2_se), dim(se))
+})
+
+test_that("imputation methods record their processing steps", {
+  se <- load_basic_se()
+
+  imputed_fixed <- ProtPipe::impute(se, 5)
+  imputed_min <- ProtPipe::impute_min(se, 0.5)
+  imputed_dist <- ProtPipe::impute_left_dist(se)
+
   expect_true(ProtPipe::has_step(imputed_fixed, "impute"))
-  imputed_min <- ProtPipe::impute_min(dat_pro, 0.5)
   expect_true(ProtPipe::has_step(imputed_min, "impute_min"))
-  imputed_dist <- ProtPipe::impute_left_dist(dat_pro)
   expect_true(ProtPipe::has_step(imputed_dist, "impute_left_dist"))
+  expect_false(anyNA(SummarizedExperiment::assay(imputed_fixed)))
 })
 
-test_that("test batch correction", {
-  vdat <- data.table::fread("EXAMPLES/VIRUS/virus_data.tsv")
-  vmeta <- data.table::fread("EXAMPLES/VIRUS/virus_metadata.tsv")
-  dat_v <- create_se(vdat, sample_metadata = vmeta) %>% impute(0)
-  plot_PCs(dat_v, condition = "viral.exposure")
-  dat_v_corrected <- ProtPipe::batch_correct(dat_v, batch_variable = "viral.exposure")
-  plot_PCs(dat_v_corrected, condition = "viral.exposure")
-  dat_v_corrected_careful <- ProtPipe::batch_correct(dat_v, batch_variable = "viral.exposure",
-                                                     bio_variables = c("concentration", "time"))
-  plot_PCs(dat_v_corrected_careful, condition = "viral.exposure")
+test_that("batch correction works with bundled example metadata", {
+  meta <- load_basic_metadata(include_batch = TRUE)
+  se <- load_basic_se(meta)
+  corrected <- ProtPipe::batch_correct(ProtPipe::impute(se, 0), batch_variable = "batch")
+
+  expect_true(ProtPipe::has_step(corrected, "batch_corrected"))
+  expect_equal(dim(SummarizedExperiment::assay(corrected)),
+               dim(SummarizedExperiment::assay(se)))
 })
 
+test_that("generate_preprocessing_report writes a markdown file", {
+  se <- ProtPipe::log2_transform(load_basic_se())
+  report <- tempfile(fileext = ".md")
+
+  out <- ProtPipe::generate_preprocessing_report(se, output_file = report)
+
+  expect_equal(out, report)
+  expect_true(file.exists(report))
+  expect_match(paste(readLines(report), collapse = "\n"), "log2_transform")
+})

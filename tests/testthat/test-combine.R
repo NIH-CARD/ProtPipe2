@@ -1,11 +1,6 @@
-library(testthat)
-setwd("../..")
-
 #spectronaut input
 test_that("correctly make a prot_data object", {
-  # Print the current working directory
-  print(getwd())
-  dat <- data.table::fread("EXAMPLES/basic_example_data/iPSC.csv")
+  dat <- data.table::fread(basic_example_path("iPSC.csv"))
   dat1 <- dat[,c(1:2,6:10)]
   dat2 <- dat[,c(1:5)]
   dat_pro_1 <- create_protdata(dat1)

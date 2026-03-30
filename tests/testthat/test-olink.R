@@ -1,8 +1,5 @@
-library(testthat)
-setwd("../../..")
-
-file = "EXAMPLES/olink/npx_data1.csv"
-metafile <- "EXAMPLES/olink/manifest.tsv"
+file <- package_path("EXAMPLES", "olink", "npx_data1.csv")
+metafile <- package_path("EXAMPLES", "olink", "manifest.tsv")
 
 npx <- OlinkAnalyze::read_NPX(file)
 meta <- read.delim(metafile, sep = "\t")
@@ -12,19 +9,19 @@ test_that("correctly make a prot_data object from Olink without LOD filtering", 
   dat_pro <- create_se_from_olink(npx, meta, filter = T)
   t <- ProtPipe::get_sample_correlation(dat_pro)
   tt <- ProtPipe::plot_correlation_heatmap(dat_pro)
-  expect_s4_class(dat_pro, "ProtData")
-  cols = ncol(dat_pro@data)
+  expect_s4_class(dat_pro, "SummarizedExperiment")
+  cols = ncol(SummarizedExperiment::assay(dat_pro))
   expect_equal(cols, 158)
-  rows = nrow(dat_pro@data)
+  rows = nrow(SummarizedExperiment::assay(dat_pro))
   expect_equal(rows, 184)
 })
 
 test_that("correctly make a prot_data object from Olink with LOD filtering", {
-  dat_pro <- create_protdata_from_olink(npx)
-  expect_s4_class(dat_pro, "ProtData")
-  cols = ncol(dat_pro@data)
+  dat_pro <- create_se_from_olink(npx, meta, filter = TRUE)
+  expect_s4_class(dat_pro, "SummarizedExperiment")
+  cols = ncol(SummarizedExperiment::assay(dat_pro))
   expect_equal(cols, 158)
-  rows = nrow(dat_pro@data)
+  rows = nrow(SummarizedExperiment::assay(dat_pro))
   expect_equal(rows, 184)
 })
 
@@ -42,7 +39,7 @@ example_df <- data.frame(
   Condition = conditions
 )
 
-output_filename <- "EXAMPLES/olink/manifest.tsv"
+output_filename <- tempfile(fileext = ".tsv")
 write.table(
   example_df,
   file = output_filename,
