@@ -2,3 +2,75 @@ url: https://nih-card.github.io/ProtPipe2/docs/
 template:
   bootstrap: 5
 
+reference:
+  - title: "Input"
+    contents:
+      - protpipe_example_se
+      - create_se
+      - create_se_from_olink
+      - create_se_from_soma
+      - detect_intensity_cols
+      - convert_numeric_cols
+      - olink_all_output
+      - soma_all_output
+      - run_protpipe_shiny
+
+  - title: "Quality Control"
+    contents:
+      - get_pg_counts
+      - plot_pg_counts
+      - plot_pg_intensities
+      - get_CVs
+      - plot_CVs
+      - get_sample_correlation
+      - plot_correlation_heatmap
+
+  - title: "Pre-Processing"
+    contents:
+      - lod_filter
+      - apply_min_intenisty
+      - filter_unique_proteins
+      - filter_overlap
+      - filter_proteins_by_percent
+      - filter_outlier_samples
+      - log2_transform
+      - z_score
+      - mean_normalize
+      - median_normalize
+      - impute
+      - impute_min
+      - impute_left_dist
+      - batch_correct
+      - generate_preprocessing_report
+      - has_step
+
+  - title: "Clustering / Dimensionality Reduction"
+    contents:
+      - get_PCs
+      - plot_PCs
+      - plot_hierarchical_cluster
+      - get_umap
+      - plot_umap
+
+  - title: "Differential Expression"
+    contents:
+      - filter_features
+      - do_limma_binary
+      - do_t_test_binary
+      - do_comparison_continuous
+      - plot_volcano
+      - plot_correlation_volcano
+      - add_entrez
+      - read_ontology
+      - enrich_go
+      - enrich_kegg
+      - enrich_terms
+      - gse_go
+      - gse_kegg
+      - gse_terms
+      - enrich_pathways
+
+  - title: "Abundance Profiling"
+    contents:
+      - compare_protein
+      - plot_proteomics_heatmap
