@@ -28,11 +28,6 @@ A \code{SummarizedExperiment} object with a new assay named
 This function uses the \code{removeBatchEffect} method from the limma package to
 adjust for known batch effects in the data.
 }
-\section{Functions}{
-\itemize{
-\item \code{batch_correct(object = SummarizedExperiment, batch_variable = character)}: Method for SummarizedExperiment objects.
-
-}}
 \examples{
 # --- Create a sample SummarizedExperiment object ---
 set.seed(123)

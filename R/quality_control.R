@@ -1,4 +1,4 @@
-#' @describeIn get_pg_counts
+#' @rdname get_pg_counts
 #' @export
 setMethod("get_pg_counts", "SummarizedExperiment",
           function(object){
@@ -10,7 +10,7 @@ setMethod("get_pg_counts", "SummarizedExperiment",
           }
 )
 
-#' @describeIn plot_pg_counts
+#' @rdname plot_pg_counts
 #' @export
 setMethod("plot_pg_counts", "SummarizedExperiment",
           function(object, condition = NULL) {
@@ -63,7 +63,7 @@ setMethod("plot_pg_counts", "SummarizedExperiment",
           }
 )
 
-#' @describeIn plot_pg_intensities
+#' @rdname plot_pg_intensities
 #' @export
 setMethod("plot_pg_intensities", "SummarizedExperiment",
           function(object) {
@@ -90,7 +90,7 @@ setMethod("plot_pg_intensities", "SummarizedExperiment",
           }
 )
 
-#' @describeIn get_CVs
+#' @rdname get_CVs
 #' @export
 setMethod("get_CVs", "SummarizedExperiment",
           function(object, condition, min_samples = 2) {
@@ -132,7 +132,7 @@ setMethod("get_CVs", "SummarizedExperiment",
           }
 )
 
-#' @describeIn plot_CVs
+#' @rdname plot_CVs
 #' @export
 setMethod("plot_CVs", "SummarizedExperiment",
           function(object, condition, plot_type = "violin") {
@@ -162,7 +162,7 @@ setMethod("plot_CVs", "SummarizedExperiment",
           }
 )
 
-#' @describeIn get_sample_correlation
+#' @rdname get_sample_correlation
 #' @export
 setMethod("get_sample_correlation", "SummarizedExperiment",
           function(object, method = 'spearman') {
@@ -183,7 +183,7 @@ setMethod("get_sample_correlation", "SummarizedExperiment",
           }
 )
 
-#' @describeIn plot_correlation_heatmap
+#' @rdname plot_correlation_heatmap
 #' @export
 setMethod("plot_correlation_heatmap", "SummarizedExperiment",
           function(object, order_by = NULL, label_by = NULL) {

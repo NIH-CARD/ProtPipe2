@@ -2,13 +2,16 @@
 % Please edit documentation in R/olink.R
 \name{olink_all_output}
 \alias{olink_all_output}
-\title{Title}
+\title{Format Olink NPX Data into Data and Condition Tables}
 \usage{
 olink_all_output(my_npx)
 }
 \arguments{
-\item{my_npx}{}
+\item{my_npx}{A data frame of Olink NPX measurements.}
+}
+\value{
+A list containing \code{data}, \code{condition}, and \code{number_samples}.
 }
 \description{
-Title
+Format Olink NPX Data into Data and Condition Tables
 }

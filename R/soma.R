@@ -77,12 +77,10 @@ create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
 
 #' format soma adat into data and condition dataframes
 #'
-#' @param DT 
+#' @param DT A SomaScan ADAT object or data frame containing SomaScan measurements.
 #'
-#' @return
+#' @return A list containing formatted `data` and `condition` data frames.
 #' @export
-#'
-#' @examples
 soma_all_output <- function(DT){
   anno=SomaDataIO::getAnalyteInfo(DT)
   DT=data.frame(DT)

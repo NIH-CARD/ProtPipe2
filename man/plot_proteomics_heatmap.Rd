@@ -41,6 +41,10 @@ is case-insensitive.}
 
 \item{condition}{Optional. A character string specifying a column name in the
 \code{colData} slot. If provided, triggers the summarized heatmap mode.}
+
+\item{cluster_cols}{Logical indicating whether heatmap columns should be clustered.}
+
+\item{cluster_rows}{Logical indicating whether heatmap rows should be clustered.}
 }
 \value{
 A \code{ggplot} object representing the heatmap.

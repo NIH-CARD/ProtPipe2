@@ -4,7 +4,7 @@
 #'
 #' @description
 #' Calculates the number of non-missing protein groups (or features) for each
-#' sample in a ProtData object.
+#' sample in a `SummarizedExperiment` object.
 #'
 #' @param object A \code{SummarizedExperiment} object.
 #'
@@ -56,10 +56,10 @@ setGeneric("plot_pg_counts", function(object, condition = NULL) standardGeneric(
 #'   SampleB = c(110, 210, 160, 130), # Slightly higher than A
 #'   SampleC = c(250, 500, 400, 300)   # Higher median and spread
 #' )
-#' pd_obj <- create_protdata(dat = raw_data)
+#' se <- create_se(raw_data)
 #'
 #' # Generate the boxplot of intensities
-#' p <- plot_pg_intensities(pd_obj)
+#' p <- plot_pg_intensities(se)
 #' if (interactive()) {
 #'   print(p)
 #' }
@@ -255,9 +255,9 @@ setGeneric("filter_unique_proteins", function(object, col = NULL) standardGeneri
 #'
 setGeneric("filter_outlier_samples", function(object, sds = 3) standardGeneric("filter_outlier_samples"))
 
-#' get_overlap method for protdata class
+#' Retain proteins present in a specified group of a \code{SummarizedExperiment} object
 #'
-#' Filters the protdata object to retain only proteins that are present (non-NA)
+#' Filters the object to retain only proteins that are present (non-NA)
 #' in at least one sample within each unique group of the specified condition.
 #'
 #' @param object A \code{SummarizedExperiment} object
@@ -288,49 +288,45 @@ setGeneric("filter_overlap",
 #'   have been replaced by their row-wise Z-scores.
 #'
 #' @export
-#' @rdname scale-ProtData
-#' @aliases scale,ProtData-method
 #'
 #' @seealso [base::scale()]
 #'
 #' @examples
-#' # Create sample data with proteins as rows
+#' # Create sample data with proteins as rows and samples as columns
 #' df <- data.frame(
+#'   Protein = c("Protein1", "Protein2", "Protein3"),
 #'   SampleA = c(100, 250, 50),
 #'   SampleB = c(120, 200, 100),
-#'   SampleC = c(110, 225, 75),
-#'   row.names = c("Protein1", "Protein2", "Protein3")
+#'   SampleC = c(110, 225, 75)
 #' )
 #'
-#' conditions <- data.frame(
-#'   row.names = colnames(df),
+#' sample_info <- data.frame(
+#'   SampleID = c("SampleA", "SampleB", "SampleC"),
 #'   group = c("Control", "Treatment", "Control")
 #' )
 #'
-#' prot_obj <- new("ProtData",
-#'                 data = df,
-#'                 condition = conditions,
-#'                 method = "MS")
+#' se <- create_se(df, sample_metadata = sample_info)
 #'
 #' # Check the means of each protein (row) before scaling
-#' rowMeans(prot_obj@data)
+#' rowMeans(assay(se))
 #'
 #' # Apply the scaling method
-#' scaled_prot_obj <- scale(prot_obj)
+#' scaled_se <- z_score(se)
 #'
 #' # The new data has row means near zero and row standard deviations of one
-#' print(scaled_prot_obj@data)
+#' print(assay(scaled_se))
 #' cat("Row means after scaling:\n")
-#' print(rowMeans(scaled_prot_obj@data))
+#' print(rowMeans(assay(scaled_se)))
 #' cat("\nRow standard deviations after scaling:\n")
-#' print(apply(scaled_prot_obj@data, 1, sd))
+#' print(apply(assay(scaled_se), 1, sd))
 #'
 setGeneric("z_score", function(object) standardGeneric("z_score"))
 
 #' Median Normalization of Proteomics Data
 #'
 #' @description
-#' Performs median normalization on the quantitative data within a `ProtData`
+#' Performs median normalization on the quantitative data within a
+#' `SummarizedExperiment`
 #' object. This method corrects for systematic, sample-specific biases (e.g.,
 #' differences in sample loading or instrument sensitivity) to make the samples
 #' more comparable.
@@ -351,10 +347,6 @@ setGeneric("z_score", function(object) standardGeneric("z_score"))
 #'   normalized by the median-centering method.
 #'
 #' @export
-#' @rdname median_normalize-ProtData
-#' @aliases median_normalize,ProtData-method
-#'
-#'
 setGeneric("median_normalize", function(object) standardGeneric("median_normalize"))
 
 #' Mean Normalization of Proteomics Data
@@ -377,9 +369,6 @@ setGeneric("median_normalize", function(object) standardGeneric("median_normaliz
 #'   method.
 #'
 #' @export
-#' @rdname mean_normalize-ProtData
-#' @aliases mean_normalize,ProtData-method
-#'
 setGeneric("mean_normalize", function(object) standardGeneric("mean_normalize"))
 
 #' Performs a log2 transform of protein intensity values
@@ -403,9 +392,6 @@ setGeneric("log2_transform", function(object) standardGeneric("log2_transform"))
 #' @return A \code{SummarizedExperiment} object with missing values imputed.
 #'
 #' @export
-#' @rdname impute-ProtData
-#' @aliases impute,ProtData-method
-#'
 #' @examples
 #' # Create a sample data frame with metadata and a missing numeric value
 #' raw_data <- data.frame(
@@ -415,15 +401,14 @@ setGeneric("log2_transform", function(object) standardGeneric("log2_transform"))
 #'   Sample_B = c(1.4e6, 2.6e6, 4.8e6)
 #' )
 #'
-#' # Use the constructor to create a ProtData object.
-#' # The constructor will automatically separate metadata from numeric data.
-#' pd_obj <- create_protdata(dat = raw_data)
+#' # Create a SummarizedExperiment object
+#' se <- create_se(raw_data)
 #'
 #' # Impute the NA with 0
-#' imputed_obj <- impute(pd_obj, value = 0)
+#' imputed_obj <- impute(se, value = 0)
 #'
-#' # View the imputed data slot
-#' print(imputed_obj@data)
+#' # View the imputed assay data
+#' print(assay(imputed_obj))
 #'
 setGeneric("impute", function(object, value) standardGeneric("impute"))
 
@@ -443,9 +428,6 @@ setGeneric("impute", function(object, value) standardGeneric("impute"))
 #' @return A \code{SummarizedExperiment} object with missing values imputed on a per-protein basis.
 #'
 #' @export
-#' @rdname impute_min-ProtData
-#' @aliases impute_min,ProtData-method
-#'
 #' @examples
 #' # Create data with different minimums and NAs in each row
 #' raw_data <- data.frame(
@@ -455,20 +437,20 @@ setGeneric("impute", function(object, value) standardGeneric("impute"))
 #'   SampleC = c(NA, NA)
 #' )
 #'
-#' pd_obj <- create_protdata(dat = raw_data)
+#' se <- create_se(raw_data)
 #' cat("Original Data:\n")
-#' print(pd_obj@data)
+#' print(assay(se))
 #'
 #' # Impute using the row minimum (alpha = 1)
 #' # Row 1's NA becomes 100; Row 2's NA becomes 500.
-#' imputed_obj <- impute_min(pd_obj)
+#' imputed_obj <- impute_min(se)
 #' cat("\nImputed with alpha = 1:\n")
-#' print(imputed_obj@data)
+#' print(assay(imputed_obj))
 #'
 #' # Impute using 90% of the row minimum
-#' imputed_scaled <- impute_min(pd_obj, alpha = 0.9)
+#' imputed_scaled <- impute_min(se, alpha = 0.9)
 #' cat("\nImputed with alpha = 0.9:\n")
-#' print(imputed_scaled@data)
+#' print(assay(imputed_scaled))
 #'
 setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min"))
 
@@ -499,9 +481,6 @@ setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min")
 #'   low-abundance distribution.
 #'
 #' @export
-#' @rdname impute_left_dist-ProtData
-#' @aliases impute_left_dist,ProtData-method
-#'
 #' @examples
 #' # Create data with NAs, typically representing log-transformed values
 #' raw_data <- data.frame(
@@ -511,14 +490,14 @@ setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min")
 #'   SampleC = c(NA, NA)
 #' )
 #'
-#' pd_obj <- create_protdata(dat = raw_data)
+#' se <- create_se(raw_data)
 #'
 #' # For reproducibility of the random imputation
 #' set.seed(123)
 #'
-#' imputed_obj <- impute_left_dist(pd_obj)
+#' imputed_obj <- impute_left_dist(se)
 #' cat("Data after imputation:\n")
-#' print(imputed_obj@data)
+#' print(assay(imputed_obj))
 #'
 setGeneric("impute_left_dist", function(object, shift = 1.8, scale = 0.3) standardGeneric("impute_left_dist"))
 
@@ -644,7 +623,7 @@ setGeneric("get_PCs",
 #' @export
 #'
 #' @examples
-#' # Create a sample ProtData object with missing data
+#' # Create a sample SummarizedExperiment object with missing data
 #' raw_data <- data.frame(
 #'   Gene = c("GENEA", "GENEB", "GENEC", "GENED", "GENEE", "GENEF"),
 #'   Control_1 = c(10, 11, 12, 13, 14, 15),
@@ -656,19 +635,19 @@ setGeneric("get_PCs",
 #'    SampleID = c("Control_1", "Control_2", "Treatment_1", "Treatment_2"),
 #'    group = c("Control", "Control", "Treatment", "Treatment")
 #' )
-#' pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+#' se <- create_se(raw_data, sample_metadata = cond_df)
 #'
 #' # Impute missing values before plotting
-#' pd_obj_imputed <- impute(pd_obj, value = 13.5)
+#' se_imputed <- impute(se, value = 13.5)
 #'
 #' # Generate the plot of PC1 vs PC2
-#' p1 <- plot_pca(pd_obj_imputed, condition = "group")
+#' p1 <- plot_PCs(se_imputed, condition = "group")
 #' if (interactive()) {
 #'   print(p1)
 #' }
 #'
 #' # Generate a plot of PC1 vs PC3
-#' p2 <- plot_pca(pd_obj_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
+#' p2 <- plot_PCs(se_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
 #' if (interactive()) {
 #'   print(p2)
 #' }
@@ -703,7 +682,7 @@ setGeneric("plot_PCs",
 #' @export
 #'
 #' @examples
-#' # Create a sample ProtData object
+#' # Create a sample SummarizedExperiment object
 #' raw_data <- data.frame(
 #'   Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
 #'   SampleA = c(10, 20, 15, 12),
@@ -711,16 +690,16 @@ setGeneric("plot_PCs",
 #'   SampleC = c(25, 10, 30, 5),
 #'   SampleD = c(26, 11, 31, 6)  # Similar to C
 #' )
-#' pd_obj <- create_protdata(dat = raw_data)
+#' se <- create_se(raw_data)
 #'
 #' # Run with default methods. We expect A/B and C/D to cluster together.
-#' p1 <- plot_hierarchical_cluster(pd_obj)
+#' p1 <- plot_hierarchical_cluster(se)
 #' if (interactive()) {
 #'   print(p1)
 #' }
 #'
 #' # Run with different methods
-#' p2 <- plot_hierarchical_cluster(pd_obj, dist_method = "manhattan", hclust_method = "ward.D2")
+#' p2 <- plot_hierarchical_cluster(se, dist_method = "manhattan", hclust_method = "ward.D2")
 #' if (interactive()) {
 #'   print(p2)
 #' }
@@ -801,20 +780,20 @@ setGeneric("get_umap",
 #' @examples
 #' # This example requires the 'umap' package
 #' if (requireNamespace("umap", quietly = TRUE)) {
-#'   # Create a sample ProtData object
+#'   # Create a sample SummarizedExperiment object
 #'   raw_data <- data.frame(
 #'     Gene = paste0("GENE", 1:10),
 #'     Control_1 = rnorm(10, 10), Control_2 = rnorm(10, 10),
 #'     Treat_A_1 = rnorm(10, 12), Treat_A_2 = rnorm(10, 12),
 #'     Treat_B_1 = rnorm(10, 15), Treat_B_2 = rnorm(10, 15)
 #'   )
-#'   pd_obj <- create_protdata(dat = raw_data)
+#'   se <- create_se(raw_data)
 #'
 #'   # For reproducible UMAP results, set a seed!
 #'   set.seed(42)
 #'
 #'   # Generate the UMAP plot
-#'   p <- plot_umap(pd_obj, n_neighbors = 3)
+#'   p <- plot_umap(se, neighbors = 3)
 #'
 #'   # The plot can be printed in an interactive session
 #'   if (interactive()) {
@@ -857,8 +836,8 @@ setGeneric("plot_umap",
 #' @param title Optional. A character string for the plot title.
 #' @param condition Optional. A character string specifying a column name in the
 #'   `colData` slot. If provided, triggers the summarized heatmap mode.
-#' @param cluster_cols
-#' @param cluster_rows
+#' @param cluster_cols Logical indicating whether heatmap columns should be clustered.
+#' @param cluster_rows Logical indicating whether heatmap rows should be clustered.
 #' @return A `ggplot` object representing the heatmap.
 #'
 #' @export
@@ -871,5 +850,3 @@ setGeneric("plot_proteomics_heatmap",
 )
 
 ## Protein Comparison ############################################################
-
-

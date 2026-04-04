@@ -12,7 +12,14 @@ enrich_pathways(
   go_org = org.Hs.eg.db,
   kegg_org = "hsa",
   gene_col = "Genes",
-  adj = TRUE
+  adj = TRUE,
+  source = c("go", "custom"),
+  go_ont = "BP",
+  term2gene = NULL,
+  term2name = NULL,
+  run_ora = TRUE,
+  run_gsea = TRUE,
+  run_kegg = FALSE
 )
 }
 \arguments{
@@ -36,6 +43,24 @@ used for GO analysis and mapping gene IDs.}
 
 \item{gene_col}{A character string indicating the name of the column in the \code{DE}
 data frame that contains the gene symbols/identifiers. Defaults to \code{"Genes"}.}
+
+\item{source}{Pathway source. Use \code{"go"} for Gene Ontology or \code{"custom"} for
+user-supplied ontologies.}
+
+\item{go_ont}{GO ontology to test when \code{source = "go"}. Defaults to \code{"BP"}.}
+
+\item{term2gene}{Optional two-column data frame of term-to-gene mappings for
+custom ontologies. Gene IDs must match the IDs used for enrichment,
+currently Entrez IDs in the Shiny app workflow.}
+
+\item{term2name}{Optional two-column data frame of term-to-name mappings for
+custom ontologies.}
+
+\item{run_ora}{Logical; run over-representation analysis.}
+
+\item{run_gsea}{Logical; run gene set enrichment analysis.}
+
+\item{run_kegg}{Logical; also run KEGG analyses. Defaults to \code{FALSE}.}
 }
 \value{
 A list containing two named elements:

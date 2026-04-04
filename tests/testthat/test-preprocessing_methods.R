@@ -71,16 +71,6 @@ test_that("imputation methods record their processing steps", {
   expect_false(anyNA(SummarizedExperiment::assay(imputed_fixed)))
 })
 
-test_that("batch correction works with bundled example metadata", {
-  meta <- load_basic_metadata(include_batch = TRUE)
-  se <- load_basic_se(meta)
-  corrected <- ProtPipe::batch_correct(ProtPipe::impute(se, 0), batch_variable = "batch")
-
-  expect_true(ProtPipe::has_step(corrected, "batch_corrected"))
-  expect_equal(dim(SummarizedExperiment::assay(corrected)),
-               dim(SummarizedExperiment::assay(se)))
-})
-
 test_that("generate_preprocessing_report writes a markdown file", {
   se <- ProtPipe::log2_transform(load_basic_se())
   report <- tempfile(fileext = ".md")

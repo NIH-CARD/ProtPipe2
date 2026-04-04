@@ -96,7 +96,7 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
 
 ### minimum intensity filtering #################################################################
 
-#' @describeIn lod_filter Method for SummarizedExperiment objects
+#' @rdname lod_filter
 #' @export
 setMethod("lod_filter", signature(se = "SummarizedExperiment"),
           function(se, lod_col = "Buffer") {
@@ -152,7 +152,7 @@ setMethod("lod_filter", signature(se = "SummarizedExperiment"),
           }
 )
 
-#' @describeIn apply_min_intenisty Method for SummarizedExperiment objects
+#' @rdname apply_min_intenisty
 #' @export
 setMethod("apply_min_intenisty", signature(object = "SummarizedExperiment"),
           function(object, lod) {
@@ -176,7 +176,7 @@ setMethod("apply_min_intenisty", signature(object = "SummarizedExperiment"),
 
 ### outlier removal #################################################################
 
-#' @describeIn filter_proteins_by_percent
+#' @rdname filter_proteins_by_percent
 #' @export
 setMethod("filter_proteins_by_percent",
           signature(object = "SummarizedExperiment", percent = "numeric"),
@@ -232,7 +232,7 @@ setMethod("filter_proteins_by_percent",
           }
 )
 
-#' @describeIn filter_unique_proteins
+#' @rdname filter_unique_proteins
 #' @export
 setMethod("filter_unique_proteins",
           signature(object = "SummarizedExperiment", col = "character"),
@@ -291,7 +291,7 @@ setMethod("filter_unique_proteins",
   return(filtered_object)
 })
 
-#' @describeIn filter_outlier_samples
+#' @rdname filter_outlier_samples
 #' @export
 setMethod("filter_outlier_samples",
           signature(object = "SummarizedExperiment", sds = "numeric"),
@@ -335,7 +335,7 @@ setMethod("filter_outlier_samples",
           }
 )
 
-#' @describeIn filter_overlap
+#' @rdname filter_overlap
 #' @export
 setMethod("filter_overlap",
           signature(object = "SummarizedExperiment", condition_name = "character"),
@@ -416,7 +416,7 @@ setMethod("filter_overlap",
 )
 ### Normalization #################################################################
 
-#' @describeIn z_score
+#' @rdname z_score
 #' @export
 setMethod("z_score",
           signature(object = "SummarizedExperiment"),
@@ -436,7 +436,7 @@ setMethod("z_score",
 # normalization methods
 
 
-#' @describeIn median_normalize
+#' @rdname median_normalize
 #' @export
 setMethod("median_normalize",
           signature(object = "SummarizedExperiment"),
@@ -457,7 +457,7 @@ setMethod("median_normalize",
 })
 
 
-#' @describeIn "mean_normalize"
+#' @rdname mean_normalize
 #' @export
 setMethod("mean_normalize",
           signature(object = "SummarizedExperiment"),
@@ -478,7 +478,7 @@ setMethod("mean_normalize",
 
 ### Transformation #################################################################
 
-#' @describeIn log2_transform
+#' @rdname log2_transform
 #' @export
 setMethod("log2_transform",
           signature(object = "SummarizedExperiment"),
@@ -499,7 +499,7 @@ setMethod("log2_transform",
 ### Imputation #################################################################
 
 
-#' @describeIn impute
+#' @rdname impute
 #' @export
 setMethod(
   "impute",
@@ -532,7 +532,7 @@ setMethod(
   }
 )
 
-#' @describeIn impute_min
+#' @rdname impute_min
 #' @export
 ## Optional: use these if you have DelayedArray/DelayedMatrixStats installed
 ## library(DelayedArray)
@@ -586,7 +586,7 @@ setMethod(
   }
 )
 
-#' @describeIn impute_left_dist
+#' @rdname impute_left_dist
 #' @export
 setMethod(
   "impute_left_dist","SummarizedExperiment",
@@ -634,7 +634,7 @@ setMethod(
 
 ### Correction #################################################################
 
-#' @describeIn batch_correct Method for SummarizedExperiment objects.
+#' @rdname batch_correct
 #' @export
 setMethod("batch_correct",
           signature(object = "SummarizedExperiment", batch_variable = "character", bio_variables = "ANY"),

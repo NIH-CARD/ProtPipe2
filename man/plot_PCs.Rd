@@ -41,7 +41,7 @@ normalized data for the best results.
 
 }}
 \examples{
-# Create a sample ProtData object with missing data
+# Create a sample SummarizedExperiment object with missing data
 raw_data <- data.frame(
   Gene = c("GENEA", "GENEB", "GENEC", "GENED", "GENEE", "GENEF"),
   Control_1 = c(10, 11, 12, 13, 14, 15),
@@ -53,19 +53,19 @@ cond_df <- data.frame(
    SampleID = c("Control_1", "Control_2", "Treatment_1", "Treatment_2"),
    group = c("Control", "Control", "Treatment", "Treatment")
 )
-pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+se <- create_se(raw_data, sample_metadata = cond_df)
 
 # Impute missing values before plotting
-pd_obj_imputed <- impute(pd_obj, value = 13.5)
+se_imputed <- impute(se, value = 13.5)
 
 # Generate the plot of PC1 vs PC2
-p1 <- plot_pca(pd_obj_imputed, condition = "group")
+p1 <- plot_PCs(se_imputed, condition = "group")
 if (interactive()) {
   print(p1)
 }
 
 # Generate a plot of PC1 vs PC3
-p2 <- plot_pca(pd_obj_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
+p2 <- plot_PCs(se_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
 if (interactive()) {
   print(p2)
 }

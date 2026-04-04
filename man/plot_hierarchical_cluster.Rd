@@ -46,7 +46,7 @@ data that has been log-transformed and normalized before clustering.
 
 }}
 \examples{
-# Create a sample ProtData object
+# Create a sample SummarizedExperiment object
 raw_data <- data.frame(
   Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
   SampleA = c(10, 20, 15, 12),
@@ -54,16 +54,16 @@ raw_data <- data.frame(
   SampleC = c(25, 10, 30, 5),
   SampleD = c(26, 11, 31, 6)  # Similar to C
 )
-pd_obj <- create_protdata(dat = raw_data)
+se <- create_se(raw_data)
 
 # Run with default methods. We expect A/B and C/D to cluster together.
-p1 <- plot_hierarchical_cluster(pd_obj)
+p1 <- plot_hierarchical_cluster(se)
 if (interactive()) {
   print(p1)
 }
 
 # Run with different methods
-p2 <- plot_hierarchical_cluster(pd_obj, dist_method = "manhattan", hclust_method = "ward.D2")
+p2 <- plot_hierarchical_cluster(se, dist_method = "manhattan", hclust_method = "ward.D2")
 if (interactive()) {
   print(p2)
 }

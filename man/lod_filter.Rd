@@ -27,8 +27,3 @@ against a specific Limit of Detection (LOD). The LOD values can be sourced
 either from a metadata column (rowData) or a specific reference sample
 (e.g., a Buffer column in the assay).
 }
-\section{Functions}{
-\itemize{
-\item \code{lod_filter(SummarizedExperiment)}: Method for SummarizedExperiment objects
-
-}}

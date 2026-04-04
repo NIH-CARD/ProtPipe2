@@ -24,11 +24,6 @@ The original \code{object} with the assay matrix updated to contain
 Filters assay data by converting values below a specified Limit of Detection
 (LOD) to \code{NA}.
 }
-\section{Functions}{
-\itemize{
-\item \code{apply_min_intenisty(SummarizedExperiment)}: Method for SummarizedExperiment objects
-
-}}
 \examples{
 # Create a mock SummarizedExperiment
 counts <- matrix(c(10, 5, 2, 8, 1, 15), nrow = 3, ncol = 2)

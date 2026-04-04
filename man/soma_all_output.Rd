@@ -7,7 +7,10 @@
 soma_all_output(DT)
 }
 \arguments{
-\item{DT}{}
+\item{DT}{A SomaScan ADAT object or data frame containing SomaScan measurements.}
+}
+\value{
+A list containing formatted \code{data} and \code{condition} data frames.
 }
 \description{
 format soma adat into data and condition dataframes

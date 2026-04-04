@@ -4,7 +4,12 @@
 \alias{gse_go}
 \title{Perform Gene Ontology (GO) Gene Set Enrichment Analysis (GSEA)}
 \usage{
-gse_go(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db)
+gse_go(
+  gene_list,
+  enrich_pvalue = 1,
+  org = org.Hs.eg.db::org.Hs.eg.db,
+  ont = "BP"
+)
 }
 \arguments{
 \item{gene_list}{A named numeric vector of genes. Names should be Entrez IDs
@@ -13,6 +18,8 @@ and values should be the ranking metric (e.g., log2 fold change).}
 \item{enrich_pvalue}{The p-value cutoff for enrichment. Defaults to 1 (no cutoff).}
 
 \item{org}{An organism annotation database (e.g., org.Hs.eg.db).}
+
+\item{ont}{GO ontology to test. One of \code{"BP"}, \code{"MF"}, \code{"CC"}, or \code{"ALL"}.}
 }
 \value{
 A gseResult object if the analysis is successful and finds

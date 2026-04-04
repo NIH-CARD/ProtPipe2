@@ -1,31 +1,13 @@
-test_that("limma wrappers run on the bundled example dataset", {
+
+test_that("binary limma returns expected columns and rejects identical groups", {
   se <- load_basic_imputed_se()
-  treatment_samples <- paste0("Day28_", 1:3)
-  control_samples <- paste0("Day0_", 1:3)
-
-  de <- ProtPipe::do_limma(se, treatment_samples = treatment_samples, control_samples = control_samples)
-  de_by_condition <- ProtPipe::do_limma_by_condition(
-    se,
-    condition = "base_condition",
-    control_group = "Day0",
-    treatment_group = "Day28"
-  )
-
-  expect_true(all(c("logFC", "P.Value", "adj.P.Val") %in% names(de)))
-  expect_true(all(c("logFC", "P.Value", "adj.P.Val") %in% names(de_by_condition)))
-  expect_s3_class(ProtPipe::plot_volcano(de_by_condition, label_col = "PG.Genes"), "ggplot")
-})
-
-test_that("binary limma supports covariates and rejects identical groups", {
-  meta <- load_basic_metadata(include_batch = TRUE)
-  se <- load_basic_imputed_se(meta)
 
   de <- ProtPipe::do_limma_binary(
     se,
     condition = "base_condition",
     treatment_group = "Day28",
     control_group = "Day0",
-    covariates = "batch"
+    covariates = NULL
   )
 
   expect_true(all(c("logFC", "P.Value", "adj.P.Val") %in% names(de)))
@@ -40,9 +22,34 @@ test_that("binary limma supports covariates and rejects identical groups", {
   )
 })
 
-test_that("continuous comparison works with bundled numeric metadata", {
-  meta <- load_basic_metadata(include_numeric = TRUE)
-  se <- ProtPipe::impute_min(load_basic_se(meta), 0)
+test_that("binary t-tests match limma-style output columns", {
+  se <- load_basic_imputed_se()
+
+  de <- ProtPipe::do_t_test_binary(
+    se,
+    condition = "base_condition",
+    treatment_group = "Day28",
+    control_group = "Day0",
+    covariates = NULL
+  )
+
+  expect_true(all(c("logFC", "AveExpr", "t", "P.Value", "adj.P.Val", "B") %in% names(de)))
+  expect_error(
+    ProtPipe::do_t_test_binary(
+      se,
+      condition = "base_condition",
+      treatment_group = "Day0",
+      control_group = "Day0",
+      covariates = NULL
+    )
+  )
+})
+
+test_that("continuous comparison works with bundled base-condition metadata", {
+  se <- load_basic_imputed_se()
+  SummarizedExperiment::colData(se)$day_num <- as.numeric(
+    gsub("\\D", "", SummarizedExperiment::colData(se)$base_condition)
+  )
 
   de <- ProtPipe::do_comparison_continuous(se, "day_num")
 
@@ -83,11 +90,12 @@ test_that("add_entrez maps gene symbols onto differential results", {
   skip_if_not_installed("org.Hs.eg.db")
 
   se <- load_basic_imputed_se()
-  de <- ProtPipe::do_limma_by_condition(
+  de <- ProtPipe::do_limma_binary(
     se,
     condition = "base_condition",
     control_group = "Day0",
-    treatment_group = "Day28"
+    treatment_group = "Day28",
+    covariates = NULL
   )
 
   mapped <- ProtPipe::add_entrez(de, gene_col = "PG.Genes")

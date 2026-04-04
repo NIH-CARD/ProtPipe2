@@ -8,7 +8,8 @@ enrich_go(
   gene_id,
   all_gene_vector,
   enrich_pvalue = 1,
-  org = org.Hs.eg.db::org.Hs.eg.db
+  org = org.Hs.eg.db::org.Hs.eg.db,
+  ont = "BP"
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ gene IDs against which to test.}
 \item{enrich_pvalue}{The p-value and q-value cutoff for enrichment. Defaults to 1.}
 
 \item{org}{An organism annotation database (e.g., org.Hs.eg.db).}
+
+\item{ont}{GO ontology to test. One of \code{"BP"}, \code{"MF"}, \code{"CC"}, or \code{"ALL"}.}
 }
 \value{
 An enrichResult object if the analysis is successful and finds

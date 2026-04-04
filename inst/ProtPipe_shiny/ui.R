@@ -2,7 +2,7 @@
 #options(shiny.maxRequestSize=5000 * 1024^2)
 source("helpers.R")
 
-workflow_header <- function(title) {
+workflow_header <- function(title, purpose) {
   div(
     style = "width: 100%; margin-bottom: 1.25rem;",
     div(
@@ -22,12 +22,25 @@ workflow_header <- function(title) {
     ),
     card(
       card_body(
-        div(
-          style = "width: 100%; text-align: center; font-size: 2.15rem; font-weight: 700; line-height: 1.15;",
-          title
+        div(style = "width: 100%; text-align: center;",
+          div(
+            style = "font-size: 2.15rem; font-weight: 700; line-height: 1.15;",
+            title
+          ),
+          div(
+            style = "margin-top: 0.45rem; font-size: 1rem; color: #5b6470;",
+            purpose
+          )
         )
       )
     )
+  )
+}
+
+page_section <- function(label) {
+  div(
+    style = "margin: 1.25rem 0 0.75rem 0; padding-bottom: 0.35rem; border-bottom: 2px solid #d9dee5; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #4b5563;",
+    label
   )
 }
 
@@ -73,20 +86,21 @@ ui <- page_sidebar(
   ### Parameter input screen ############################################################################################
   conditionalPanel(condition = "input.select == 0",
                    fluidPage(
-                       workflow_header("Input"),
+                       workflow_header("Input", "Load a proteomics intensity matrix and optional sample metadata."),
+                       page_section("Inputs"),
                        card(
-                         card_header(h4("Protein Intensity File")),
+                         card_header(h4("Protein Intensity Data")),
                          fluidRow(
                            column(width = 6, fileUploadUI("intensity", label = NULL)),
                            column(width = 6, verbatimTextOutput("file_type_output", T))),
                          fluidRow(
-                           column(width = 6, checkboxInput("use_example", "Or use our iPSC to neuron differentiation example dataset", value = FALSE),),
+                           column(width = 6, checkboxInput("use_example", "Use the iPSC-to-neuron example dataset", value = FALSE),),
                            column(width = 6, downloadButton("download_ex", "Download example dataset"))),
                          uiOutput("column_range_ui"),
                          verbatimTextOutput("range_result")),
                        card(
-                         card_header(h4("Sample Condition File")),
-                         p("make sure row names match the column names of the intensity file exactly"),
+                         card_header(h4("Sample Metadata Table")),
+                         p("Make sure sample names match the intensity matrix column names exactly."),
                          fileUploadUI("sample_condition", label = NULL)
                        )
                    )
@@ -96,9 +110,11 @@ ui <- page_sidebar(
   ### Quality control screen ############################################################################################
   conditionalPanel(condition = "input.select == 1",
                    fluidPage(
-                     workflow_header("Quality Control"),
-                     uiOutput("quality_control_condition"),
-                     card(card_header("Coefficients of Variation (requires condition file)"),
+                     workflow_header("Quality Control", "Assess sample quality, replicate consistency, and overall data structure."),
+                     page_section("Options"),
+                     card(uiOutput("quality_control_condition")),
+                     page_section("Results"),
+                     card(card_header("Coefficients of Variation (requires metadata table)"),
                           selectInput("cv_plot_type", "Select format:", choices = c("violin", "jitter"), selected = "violin"),
                           plotOutput("cv_graph"),
                           downloadButton("download_cv", "Download Plot as PDF"),
@@ -108,7 +124,7 @@ ui <- page_sidebar(
                           plotOutput("intensity_graph"),
                           downloadButton("download_intensity", "Download Plot as PDF")
                      ),
-                     card(card_header("Non-zero Protein Group Counts"),
+                     card(card_header("Protein Group Counts"),
                           plotOutput("pgroup_graph"),
                           downloadButton("download_pg", "Download Plot as PDF"),
                           downloadButton("download_pg_tsv", "Download data as tsv")
@@ -123,32 +139,33 @@ ui <- page_sidebar(
   ### Pre Processing Screen ############################################################################################
   conditionalPanel(condition = "input.select == 2",
                    fluidPage(
-                     workflow_header("Pre-Processing"),
+                     workflow_header("Pre-Processing", "Filter, transform, normalize, impute, and batch-correct the dataset."),
+                          page_section("Options"),
                           card(card_header("1. Minimum Intensity Filtering"),
                                fluidRow(
                                   column(width=6,
-                                      checkboxInput("min_int_filter", label = "set minimum intensity", value = FALSE),
-                                      numericInput("min_int_filter_lod", label="min: ", value = 0)),
+                                      checkboxInput("min_int_filter", label = "Apply minimum intensity filter", value = FALSE),
+                                      numericInput("min_int_filter_lod", label="Minimum intensity:", value = 0)),
                                   column(width=6,uiOutput("lod_filtering"))
                                )),
                           card(card_header("2. Outlier Removal"),
                             fluidRow(
                             column(width = 6,
-                                   checkboxInput("remove_outliers", label = "remove outlier samples", value = FALSE),
+                                   checkboxInput("remove_outliers", label = "Remove outlier samples", value = FALSE),
                                    numericInput("outlier_sds", label = "Remove samples with protein groups outside n standard deviations from the mean", value = 3)),
                             column(width = 6,
-                                   checkboxInput("remove_sparse_proteins", label = "remove outlier proteins", value = FALSE),
+                                   checkboxInput("remove_sparse_proteins", label = "Remove sparse proteins", value = FALSE),
                                    numericInput("sparse_protein_percent", label = "Remove proteins present in less than n% of samples", value = 30)))),
                           card(card_header("3. Transformation"),
-                               checkboxInput("log2_transform", label = "log2_transform", value = FALSE)),
+                               checkboxInput("log2_transform", label = "Log2 transform", value = FALSE)),
                           card(card_header("4. Normalization"),
-                               checkboxInput("normalize", label = "normalize", value = FALSE),
-                               selectInput("normalize_method", label = "normalize_method", choices = c("mean", "median"), selected = "median")),
+                               checkboxInput("normalize", label = "Normalize", value = FALSE),
+                               selectInput("normalize_method", label = "Normalization method", choices = c("mean", "median"), selected = "median")),
                           card(card_header("5. Imputation"),
                                fluidRow(
                                  column(width = 6,
-                                        checkboxInput("impute", label = "impute", value = TRUE),
-                                        selectInput("imputation_method", label = "imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
+                                        checkboxInput("impute", label = "Impute missing values", value = TRUE),
+                                        selectInput("imputation_method", label = "Imputation method", choices = c("fixed value", "minimum", "left-shifted distribution"), selected = "fixed value")),
                                  column(width = 6,
                                         conditionalPanel(
                                           condition = "input.imputation_method == 'fixed value'",
@@ -165,8 +182,9 @@ ui <- page_sidebar(
                                         )
                                  ))),
                           card(card_header("6. Batch Correction"),
-                               checkboxInput("batch_correct", label = "batch correct", value = FALSE),
+                               checkboxInput("batch_correct", label = "Batch correct", value = FALSE),
                                uiOutput("batch_correct_column")),
+                          page_section("Downloads"),
                           card(
                             downloadButton("download_data", "Download pre-processed data"),
                             downloadButton("download_preprocessing_report", "Download pre-processing report"))
@@ -174,9 +192,11 @@ ui <- page_sidebar(
   ### Clustering screen ############################################################################################
   conditionalPanel(condition = "input.select == 3",
                    fluidPage(
-                     workflow_header("Clustering / Dimensionality Reduction"),
-                     uiOutput("clustering_condition"),
-                     card(card_header("heirarchial clustering"),
+                     workflow_header("Clustering / Dimensionality Reduction", "Visualize sample similarity after preprocessing."),
+                     page_section("Options"),
+                     card(uiOutput("clustering_condition")),
+                     page_section("Results"),
+                     card(card_header("Hierarchical Clustering"),
                           plotOutput("hcluster"),
                           downloadButton("download_hcluster", "Download Plot as PDF")
                      ),card(card_header("PCA (requires condition file)"),
@@ -196,8 +216,8 @@ ui <- page_sidebar(
   ),
   ### Differential Intensity ############################################################################################
   conditionalPanel(condition = "input.select == 4",
-                   workflow_header("Differential Expression"),
-                   card(card_header("Options"),
+                   workflow_header("Differential Expression", "Identify proteins associated with group differences or continuous variables."),
+                   card(card_header("Volcano Plot Options"),
                         fluidPage(
                           radioButtons(
                             inputId = "outcome_type",
@@ -237,7 +257,7 @@ ui <- page_sidebar(
                      card(card_header("Pathway Enrichment Options"),
                         fluidRow(
                           column(width=6,
-                                 numericInput("enrich_pval", label = "Enter enrichment pvalue cutoff", value = 0.05)
+                                 numericInput("enrich_pval", label = "Enrichment p-value cutoff", value = 0.05)
                                  ,
                                  selectInput("organism", "Select Organism:", choices = names(organism_map), selected = "Human"),
                                  uiOutput("gene_col")
@@ -245,7 +265,7 @@ ui <- page_sidebar(
                           column(width=6,
                                  actionButton("run_enrichment", "Run Pathway Analysis", class = "btn-primary"),
                                  div(style = "margin-top: 0.75rem;"),
-                                 selectInput("pathway_source", "Ontology source:", choices = c("GO", "Custom ontology"), selected = "GO"),
+                                 selectInput("pathway_source", "Pathway source:", choices = c("GO", "Custom ontology"), selected = "GO"),
                                  conditionalPanel(
                                    condition = "input.pathway_source == 'GO'",
                                    selectInput("go_ontology", "GO ontology:", choices = c("BP", "MF", "CC"), selected = "BP")
@@ -267,7 +287,7 @@ ui <- page_sidebar(
                           column(width=6 ,card(card_header("Downregulated Pathways"),plotOutput("ora_down_enrich")))
                         ),
                         fluidRow(
-                          column(width=12 ,card(card_header("Gene Set Enrichment"),plotOutput("gsea_enrich")))
+                          column(width=12 ,card(card_header("Gene Set Enrichment Analysis"),plotOutput("gsea_enrich")))
                         ),
                         downloadButton("download_enrichment", "Download pathway enrichment results")
                      )
@@ -275,7 +295,7 @@ ui <- page_sidebar(
 
   ### Protein View ############################################################################################
   conditionalPanel(condition = "input.select == 5",
-                   workflow_header("Abundance Profiling"),
+                   workflow_header("Abundance Profiling", "Inspect selected proteins and feature sets in more detail."),
                    card(card_header("Heatmap"),
                      uiOutput("protein_label"),
                      uiOutput("heatmap_condition"),
@@ -289,7 +309,6 @@ ui <- page_sidebar(
                           downloadButton("download_hmap", "Download Plot as PDF")
                      )
                    ),
-
                    card(card_header("Protein Barchart"),
                      uiOutput("pv_prot_meta"),
                      uiOutput("pv_protein"),

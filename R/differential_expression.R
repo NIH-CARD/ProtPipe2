@@ -1,89 +1,3 @@
-#' Title
-#'
-#' @param object
-#'
-#' @return
-#' @export
-#'
-setGeneric("do_t_test", function(object, treatment_samples, control_samples, meta_col) standardGeneric("do_t_test"))
-
-
-#' Title
-#'
-#' @param ProtData
-#'
-#' @return
-#' @export
-#'
-setMethod("do_t_test", "ProtData", function(object, treatment_samples, control_samples) {
-
-  col <- names(object@prot_meta)
-  DT <- cbind(object@prot_meta, object@data)
-  meta <- object@condition
-
-  n_treatment <- length(treatment_samples)
-  n_control <- length(control_samples)
-  #ttest table
-  # Initial data transformation
-  DT_ttest <- DT[,c(col, treatment_samples, control_samples)]
-
-  # Convert NA to 0 and add missing value calculations
-  DT_ttest <- DT_ttest %>%
-    # Convert NA to 0
-    dplyr::mutate(across(where(is.numeric), ~ dplyr::coalesce(., 0))) %>%
-    # Calculate missing values
-    dplyr::mutate(
-      missing_value = rowSums(dplyr::select(., -col) == 0),  # Total missing values per row, excluding PTM column
-      missing_value_c = rowSums(dplyr::select(., all_of(control_samples)) == 0),  # Missing values in control samples per row
-      missing_value_t = rowSums(dplyr::select(., all_of(treatment_samples)) == 0)  # Missing values in treatment samples per row
-    ) %>%
-    # Filter features with > 50% missing values
-    dplyr::filter(
-      !(missing_value_t > (n_treatment / 2) & missing_value_t < n_treatment),
-      !(missing_value_c > (n_control / 2) & missing_value_c < n_control),
-      missing_value != (n_treatment + n_control)
-    ) %>%
-    # Select relevant columns
-    dplyr::select(-missing_value, -missing_value_c, -missing_value_t)%>%
-    as.data.frame()
-  # Restore row names from PTM column and remove the PTM column
-  # rownames(DT_ttest) <- DT_ttest[,col]
-  # DT_ttest[,col]=NULL
-
-  prot_meta <- DT_ttest[,col]
-  DT_ttest[,col] <- NULL
-
-  # Perform t-test  on treatment and control columns
-  t_test <- apply(DT_ttest, 1, function(x){
-    a =factor(c(rep('treatment',n_treatment),
-                rep("control",n_control)),
-              levels = c('treatment',"control"))
-    fvalue=var.test(x~a)
-    if (!is.na(fvalue$p.value)){
-      if (fvalue$p.value > 0.05){
-        result <- t.test(x~a, var.equal = T)
-      }else{
-        result <- t.test(x~a, var.equal = F)
-      }
-    }
-    treatment_estimate <- as.numeric(unlist(result$estimate[1]))
-    control_estimate <- as.numeric(unlist(result$estimate[2]))
-    return(data.table::data.table('P.Value'=result$p.value,
-                      'treatment_estimate'=treatment_estimate,
-                      'control_estimate'=control_estimate)
-    )
-  })
-  t_test <- data.table::rbindlist(t_test)
-  result_ttest <- cbind(prot_meta, DT_ttest, t_test)
-  # Merge DT and result_ttest based on PTM column
-  #result_ttest <- merge(DT[, name, drop=FALSE], result_ttest, by.x=col, by.y='row.names')
-  # Calculate logFC and adjust P-values using dplyr
-  result_ttest <- result_ttest %>%
-    dplyr::mutate(logFC = log2((treatment_estimate+1) / (control_estimate + 1)),
-           adj.P.Val = p.adjust(P.Value, method='BH'))
-  return(result_ttest)
-})
-
 #' Helper function to filter out sparse proteins
 filter_features <- function(DT_limma, control_samples, treatment_samples, alpha){
   n_treatment <- length(treatment_samples)
@@ -111,115 +25,6 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 
 }
 
-
-#' Perform limma differential expression on a ProtData object
-#'
-#' This function takes a `SummarizedExperiment` object and two vectors containing the column names
-#' of the treatment and control samples. It filters out proteins found in fewer than 50%
-#' of samples, performs a limma-based differential expression analysis, and returns
-#' a data frame with metadata, intensities, log fold changes, and p-values.
-#'
-#' @param object A `SummarizedExperiment` object containing protein intensities, metadata, and condition info.
-#' @param treatment_samples Character vector of column names representing treatment samples.
-#' @param control_samples Character vector of column names representing control samples.
-#'
-#' @return A data frame containing filtered proteins with metadata, intensity values, log fold change,
-#' p-value, and adjusted p-value.
-#' @export
-#'
-setGeneric("do_limma", function(object, treatment_samples, control_samples) standardGeneric("do_limma"))
-
-setMethod("do_limma", "SummarizedExperiment", function(object, treatment_samples, control_samples) {
-  meta_cols <- names(rowData(object))
-  if (ProtPipe::has_step(object, "log2_transform")){
-    data <- assay(object) %>% as.data.frame()
-  }else{
-    object <- ProtPipe::log2_transform(object)
-    data <- assay(object)%>% as.data.frame()
-  }
-
-  # Stop if data contains missing values
-  if (anyNA(data)) {
-    stop("Missing values (NA) found. Please impute before running PCA.")
-  }
-
-  DT <- cbind(rowData(object), data) %>% as.data.frame(make.names = FALSE)
-  meta <- colData(object)
-  # treatment_samples=grep(treatment,colnames(Log2_DT),value = T)
-  # control_samples=grep(control,colnames(Log2_DT),value = T)
-  DT_limma <- DT[,c(treatment_samples, control_samples)]
-  n_treatment <- length(treatment_samples)
-  n_control <- length(control_samples)
-  # Convert NA to 0
-  #DT_limma[is.na(DT_limma)] <- 0
-
-  # Filter out sparse proteins (not doing this anymore)
-  #DT_limma <- filter_features(DT_limma, control_samples, treatment_samples, alpha = 0.5)
-
-  #design
-  group_list <- factor(c(rep('treatment',n_treatment),
-                         rep("control",n_control)),
-                       levels = c('treatment',"control"))
-  limma_design <- model.matrix(~0+group_list)
-  colnames(limma_design) <- levels(group_list)
-  rownames(limma_design) <- colnames(DT_limma)
-  cont.matrix <- limma::makeContrasts(contrasts = paste0(unique(group_list),collapse = "-"),levels = limma_design)
-
-  #limma
-  fit <- limma::lmFit(DT_limma, limma_design)
-  fit2 <- limma::contrasts.fit(fit, cont.matrix)
-  fit2 <- limma::eBayes(fit2, trend=TRUE)
-
-  result_limma <- limma::topTable(fit2, coef=1,n=Inf)
-  result_limma=merge(DT[,c(meta_cols,treatment_samples, control_samples)],result_limma,by.x=0,by.y=0)
-  result_limma$Row.names <- NULL
-  # sort by adjusted o value and log fold change
-  result_limma_sorted <- result_limma[order(result_limma$adj.P.Val, -abs(result_limma$logFC)), ]
-  return(result_limma_sorted)
-  }
-)
-
-
-#' Perform DEA using the condition labels of the protdata object
-#'
-#' @param object
-#' @param condition the name of a column in the condition slot that contains the comparison group names.
-#' @param control_group the name of the control group
-#' @param treatment_group the name of the treatment group
-#'
-#' @return
-#' @export
-#'
-setGeneric("do_limma_by_condition", function(object, condition, control_group, treatment_group) standardGeneric("do_limma_by_condition"))
-
-setMethod("do_limma_by_condition", "SummarizedExperiment", function(object, condition, control_group, treatment_group) {
-  meta <- colData(object) %>% as.data.frame()
-  conditions <- names(meta)
-
-  if (!(condition %in% conditions)) {
-    stop("The 'condition' must be a column name of the ProtData condition metadata.")
-  }
-
-  groups <- unique(meta[[condition]])
-  if (!(control_group %in% groups && treatment_group %in% groups)) {
-    stop("Both control and treatment groups must be valid entries in the condition metadata.")
-  }
-
-  control_samples <- rownames(meta %>% dplyr::filter(.data[[condition]] == control_group))
-  treatment_samples <- rownames(meta %>% dplyr::filter(.data[[condition]] == treatment_group))
-
-
-  treatment_samples <<- treatment_samples
-  control_samples <<- control_samples
-  object <<- object
-  control_group <<- control_group
-  treatment_group <<- treatment_group
-  if (length(control_samples) < 2 || length(treatment_samples) < 2) {
-    stop("Each of the control and treatment groups must contain at least 2 samples.")
-  }
-
-  return(ProtPipe::do_limma(object, treatment_samples, control_samples))
-})
 #' Perform limma differential expression on a SummarizedExperiment
 #'
 #' This function takes a `SummarizedExperiment` object and uses group labels in
@@ -324,6 +129,123 @@ setMethod("do_limma_binary", "SummarizedExperiment",
             # sort by adjusted p-value then effect size
             result_limma_sorted <- result_limma[order(result_limma$adj.P.Val, -abs(result_limma$logFC)), ]
             return(result_limma_sorted)
+          })
+
+#' Perform t-test differential expression on a SummarizedExperiment
+#'
+#' This function takes a `SummarizedExperiment` object and uses group labels in
+#' `colData(object)` to perform differential expression between a treatment group
+#' and a control group using per-protein t-tests. Optional covariates can be
+#' regressed out before testing.
+#'
+#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
+#' @param condition String: column name in `colData(object)` that holds group labels.
+#' @param treatment_group String: name of treatment group in `condition`.
+#' @param control_group String: name of control group in `condition`.
+#' @param covariates Optional character vector: column names in `colData(object)` to regress out before testing.
+#'
+#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @export
+#'
+setGeneric("do_t_test_binary", function(object,
+                                       condition,
+                                       treatment_group,
+                                       control_group,
+                                       covariates = NULL) {
+  standardGeneric("do_t_test_binary")
+})
+
+setMethod("do_t_test_binary", "SummarizedExperiment",
+          function(object, condition, treatment_group, control_group, covariates) {
+            meta_cols <- names(rowData(object))
+            if (ProtPipe::has_step(object, "log2_transform")) {
+              data <- assay(object) %>% as.data.frame()
+            } else {
+              object <- ProtPipe::log2_transform(object)
+              data <- assay(object) %>% as.data.frame()
+            }
+            if (anyNA(data)) stop("Missing values detected. Please impute before running t-tests.")
+
+            DT <- cbind(rowData(object), data) %>% as.data.frame()
+            meta <- colData(object) %>% as.data.frame()
+
+            if (!(condition %in% colnames(meta))) {
+              stop("`condition` must be a column name in colData(object).")
+            }
+            if (treatment_group == control_group) {
+              stop("Treatment group and control group must be different.")
+            }
+            if (!is.null(covariates) && condition %in% covariates) {
+              stop("Covariates cannot include the grouping variable used for treatment/control.")
+            }
+
+            groups <- meta[[condition]]
+            if (!(treatment_group %in% groups && control_group %in% groups)) {
+              stop("Both treatment and control groups must exist in `condition`.")
+            }
+
+            treatment_samples <- rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE])
+            control_samples <- rownames(meta[meta[[condition]] == control_group, , drop = FALSE])
+
+            if (length(treatment_samples) < 2 || length(control_samples) < 2) {
+              stop("Each group must contain at least 2 samples.")
+            }
+
+            selected_samples <- c(treatment_samples, control_samples)
+            feature_ids <- rownames(object)
+            test_data <- as.matrix(DT[, selected_samples, drop = FALSE])
+            if (is.null(feature_ids) || length(feature_ids) != nrow(test_data)) {
+              feature_ids <- seq_len(nrow(test_data))
+            }
+
+            if (!is.null(covariates)) {
+              for (cov in covariates) {
+                if (!(cov %in% colnames(meta))) {
+                  stop(paste("Covariate", cov, "not found in colData(object)."))
+                }
+              }
+
+              covariate_df <- meta[selected_samples, covariates, drop = FALSE]
+              covariate_design <- stats::model.matrix(~ ., data = covariate_df)
+
+              residualized <- t(apply(test_data, 1, function(y) {
+                fit <- stats::lm.fit(x = covariate_design, y = as.numeric(y))
+                stats::residuals(fit) + stats::coef(fit)[1]
+              }))
+              colnames(residualized) <- selected_samples
+              rownames(residualized) <- rownames(test_data)
+              test_data <- residualized
+            }
+
+            test_results <- lapply(seq_len(nrow(test_data)), function(i) {
+              treat_vals <- as.numeric(test_data[i, treatment_samples])
+              ctrl_vals <- as.numeric(test_data[i, control_samples])
+
+              tt <- stats::t.test(treat_vals, ctrl_vals)
+              data.frame(
+                Row.names = feature_ids[i],
+                logFC = mean(treat_vals) - mean(ctrl_vals),
+                AveExpr = mean(c(treat_vals, ctrl_vals)),
+                t = unname(tt$statistic),
+                P.Value = tt$p.value,
+                B = NA_real_,
+                stringsAsFactors = FALSE
+              )
+            })
+
+            result_ttest <- do.call(rbind, test_results)
+            result_ttest$adj.P.Val <- stats::p.adjust(result_ttest$P.Value, method = "BH")
+
+            result_ttest <- merge(
+              DT[, c(meta_cols, treatment_samples, control_samples), drop = FALSE],
+              result_ttest,
+              by.x = 0,
+              by.y = "Row.names"
+            )
+            result_ttest$Row.names <- NULL
+
+            result_ttest_sorted <- result_ttest[order(result_ttest$adj.P.Val, -abs(result_ttest$logFC)), ]
+            return(result_ttest_sorted)
           })
 
 
@@ -1203,5 +1125,3 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   }
   return(list(results = datas, plots = plots))
 }
-
-

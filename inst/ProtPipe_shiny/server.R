@@ -916,7 +916,7 @@ server <- function(input, output, session) {
   output$label_col <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
-    selectInput("label_col", "select the column used to label proteins:", choices = choices)
+    selectInput("label_col", "Column used for protein labels:", choices = choices)
   })
   output$logfc <- renderUI({
     if (input$outcome_type == "continuous"){
@@ -1049,7 +1049,7 @@ server <- function(input, output, session) {
   output$gene_col <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
-    selectInput("gene_col", "select the column containing official gene symbols (e.g., TP53):", choices = choices)
+    selectInput("gene_col", "Column containing official gene symbols (for example, TP53):", choices = choices)
   })
 
   #go and kegg db for different organisms
@@ -1199,7 +1199,7 @@ server <- function(input, output, session) {
   output$protein_label <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
-    selectInput("protein_label", "select the column used to label proteins:", choices = choices)
+    selectInput("protein_label", "Column used for protein labels:", choices = choices)
   })
 
   #heatmap subset
@@ -1218,14 +1218,14 @@ server <- function(input, output, session) {
 
   output$heatmap_condition <- renderUI({
     req(intensity_file())
-    choices <- c("no goruping", names(colData(prot_data())))
-    selectInput("heatmap_condition", "Select condition to group samples:", choices = choices)
+    choices <- c("No grouping", names(colData(prot_data())))
+    selectInput("heatmap_condition", "Group samples by:", choices = choices)
   })
 
   heatmap_condition <- reactive({
     req(intensity_file())  # Ensure file is uploaded
     req(input$heatmap_condition)  # Ensure file is uploaded
-    if(is.null(input$heatmap_condition) || input$heatmap_condition == "no goruping"){
+    if(is.null(input$heatmap_condition) || input$heatmap_condition == "No grouping"){
       return(NULL)
     }
     return(input$heatmap_condition)
@@ -1276,7 +1276,7 @@ server <- function(input, output, session) {
   output$pv_prot_meta <- renderUI({
     req(intensity_file())
     choices <- names(rowData(prot_data()))
-    selectInput("pv_prot_meta", "select the column used to label proteins:", choices = choices)
+    selectInput("pv_prot_meta", "Column used for protein labels:", choices = choices)
   })
 
   #select condition
@@ -1284,14 +1284,14 @@ server <- function(input, output, session) {
     req(intensity_file())
     req(input$pv_prot_meta)
     choices <- rowData(prot_data())[[input$pv_prot_meta]]
-    selectInput("pv_protein", "select a protein:", choices = choices)
+    selectInput("pv_protein", "Select a protein:", choices = choices)
   })
 
   #select condition
   output$pv_condition <- renderUI({
     req(intensity_file())
     choices <- c("No grouping", names(colData(prot_data())))
-    selectInput("pv_condition", "select the column used to group samples:", choices = choices)
+    selectInput("pv_condition", "Group samples by:", choices = choices)
   })
 
   pv_selected_condition <-reactive({
@@ -1306,7 +1306,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     req(pv_selected_condition())
     choices <- colData(prot_data())[[pv_selected_condition()]]
-    selectInput("barchart_selected_groups", "select groups to display:", choices = choices, multiple = TRUE,selected = NULL)
+    selectInput("barchart_selected_groups", "Groups to display:", choices = choices, multiple = TRUE,selected = NULL)
   })
 
   protein_barchart_reactive <- reactive({

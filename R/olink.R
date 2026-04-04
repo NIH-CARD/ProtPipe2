@@ -31,14 +31,12 @@ create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
 }
 
 
-#' Title
+#' Format Olink NPX Data into Data and Condition Tables
 #'
-#' @param my_npx 
+#' @param my_npx A data frame of Olink NPX measurements.
 #'
-#' @return
+#' @return A list containing `data`, `condition`, and `number_samples`.
 #' @export
-#'
-#' @examples
 olink_all_output <- function(my_npx){
   npx_wide <- my_npx |>
     # dplyr::filter(AssayType == "assay") |>
