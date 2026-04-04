@@ -62,25 +62,27 @@ This function requires the `umap` and `ggplot2` packages.
 ``` r
 # This example requires the 'umap' package
 if (requireNamespace("umap", quietly = TRUE)) {
-  # Create a sample ProtData object
+  # Create a sample SummarizedExperiment object
   raw_data <- data.frame(
     Gene = paste0("GENE", 1:10),
     Control_1 = rnorm(10, 10), Control_2 = rnorm(10, 10),
     Treat_A_1 = rnorm(10, 12), Treat_A_2 = rnorm(10, 12),
     Treat_B_1 = rnorm(10, 15), Treat_B_2 = rnorm(10, 15)
   )
-  pd_obj <- create_protdata(dat = raw_data)
+  se <- create_se(raw_data)
 
   # For reproducible UMAP results, set a seed!
   set.seed(42)
 
   # Generate the UMAP plot
-  p <- plot_umap(pd_obj, n_neighbors = 3)
+  p <- plot_umap(se, neighbors = 3)
 
   # The plot can be printed in an interactive session
   if (interactive()) {
     print(p)
   }
 }
-#> Error: unable to find an inherited method for function ‘plot_umap’ for signature ‘object = "ProtData"’
+#> `intensity_cols` not provided. Detecting numeric columns as intensity data.
+#> Warning: `sample_metadata` not provided. Generating a basic version from column names.
+#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 ```

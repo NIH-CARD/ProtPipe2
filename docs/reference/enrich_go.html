@@ -49,7 +49,8 @@ find enriched GO terms (Biological Process, Molecular Function, Cellular Compone
 <span>  <span class="va">gene_id</span>,</span>
 <span>  <span class="va">all_gene_vector</span>,</span>
 <span>  enrich_pvalue <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  org <span class="op">=</span> <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/org.Hs.eg.db/man/org.Hs.egBASE.html" class="external-link">org.Hs.eg.db</a></span></span>
+<span>  org <span class="op">=</span> <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/org.Hs.eg.db/man/org.Hs.egBASE.html" class="external-link">org.Hs.eg.db</a></span>,</span>
+<span>  ont <span class="op">=</span> <span class="st">"BP"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -72,6 +73,10 @@ gene IDs against which to test.</p></dd>
 
 <dt id="arg-org">org<a class="anchor" aria-label="anchor" href="#arg-org"></a></dt>
 <dd><p>An organism annotation database (e.g., org.Hs.eg.db).</p></dd>
+
+
+<dt id="arg-ont">ont<a class="anchor" aria-label="anchor" href="#arg-ont"></a></dt>
+<dd><p>GO ontology to test. One of <code>"BP"</code>, <code>"MF"</code>, <code>"CC"</code>, or <code>"ALL"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

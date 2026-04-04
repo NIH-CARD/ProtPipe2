@@ -61,7 +61,7 @@ before clustering.
 ## Examples
 
 ``` r
-# Create a sample ProtData object
+# Create a sample SummarizedExperiment object
 raw_data <- data.frame(
   Gene = c("GENEA", "GENEB", "GENEC", "GENED"),
   SampleA = c(10, 20, 15, 12),
@@ -69,18 +69,21 @@ raw_data <- data.frame(
   SampleC = c(25, 10, 30, 5),
   SampleD = c(26, 11, 31, 6)  # Similar to C
 )
-pd_obj <- create_protdata(dat = raw_data)
+se <- create_se(raw_data)
+#> `intensity_cols` not provided. Detecting numeric columns as intensity data.
+#> Warning: `sample_metadata` not provided. Generating a basic version from column names.
+#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # Run with default methods. We expect A/B and C/D to cluster together.
-p1 <- plot_hierarchical_cluster(pd_obj)
-#> Error: unable to find an inherited method for function ‘plot_hierarchical_cluster’ for signature ‘object = "ProtData"’
+p1 <- plot_hierarchical_cluster(se)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found
 if (interactive()) {
   print(p1)
 }
 
 # Run with different methods
-p2 <- plot_hierarchical_cluster(pd_obj, dist_method = "manhattan", hclust_method = "ward.D2")
-#> Error: unable to find an inherited method for function ‘plot_hierarchical_cluster’ for signature ‘object = "ProtData"’
+p2 <- plot_hierarchical_cluster(se, dist_method = "manhattan", hclust_method = "ward.D2")
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found
 if (interactive()) {
   print(p2)
 }

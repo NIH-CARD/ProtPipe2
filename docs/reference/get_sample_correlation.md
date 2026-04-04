@@ -8,6 +8,9 @@ format data table.
 
 ``` r
 get_sample_correlation(object, method = "spearman")
+
+# S4 method for class 'SummarizedExperiment'
+get_sample_correlation(object, method = "spearman")
 ```
 
 ## Arguments

@@ -6,6 +6,9 @@ Performs a log2 transform of protein intensity values
 
 ``` r
 log2_transform(object)
+
+# S4 method for class 'SummarizedExperiment'
+log2_transform(object)
 ```
 
 ## Arguments

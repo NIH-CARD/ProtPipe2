@@ -62,7 +62,14 @@ It analyzes both Gene Ontology (GO) terms and KEGG pathways.</p>
 <span>  go_org <span class="op">=</span> <span class="va">org.Hs.eg.db</span>,</span>
 <span>  kegg_org <span class="op">=</span> <span class="st">"hsa"</span>,</span>
 <span>  gene_col <span class="op">=</span> <span class="st">"Genes"</span>,</span>
-<span>  adj <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  go_ont <span class="op">=</span> <span class="st">"BP"</span>,</span>
+<span>  term2gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  term2name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  run_ora <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  run_gsea <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  run_kegg <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +110,38 @@ used for GO analysis and mapping gene IDs.</p></dd>
 <dt id="arg-gene-col">gene_col<a class="anchor" aria-label="anchor" href="#arg-gene-col"></a></dt>
 <dd><p>A character string indicating the name of the column in the <code>DE</code>
 data frame that contains the gene symbols/identifiers. Defaults to <code>"Genes"</code>.</p></dd>
+
+
+<dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
+<dd><p>Pathway source. Use <code>"go"</code> for Gene Ontology or <code>"custom"</code> for
+user-supplied ontologies.</p></dd>
+
+
+<dt id="arg-go-ont">go_ont<a class="anchor" aria-label="anchor" href="#arg-go-ont"></a></dt>
+<dd><p>GO ontology to test when <code>source = "go"</code>. Defaults to <code>"BP"</code>.</p></dd>
+
+
+<dt id="arg-term-gene">term2gene<a class="anchor" aria-label="anchor" href="#arg-term-gene"></a></dt>
+<dd><p>Optional two-column data frame of term-to-gene mappings for
+custom ontologies. Gene IDs must match the IDs used for enrichment,
+currently Entrez IDs in the Shiny app workflow.</p></dd>
+
+
+<dt id="arg-term-name">term2name<a class="anchor" aria-label="anchor" href="#arg-term-name"></a></dt>
+<dd><p>Optional two-column data frame of term-to-name mappings for
+custom ontologies.</p></dd>
+
+
+<dt id="arg-run-ora">run_ora<a class="anchor" aria-label="anchor" href="#arg-run-ora"></a></dt>
+<dd><p>Logical; run over-representation analysis.</p></dd>
+
+
+<dt id="arg-run-gsea">run_gsea<a class="anchor" aria-label="anchor" href="#arg-run-gsea"></a></dt>
+<dd><p>Logical; run gene set enrichment analysis.</p></dd>
+
+
+<dt id="arg-run-kegg">run_kegg<a class="anchor" aria-label="anchor" href="#arg-run-kegg"></a></dt>
+<dd><p>Logical; also run KEGG analyses. Defaults to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

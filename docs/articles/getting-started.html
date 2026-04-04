@@ -115,9 +115,6 @@ from data loading to quality control and visualization.</p>
 <span><span class="co">#&gt;     setequal, union</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'BiocGenerics'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:ProtPipe':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     combine</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     IQR, mad, sd, var, xtabs</span></span>
@@ -298,7 +295,7 @@ steps like normalization and imputation.</p>
 <p>Here, we apply median normalization to align the intensity
 distributions across all samples.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pd_obj_normalized</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/median_normalize-ProtData.html">median_normalize</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pd_obj_normalized</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/median_normalize.html">median_normalize</a></span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># We can re-plot the intensities to see the effect of normalization</span></span>
 <span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">pd_obj_normalized</span><span class="op">)</span></span>
@@ -314,7 +311,7 @@ will use the “down-shifted normal” (Perseus-like) imputation method. As
 this is a stochastic method, we set a seed for reproducibility.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> <span class="co"># Set a seed for reproducible imputation</span></span>
-<span><span class="va">pd_obj_imputed</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/impute_left_dist-ProtData.html">impute_left_dist</a></span><span class="op">(</span><span class="va">pd_obj_normalized</span><span class="op">)</span></span>
+<span><span class="va">pd_obj_imputed</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/impute_left_dist.html">impute_left_dist</a></span><span class="op">(</span><span class="va">pd_obj_normalized</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The object should no longer have missing values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">pd_obj_imputed</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>

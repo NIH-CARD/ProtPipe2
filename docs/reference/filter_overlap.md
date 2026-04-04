@@ -1,12 +1,14 @@
-# get_overlap method for protdata class
+# Retain proteins present in a specified group of a `SummarizedExperiment` object
 
-Filters the protdata object to retain only proteins that are present
-(non-NA) in at least one sample within each unique group of the
-specified condition.
+Filters the object to retain only proteins that are present (non-NA) in
+at least one sample within each unique group of the specified condition.
 
 ## Usage
 
 ``` r
+filter_overlap(object, condition_name)
+
+# S4 method for class 'SummarizedExperiment,character'
 filter_overlap(object, condition_name)
 ```
 

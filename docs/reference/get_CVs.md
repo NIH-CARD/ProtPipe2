@@ -10,6 +10,9 @@ condition group.
 
 ``` r
 get_CVs(object, condition, min_samples = 2)
+
+# S4 method for class 'SummarizedExperiment'
+get_CVs(object, condition, min_samples = 2)
 ```
 
 ## Arguments

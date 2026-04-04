@@ -1,11 +1,14 @@
 # Get Protein Group Counts Per Sample
 
 Calculates the number of non-missing protein groups (or features) for
-each sample in a ProtData object.
+each sample in a `SummarizedExperiment` object.
 
 ## Usage
 
 ``` r
+get_pg_counts(object)
+
+# S4 method for class 'SummarizedExperiment'
 get_pg_counts(object)
 ```
 

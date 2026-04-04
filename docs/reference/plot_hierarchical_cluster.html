@@ -99,7 +99,7 @@ data that has been log-transformed and normalized before clustering.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a sample ProtData object</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a sample SummarizedExperiment object</span></span></span>
 <span class="r-in"><span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Gene <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GENEA"</span>, <span class="st">"GENEB"</span>, <span class="st">"GENEC"</span>, <span class="st">"GENED"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  SampleA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">12</span><span class="op">)</span>,</span></span>
@@ -107,18 +107,21 @@ data that has been log-transformed and normalized before clustering.</p>
 <span class="r-in"><span>  SampleC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  SampleD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">26</span>, <span class="fl">11</span>, <span class="fl">31</span>, <span class="fl">6</span><span class="op">)</span>  <span class="co"># Similar to C</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">pd_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_protdata.html">create_protdata</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">raw_data</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_se.html">create_se</a></span><span class="op">(</span><span class="va">raw_data</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`sample_metadata` not provided. Generating a basic version from column names.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Run with default methods. We expect A/B and C/D to cluster together.</span></span></span>
-<span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plot_hierarchical_cluster</span><span class="op">(</span><span class="va">pd_obj</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> unable to find an inherited method for function ‘plot_hierarchical_cluster’ for signature ‘object = "ProtData"’</span>
+<span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plot_hierarchical_cluster</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Run with different methods</span></span></span>
-<span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plot_hierarchical_cluster</span><span class="op">(</span><span class="va">pd_obj</span>, dist_method <span class="op">=</span> <span class="st">"manhattan"</span>, hclust_method <span class="op">=</span> <span class="st">"ward.D2"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> unable to find an inherited method for function ‘plot_hierarchical_cluster’ for signature ‘object = "ProtData"’</span>
+<span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plot_hierarchical_cluster</span><span class="op">(</span><span class="va">se</span>, dist_method <span class="op">=</span> <span class="st">"manhattan"</span>, hclust_method <span class="op">=</span> <span class="st">"ward.D2"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>

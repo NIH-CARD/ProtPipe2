@@ -35,11 +35,6 @@ batch_correct(object, batch_variable, bio_variables = NULL)
 A `SummarizedExperiment` object with a new assay named `"corrected"`
 containing the batch-corrected data.
 
-## Functions
-
-- `batch_correct(object = SummarizedExperiment, batch_variable = character)`:
-  Method for SummarizedExperiment objects.
-
 ## Examples
 
 ``` r

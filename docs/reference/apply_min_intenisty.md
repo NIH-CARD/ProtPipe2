@@ -28,11 +28,6 @@ apply_min_intenisty(object, lod)
 The original `object` with the assay matrix updated to contain `NA`
 values where intensities were below the `lod`.
 
-## Functions
-
-- `apply_min_intenisty(SummarizedExperiment)`: Method for
-  SummarizedExperiment objects
-
 ## Examples
 
 ``` r

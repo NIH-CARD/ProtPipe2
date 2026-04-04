@@ -8,6 +8,9 @@ missing values and 2) the greatest median intensity will be kept.
 
 ``` r
 filter_unique_proteins(object, col = NULL)
+
+# S4 method for class 'SummarizedExperiment,character'
+filter_unique_proteins(object, col = NULL)
 ```
 
 ## Arguments

@@ -9,6 +9,9 @@ correctly order axes based on numeric parts of labels (e.g., "Day1",
 
 ``` r
 plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
+
+# S4 method for class 'SummarizedExperiment'
+plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
 ```
 
 ## Arguments

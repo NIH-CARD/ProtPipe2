@@ -67,6 +67,14 @@ plot_proteomics_heatmap(
   Optional. A character string specifying a column name in the `colData`
   slot. If provided, triggers the summarized heatmap mode.
 
+- cluster_cols:
+
+  Logical indicating whether heatmap columns should be clustered.
+
+- cluster_rows:
+
+  Logical indicating whether heatmap rows should be clustered.
+
 ## Value
 
 A `ggplot` object representing the heatmap.

@@ -9,6 +9,9 @@ sample groups.
 
 ``` r
 plot_CVs(object, condition, plot_type = "violin")
+
+# S4 method for class 'SummarizedExperiment'
+plot_CVs(object, condition, plot_type = "violin")
 ```
 
 ## Arguments

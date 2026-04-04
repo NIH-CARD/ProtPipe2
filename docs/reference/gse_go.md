@@ -6,7 +6,12 @@ Ontology terms on a ranked list of genes.
 ## Usage
 
 ``` r
-gse_go(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db)
+gse_go(
+  gene_list,
+  enrich_pvalue = 1,
+  org = org.Hs.eg.db::org.Hs.eg.db,
+  ont = "BP"
+)
 ```
 
 ## Arguments
@@ -23,6 +28,10 @@ gse_go(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db)
 - org:
 
   An organism annotation database (e.g., org.Hs.eg.db).
+
+- ont:
+
+  GO ontology to test. One of `"BP"`, `"MF"`, `"CC"`, or `"ALL"`.
 
 ## Value
 

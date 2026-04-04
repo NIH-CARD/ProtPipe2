@@ -8,6 +8,9 @@ observations.
 
 ``` r
 filter_proteins_by_percent(object, percent)
+
+# S4 method for class 'SummarizedExperiment,numeric'
+filter_proteins_by_percent(object, percent)
 ```
 
 ## Arguments

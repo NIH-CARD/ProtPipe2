@@ -13,6 +13,9 @@ standard deviations (`sds`) from the mean.
 
 ``` r
 filter_outlier_samples(object, sds = 3)
+
+# S4 method for class 'SummarizedExperiment,numeric'
+filter_outlier_samples(object, sds = 3)
 ```
 
 ## Arguments

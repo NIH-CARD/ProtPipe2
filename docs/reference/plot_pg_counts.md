@@ -9,6 +9,9 @@ condition.
 
 ``` r
 plot_pg_counts(object, condition = NULL)
+
+# S4 method for class 'SummarizedExperiment'
+plot_pg_counts(object, condition = NULL)
 ```
 
 ## Arguments

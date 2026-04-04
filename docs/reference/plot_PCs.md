@@ -54,7 +54,7 @@ log-transformed and normalized data for the best results.
 ## Examples
 
 ``` r
-# Create a sample ProtData object with missing data
+# Create a sample SummarizedExperiment object with missing data
 raw_data <- data.frame(
   Gene = c("GENEA", "GENEB", "GENEC", "GENED", "GENEE", "GENEF"),
   Control_1 = c(10, 11, 12, 13, 14, 15),
@@ -66,22 +66,24 @@ cond_df <- data.frame(
    SampleID = c("Control_1", "Control_2", "Treatment_1", "Treatment_2"),
    group = c("Control", "Control", "Treatment", "Treatment")
 )
-pd_obj <- create_protdata(dat = raw_data, condition = cond_df)
+se <- create_se(raw_data, sample_metadata = cond_df)
+#> `intensity_cols` not provided. Detecting numeric columns as intensity data.
+#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # Impute missing values before plotting
-pd_obj_imputed <- impute(pd_obj, value = 13.5)
-#> Error: unable to find an inherited method for function ‘impute’ for signature ‘object = "ProtData", value = "numeric"’
+se_imputed <- impute(se, value = 13.5)
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'impute': object 'se' not found
 
 # Generate the plot of PC1 vs PC2
-p1 <- plot_pca(pd_obj_imputed, condition = "group")
-#> Error in plot_pca(pd_obj_imputed, condition = "group"): could not find function "plot_pca"
+p1 <- plot_PCs(se_imputed, condition = "group")
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_PCs': object 'se_imputed' not found
 if (interactive()) {
   print(p1)
 }
 
 # Generate a plot of PC1 vs PC3
-p2 <- plot_pca(pd_obj_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
-#> Error in plot_pca(pd_obj_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3"): could not find function "plot_pca"
+p2 <- plot_PCs(se_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_PCs': object 'se_imputed' not found
 if (interactive()) {
   print(p2)
 }

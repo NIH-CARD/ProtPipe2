@@ -30,8 +30,3 @@ lod_filter(se, lod_col = "Buffer")
 
 A `SummarizedExperiment` object where values below the defined LOD are
 replaced with `NA`.
-
-## Functions
-
-- `lod_filter(SummarizedExperiment)`: Method for SummarizedExperiment
-  objects

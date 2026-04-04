@@ -11,7 +11,8 @@ enrich_go(
   gene_id,
   all_gene_vector,
   enrich_pvalue = 1,
-  org = org.Hs.eg.db::org.Hs.eg.db
+  org = org.Hs.eg.db::org.Hs.eg.db,
+  ont = "BP"
 )
 ```
 
@@ -33,6 +34,10 @@ enrich_go(
 - org:
 
   An organism annotation database (e.g., org.Hs.eg.db).
+
+- ont:
+
+  GO ontology to test. One of `"BP"`, `"MF"`, `"CC"`, or `"ALL"`.
 
 ## Value
 

@@ -18,7 +18,14 @@ enrich_pathways(
   go_org = org.Hs.eg.db,
   kegg_org = "hsa",
   gene_col = "Genes",
-  adj = TRUE
+  adj = TRUE,
+  source = c("go", "custom"),
+  go_ont = "BP",
+  term2gene = NULL,
+  term2name = NULL,
+  run_ora = TRUE,
+  run_gsea = TRUE,
+  run_kegg = FALSE
 )
 ```
 
@@ -59,6 +66,38 @@ enrich_pathways(
   A character string indicating the name of the column in the `DE` data
   frame that contains the gene symbols/identifiers. Defaults to
   `"Genes"`.
+
+- source:
+
+  Pathway source. Use `"go"` for Gene Ontology or `"custom"` for
+  user-supplied ontologies.
+
+- go_ont:
+
+  GO ontology to test when `source = "go"`. Defaults to `"BP"`.
+
+- term2gene:
+
+  Optional two-column data frame of term-to-gene mappings for custom
+  ontologies. Gene IDs must match the IDs used for enrichment, currently
+  Entrez IDs in the Shiny app workflow.
+
+- term2name:
+
+  Optional two-column data frame of term-to-name mappings for custom
+  ontologies.
+
+- run_ora:
+
+  Logical; run over-representation analysis.
+
+- run_gsea:
+
+  Logical; run gene set enrichment analysis.
+
+- run_kegg:
+
+  Logical; also run KEGG analyses. Defaults to `FALSE`.
 
 ## Value
 
