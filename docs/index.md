@@ -2,11 +2,14 @@
 
 ![](reference/figures/graphical_abstract.png)
 
-This repository facilitates quick, simple, and reproducible access to
-proteomics workflows. These workflows can be accessed programatically
-with the ProtPipe R package, or through our ProtPipe Shiny app. For more
-detailed information on how to use these tools, check out our
-[wiki](https://github.com/NIH-CARD/ProtPipe2/wiki).
+ProtPipe2 provides reproducible workflows for downstream proteomics
+analysis through the ProtPipe R package and a Shiny interface. The
+package supports data import into `SummarizedExperiment`, quality
+control, filtering, normalization, imputation, batch correction,
+dimensionality reduction, clustering, differential intensity analysis,
+and abundance profiling. It also includes visualization and pathway or
+gene set enrichment utilities for interpretation of protein-level
+results.
 
 ``` r
 devtools::install_github(NIH-CARD/ProtPipe2)

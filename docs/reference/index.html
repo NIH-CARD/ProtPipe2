@@ -35,7 +35,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="input">Input<a class="anchor" aria-label="anchor" href="#input"></a></h2>
 
 
 
@@ -46,38 +46,10 @@
 
       <dl><dt>
 
-          <code><a href="add_entrez.html">add_entrez()</a></code>
+          <code><a href="protpipe_example_se.html">protpipe_example_se</a></code>
 
         </dt>
-        <dd>Add Entrez Gene IDs to a Data Frame</dd>
-
-        <dt>
-
-          <code><a href="apply_min_intenisty.html">apply_min_intenisty()</a></code>
-
-        </dt>
-        <dd>Apply Limit of Detection Threshold</dd>
-
-        <dt>
-
-          <code><a href="batch_correct.html">batch_correct()</a></code>
-
-        </dt>
-        <dd>Correct for Batch Effects</dd>
-
-        <dt>
-
-          <code><a href="compare_protein.html">compare_protein()</a></code>
-
-        </dt>
-        <dd>Creates a ggplot bar chart comparing the intensity of a single protein either across all samples or grouped by a condition.</dd>
-
-        <dt>
-
-          <code><a href="convert_numeric_cols.html">convert_numeric_cols()</a></code>
-
-        </dt>
-        <dd>Safely Convert Character Columns to Numeric Type</dd>
+        <dd>Example SummarizedExperiment for ProtPipe workflows</dd>
 
         <dt>
 
@@ -102,66 +74,126 @@
 
         <dt>
 
-          <code><a href="do_comparison_continuous.html">do_comparison_continuous()</a></code>
+          <code><a href="detect_intensity_cols.html">detect_intensity_cols()</a></code>
 
         </dt>
-        <dd>Perform limma differential expression for a continuous outcome</dd>
+        <dd>Identify Numeric Columns by Index</dd>
 
         <dt>
 
-          <code><a href="do_limma_binary.html">do_limma_binary()</a></code>
+          <code><a href="convert_numeric_cols.html">convert_numeric_cols()</a></code>
 
         </dt>
-        <dd>Perform limma differential expression on a SummarizedExperiment</dd>
+        <dd>Safely Convert Character Columns to Numeric Type</dd>
 
         <dt>
 
-          <code><a href="do_t_test_binary.html">do_t_test_binary()</a></code>
+          <code><a href="olink_all_output.html">olink_all_output()</a></code>
 
         </dt>
-        <dd>Perform t-test differential expression on a SummarizedExperiment</dd>
+        <dd>Format Olink NPX Data into Data and Condition Tables</dd>
 
         <dt>
 
-          <code><a href="enrich_go.html">enrich_go()</a></code>
+          <code><a href="soma_all_output.html">soma_all_output()</a></code>
 
         </dt>
-        <dd>Perform Gene Ontology (GO) Over-Representation Analysis (ORA)</dd>
+        <dd>format soma adat into data and condition dataframes</dd>
 
         <dt>
 
-          <code><a href="enrich_kegg.html">enrich_kegg()</a></code>
+          <code><a href="run_protpipe_shiny.html">run_protpipe_shiny()</a></code>
 
         </dt>
-        <dd>Perform KEGG Over-Representation Analysis (ORA)</dd>
+        <dd>Run the protpipe Shiny App</dd>
+      </dl></div><div class="section level2">
+      <h2 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="get_pg_counts.html">get_pg_counts()</a></code>
+
+        </dt>
+        <dd>Get Protein Group Counts Per Sample</dd>
 
         <dt>
 
-          <code><a href="enrich_pathways.html">enrich_pathways()</a></code>
+          <code><a href="plot_pg_counts.html">plot_pg_counts()</a></code>
 
         </dt>
-        <dd>Perform Comprehensive GO and KEGG Pathway Enrichment Analysis</dd>
+        <dd>Plot Protein Group Counts</dd>
 
         <dt>
 
-          <code><a href="enrich_terms.html">enrich_terms()</a></code>
+          <code><a href="plot_pg_intensities.html">plot_pg_intensities()</a></code>
 
         </dt>
-        <dd>Run Over-Representation Analysis for Custom Gene Sets</dd>
+        <dd>Plot Boxplots of Sample Intensity Distributions</dd>
 
         <dt>
 
-          <code><a href="filter_features.html">filter_features()</a></code>
+          <code><a href="get_CVs.html">get_CVs()</a></code>
 
         </dt>
-        <dd>Helper function to filter out sparse proteins</dd>
+        <dd>Calculate Coefficient of Variation (CV) for Protein Groups</dd>
 
         <dt>
 
-          <code><a href="filter_outlier_samples.html">filter_outlier_samples()</a></code>
+          <code><a href="plot_CVs.html">plot_CVs()</a></code>
 
         </dt>
-        <dd>Filter Outlier Samples Based on Protein Counts</dd>
+        <dd>Plot Coefficient of Variation (CV) Distributions</dd>
+
+        <dt>
+
+          <code><a href="get_sample_correlation.html">get_sample_correlation()</a></code>
+
+        </dt>
+        <dd>Calculate Pairwise Sample Correlations</dd>
+
+        <dt>
+
+          <code><a href="plot_correlation_heatmap.html">plot_correlation_heatmap()</a></code>
+
+        </dt>
+        <dd>Plot a Sample Correlation Heatmap</dd>
+      </dl></div><div class="section level2">
+      <h2 id="pre-processing">Pre-Processing<a class="anchor" aria-label="anchor" href="#pre-processing"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="lod_filter.html">lod_filter()</a></code>
+
+        </dt>
+        <dd>Filter Assay Based on Limit of Detection (LOD)</dd>
+
+        <dt>
+
+          <code><a href="apply_min_intenisty.html">apply_min_intenisty()</a></code>
+
+        </dt>
+        <dd>Apply Limit of Detection Threshold</dd>
+
+        <dt>
+
+          <code><a href="filter_unique_proteins.html">filter_unique_proteins()</a></code>
+
+        </dt>
+        <dd>Removes duplicate analytes</dd>
 
         <dt>
 
@@ -179,10 +211,66 @@
 
         <dt>
 
-          <code><a href="filter_unique_proteins.html">filter_unique_proteins()</a></code>
+          <code><a href="filter_outlier_samples.html">filter_outlier_samples()</a></code>
 
         </dt>
-        <dd>Removes duplicate analytes</dd>
+        <dd>Filter Outlier Samples Based on Protein Counts</dd>
+
+        <dt>
+
+          <code><a href="log2_transform.html">log2_transform()</a></code>
+
+        </dt>
+        <dd>Performs a log2 transform of protein intensity values</dd>
+
+        <dt>
+
+          <code><a href="z_score.html">z_score()</a></code>
+
+        </dt>
+        <dd>Z-Score Normalization for Proteins Across Samples</dd>
+
+        <dt>
+
+          <code><a href="mean_normalize.html">mean_normalize()</a></code>
+
+        </dt>
+        <dd>Mean Normalization of Proteomics Data</dd>
+
+        <dt>
+
+          <code><a href="median_normalize.html">median_normalize()</a></code>
+
+        </dt>
+        <dd>Median Normalization of Proteomics Data</dd>
+
+        <dt>
+
+          <code><a href="impute.html">impute()</a></code>
+
+        </dt>
+        <dd>Impute Missing Values with a Constant</dd>
+
+        <dt>
+
+          <code><a href="impute_min.html">impute_min()</a></code>
+
+        </dt>
+        <dd>Impute Missing Values with the Row Minimum</dd>
+
+        <dt>
+
+          <code><a href="impute_left_dist.html">impute_left_dist()</a></code>
+
+        </dt>
+        <dd>Impute from a Down-Shifted Normal Distribution</dd>
+
+        <dt>
+
+          <code><a href="batch_correct.html">batch_correct()</a></code>
+
+        </dt>
+        <dd>Correct for Batch Effects</dd>
 
         <dt>
 
@@ -193,12 +281,21 @@
 
         <dt>
 
-          <code><a href="get_CVs.html">get_CVs()</a></code>
+          <code><a href="has_step.html">has_step()</a></code>
 
         </dt>
-        <dd>Calculate Coefficient of Variation (CV) for Protein Groups</dd>
+        <dd>Check if a Processing Step has been Applied</dd>
+      </dl></div><div class="section level2">
+      <h2 id="clustering-dimensionality-reduction">Clustering / Dimensionality Reduction<a class="anchor" aria-label="anchor" href="#clustering-dimensionality-reduction"></a></h2>
 
-        <dt>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="get_PCs.html">get_PCs()</a></code>
 
@@ -207,17 +304,17 @@
 
         <dt>
 
-          <code><a href="get_pg_counts.html">get_pg_counts()</a></code>
+          <code><a href="plot_PCs.html">plot_PCs()</a></code>
 
         </dt>
-        <dd>Get Protein Group Counts Per Sample</dd>
+        <dd>Plot Principal Component Analysis Results</dd>
 
         <dt>
 
-          <code><a href="get_sample_correlation.html">get_sample_correlation()</a></code>
+          <code><a href="plot_hierarchical_cluster.html">plot_hierarchical_cluster()</a></code>
 
         </dt>
-        <dd>Calculate Pairwise Sample Correlations</dd>
+        <dd>Plot a Hierarchical Clustering Dendrogram of Samples</dd>
 
         <dt>
 
@@ -225,6 +322,99 @@
 
         </dt>
         <dd>Calculate UMAP Dimensionality Reduction</dd>
+
+        <dt>
+
+          <code><a href="plot_umap.html">plot_umap()</a></code>
+
+        </dt>
+        <dd>Plot UMAP Dimensionality Reduction Results</dd>
+      </dl></div><div class="section level2">
+      <h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="filter_features.html">filter_features()</a></code>
+
+        </dt>
+        <dd>Helper function to filter out sparse proteins</dd>
+
+        <dt>
+
+          <code><a href="do_limma_binary.html">do_limma_binary()</a></code>
+
+        </dt>
+        <dd>Perform limma differential expression on a SummarizedExperiment</dd>
+
+        <dt>
+
+          <code><a href="do_t_test_binary.html">do_t_test_binary()</a></code>
+
+        </dt>
+        <dd>Perform t-test differential expression on a SummarizedExperiment</dd>
+
+        <dt>
+
+          <code><a href="do_comparison_continuous.html">do_comparison_continuous()</a></code>
+
+        </dt>
+        <dd>Perform limma differential expression for a continuous outcome</dd>
+
+        <dt>
+
+          <code><a href="plot_volcano.html">plot_volcano()</a></code>
+
+        </dt>
+        <dd>Plot a Volcano Plot for Differential Expression Results</dd>
+
+        <dt>
+
+          <code><a href="plot_correlation_volcano.html">plot_correlation_volcano()</a></code>
+
+        </dt>
+        <dd>Plot a Volcano Plot for Correlation Results</dd>
+
+        <dt>
+
+          <code><a href="add_entrez.html">add_entrez()</a></code>
+
+        </dt>
+        <dd>Add Entrez Gene IDs to a Data Frame</dd>
+
+        <dt>
+
+          <code><a href="read_ontology.html">read_ontology()</a></code>
+
+        </dt>
+        <dd>Read a Custom Ontology File</dd>
+
+        <dt>
+
+          <code><a href="enrich_go.html">enrich_go()</a></code>
+
+        </dt>
+        <dd>Perform Gene Ontology (GO) Over-Representation Analysis (ORA)</dd>
+
+        <dt>
+
+          <code><a href="enrich_kegg.html">enrich_kegg()</a></code>
+
+        </dt>
+        <dd>Perform KEGG Over-Representation Analysis (ORA)</dd>
+
+        <dt>
+
+          <code><a href="enrich_terms.html">enrich_terms()</a></code>
+
+        </dt>
+        <dd>Run Over-Representation Analysis for Custom Gene Sets</dd>
 
         <dt>
 
@@ -249,115 +439,26 @@
 
         <dt>
 
-          <code><a href="has_step.html">has_step()</a></code>
+          <code><a href="enrich_pathways.html">enrich_pathways()</a></code>
 
         </dt>
-        <dd>Check if a Processing Step has been Applied</dd>
+        <dd>Perform Comprehensive GO and KEGG Pathway Enrichment Analysis</dd>
+      </dl></div><div class="section level2">
+      <h2 id="abundance-profiling">Abundance Profiling<a class="anchor" aria-label="anchor" href="#abundance-profiling"></a></h2>
 
-        <dt>
 
-          <code><a href="impute.html">impute()</a></code>
 
-        </dt>
-        <dd>Impute Missing Values with a Constant</dd>
+      <dl></dl></div><div class="section level2">
 
-        <dt>
 
-          <code><a href="impute_left_dist.html">impute_left_dist()</a></code>
 
-        </dt>
-        <dd>Impute from a Down-Shifted Normal Distribution</dd>
 
-        <dt>
+      <dl><dt>
 
-          <code><a href="impute_min.html">impute_min()</a></code>
+          <code><a href="compare_protein.html">compare_protein()</a></code>
 
         </dt>
-        <dd>Impute Missing Values with the Row Minimum</dd>
-
-        <dt>
-
-          <code><a href="lod_filter.html">lod_filter()</a></code>
-
-        </dt>
-        <dd>Filter Assay Based on Limit of Detection (LOD)</dd>
-
-        <dt>
-
-          <code><a href="log2_transform.html">log2_transform()</a></code>
-
-        </dt>
-        <dd>Performs a log2 transform of protein intensity values</dd>
-
-        <dt>
-
-          <code><a href="mean_normalize.html">mean_normalize()</a></code>
-
-        </dt>
-        <dd>Mean Normalization of Proteomics Data</dd>
-
-        <dt>
-
-          <code><a href="median_normalize.html">median_normalize()</a></code>
-
-        </dt>
-        <dd>Median Normalization of Proteomics Data</dd>
-
-        <dt>
-
-          <code><a href="olink_all_output.html">olink_all_output()</a></code>
-
-        </dt>
-        <dd>Format Olink NPX Data into Data and Condition Tables</dd>
-
-        <dt>
-
-          <code><a href="plot_CVs.html">plot_CVs()</a></code>
-
-        </dt>
-        <dd>Plot Coefficient of Variation (CV) Distributions</dd>
-
-        <dt>
-
-          <code><a href="plot_PCs.html">plot_PCs()</a></code>
-
-        </dt>
-        <dd>Plot Principal Component Analysis Results</dd>
-
-        <dt>
-
-          <code><a href="plot_correlation_heatmap.html">plot_correlation_heatmap()</a></code>
-
-        </dt>
-        <dd>Plot a Sample Correlation Heatmap</dd>
-
-        <dt>
-
-          <code><a href="plot_correlation_volcano.html">plot_correlation_volcano()</a></code>
-
-        </dt>
-        <dd>Plot a Volcano Plot for Correlation Results</dd>
-
-        <dt>
-
-          <code><a href="plot_hierarchical_cluster.html">plot_hierarchical_cluster()</a></code>
-
-        </dt>
-        <dd>Plot a Hierarchical Clustering Dendrogram of Samples</dd>
-
-        <dt>
-
-          <code><a href="plot_pg_counts.html">plot_pg_counts()</a></code>
-
-        </dt>
-        <dd>Plot Protein Group Counts</dd>
-
-        <dt>
-
-          <code><a href="plot_pg_intensities.html">plot_pg_intensities()</a></code>
-
-        </dt>
-        <dd>Plot Boxplots of Sample Intensity Distributions</dd>
+        <dd>Creates a ggplot bar chart comparing the intensity of a single protein either across all samples or grouped by a condition.</dd>
 
         <dt>
 
@@ -365,50 +466,9 @@
 
         </dt>
         <dd>Plot a Proteomics Heatmap</dd>
-
-        <dt>
-
-          <code><a href="plot_umap.html">plot_umap()</a></code>
-
-        </dt>
-        <dd>Plot UMAP Dimensionality Reduction Results</dd>
-
-        <dt>
-
-          <code><a href="plot_volcano.html">plot_volcano()</a></code>
-
-        </dt>
-        <dd>Plot a Volcano Plot for Differential Expression Results</dd>
-
-        <dt>
-
-          <code><a href="read_ontology.html">read_ontology()</a></code>
-
-        </dt>
-        <dd>Read a Custom Ontology File</dd>
-
-        <dt>
-
-          <code><a href="run_protpipe_shiny.html">run_protpipe_shiny()</a></code>
-
-        </dt>
-        <dd>Run the protpipe Shiny App</dd>
-
-        <dt>
-
-          <code><a href="soma_all_output.html">soma_all_output()</a></code>
-
-        </dt>
-        <dd>format soma adat into data and condition dataframes</dd>
-
-        <dt>
-
-          <code><a href="z_score.html">z_score()</a></code>
-
-        </dt>
-        <dd>Z-Score Normalization for Proteins Across Samples</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

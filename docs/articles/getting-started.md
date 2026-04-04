@@ -2,167 +2,55 @@
 
 ## Introduction
 
-The `ProtPipe` package provides a streamlined, start-to-finish workflow
-for common proteomics data analysis tasks. It is built around a central
-`ProtData` object, which stores quantitative data, protein metadata, and
-sample metadata in a single, cohesive unit. This vignette will walk you
-through a typical analysis, from data loading to quality control and
-visualization.
+The `ProtPipe` package provides downstream proteomics workflows based on
+`SummarizedExperiment`. This vignette uses a packaged example object so
+the analysis starts from a ready-to-use dataset rather than
+reconstructing the object from raw files.
 
 ## Setup and Data Loading
 
 First, we load the `ProtPipe` package.
 
 ``` r
-library(ProtPipe)
-#> 
+suppressPackageStartupMessages(library(ProtPipe))
 library(SummarizedExperiment)
-#> Loading required package: MatrixGenerics
-#> Loading required package: matrixStats
-#> 
-#> Attaching package: 'MatrixGenerics'
-#> The following objects are masked from 'package:matrixStats':
-#> 
-#>     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
-#>     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
-#>     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
-#>     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
-#>     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
-#>     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
-#>     colWeightedMeans, colWeightedMedians, colWeightedSds,
-#>     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
-#>     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
-#>     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
-#>     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
-#>     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
-#>     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
-#>     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
-#>     rowWeightedSds, rowWeightedVars
-#> Loading required package: GenomicRanges
-#> Loading required package: stats4
-#> Loading required package: BiocGenerics
-#> Loading required package: generics
-#> 
-#> Attaching package: 'generics'
-#> The following objects are masked from 'package:base':
-#> 
-#>     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
-#>     setequal, union
-#> 
-#> Attaching package: 'BiocGenerics'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     IQR, mad, sd, var, xtabs
-#> The following objects are masked from 'package:base':
-#> 
-#>     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-#>     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-#>     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
-#>     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-#>     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
-#>     unsplit, which.max, which.min
-#> Loading required package: S4Vectors
-#> 
-#> Attaching package: 'S4Vectors'
-#> The following object is masked from 'package:utils':
-#> 
-#>     findMatches
-#> The following objects are masked from 'package:base':
-#> 
-#>     expand.grid, I, unname
-#> Loading required package: IRanges
-#> Loading required package: Seqinfo
-#> Loading required package: Biobase
-#> Welcome to Bioconductor
-#> 
-#>     Vignettes contain introductory material; view with
-#>     'browseVignettes()'. To cite Bioconductor, see
-#>     'citation("Biobase")', and for packages 'citation("pkgname")'.
-#> 
-#> Attaching package: 'Biobase'
-#> The following object is masked from 'package:MatrixGenerics':
-#> 
-#>     rowMedians
-#> The following objects are masked from 'package:matrixStats':
-#> 
-#>     anyMissing, rowMedians
 library(ggplot2) # For plot customization
 ```
 
-Our analysis begins with two primary data frames:
-
-1.  A `data.frame` containing protein metadata and quantitative
-    intensity data for each sample.
-2.  A `data.frame` containing the experimental design, mapping each
-    sample to its condition.
+Load the packaged example object with
+[`data()`](https://rdrr.io/r/utils/data.html). This object was created
+from `EXAMPLES/basic_example_data/iPSC.csv` without supplying external
+sample metadata, so the only sample annotation present initially is
+`differentiation_day`.
 
 ``` r
-# 1. Create a sample raw data frame
-# 1. Create a more realistic sample raw data frame
-# We will simulate 50 genes in total:
-# - 40 genes that are stable (no change between conditions)
-# - 5 genes that are up-regulated in the Treatment group
-# - 5 genes that are down-regulated in the Treatment group
-n_stable <- 400
-n_up <- 50
-n_down <- 50
-n_total <- n_stable + n_up + n_down
+data("protpipe_example_se")
+se <- protpipe_example_se
 
-# Set means for each group for log2-scale data
-mean_stable <- 25
-mean_up <- 51  # Higher expression
-mean_down <- 12 # Lower expression
-
-# Note: set.seed() makes the random data reproducible
-set.seed(123) 
-
-# Simulate data for each sample group
-data <- data.frame(
-  Ctrl_1 = rnorm(n_total, mean = mean_stable, sd = 2),
-  Ctrl_2 = rnorm(n_total, mean = mean_stable, sd = 2.5),
-  Ctrl_3 = rnorm(n_total, mean = mean_stable, sd = 2.2),
-  Treat_1 = c(rnorm(n_stable, mean_stable, 2), rnorm(n_up, mean_up, 2), rnorm(n_down, mean_down, 2)),
-  Treat_2 = c(rnorm(n_stable, mean_stable, 2.5), rnorm(n_up, mean_up, 2.5), rnorm(n_down, mean_down, 2.5)),
-  Treat_3 = c(rnorm(n_stable, mean_stable, 2.2), rnorm(n_up, mean_up, 2.2), rnorm(n_down, mean_down, 2.2))
-)
-
-# Introduce some missing values (NAs) to make it more realistic
-# Set ~5% of the intensity values to NA
-num_cells <- ncol(data) * n_total
-na_indices <- sample(num_cells, size = round(0.05 * num_cells))
-data <- as.matrix(data)
-data[na_indices] <- NA
-data <- as.data.frame(data)
-
-# Combine into a single data frame with protein metadata
-raw_data <- data.frame(
-  ProteinID = paste0("P", 1:n_total),
-  Gene = paste0("GENE", 1:n_total),
-  Status = c(rep("Stable", n_stable), rep("Upregulated", n_up), rep("Downregulated", n_down)),
-  data
-)
-
-# 2. Create the corresponding condition data frame
-cond_df <- data.frame(
-   SampleID = c("Ctrl_1", "Ctrl_2", "Ctrl_3", "Treat_1", "Treat_2", "Treat_3"),
-   group = c("Control", "Control", "Control", "Treatment", "Treatment", "Treatment"),
-   batch = c("A", "B", "A", "B", "A", "B")
-)
-
-# 3. Use the constructor to create the ProtData object
-pd_obj <- ProtPipe::create_se(data = raw_data, sample_metadata = cond_df)
-#> `intensity_cols` not provided. Detecting numeric columns as intensity data.
-
-# We can inspect the created object
-print(pd_obj)
+se
 #> class: SummarizedExperiment 
-#> dim: 500 6 
+#> dim: 9119 42 
 #> metadata(2): creation_method processing_log
 #> assays(1): intensities
 #> rownames: NULL
-#> rowData names(3): ProteinID Gene Status
-#> colnames(6): Ctrl_1 Ctrl_2 ... Treat_2 Treat_3
-#> colData names(2): group batch
+#> rowData names(2): PG.ProteinGroups PG.Genes
+#> colnames(42): Day0_1 Day0_2 ... Day21_5 Day21_6
+#> colData names(1): differentiation_day
+colData(se)
+#> DataFrame with 42 rows and 1 column
+#>         differentiation_day
+#>                 <character>
+#> Day0_1                 Day0
+#> Day0_2                 Day0
+#> Day0_3                 Day0
+#> Day0_4                 Day0
+#> Day0_5                 Day0
+#> ...                     ...
+#> Day21_2               Day21
+#> Day21_3               Day21
+#> Day21_4               Day21
+#> Day21_5               Day21
+#> Day21_6               Day21
 ```
 
 ## Initial Quality Control (QC)
@@ -177,21 +65,53 @@ visualize the intensity distributions with boxplots.
 
 ``` r
 # Get the number of identified proteins per sample
-ProtPipe::get_pg_counts(pd_obj)
+ProtPipe::get_pg_counts(se)
 #>          Sample Protein_Groups
-#> Ctrl_1   Ctrl_1            478
-#> Ctrl_2   Ctrl_2            482
-#> Ctrl_3   Ctrl_3            471
-#> Treat_1 Treat_1            469
-#> Treat_2 Treat_2            477
-#> Treat_3 Treat_3            473
+#> Day0_1   Day0_1           8746
+#> Day0_2   Day0_2           8451
+#> Day0_3   Day0_3           8571
+#> Day0_4   Day0_4           8697
+#> Day0_5   Day0_5           8592
+#> Day0_6   Day0_6           8433
+#> Day28_1 Day28_1           7686
+#> Day28_2 Day28_2           7541
+#> Day28_3 Day28_3           7305
+#> Day28_4 Day28_4           7570
+#> Day28_5 Day28_5           7500
+#> Day28_6 Day28_6           7631
+#> Day03_1 Day03_1           8334
+#> Day03_2 Day03_2           8261
+#> Day03_3 Day03_3           8193
+#> Day03_4 Day03_4           7734
+#> Day03_5 Day03_5           8259
+#> Day03_6 Day03_6           8229
+#> Day07_1 Day07_1           7660
+#> Day07_2 Day07_2           7569
+#> Day07_3 Day07_3           7939
+#> Day07_4 Day07_4           8026
+#> Day07_5 Day07_5           7935
+#> Day07_6 Day07_6           7755
+#> Day10_1 Day10_1           7835
+#> Day10_2 Day10_2           7965
+#> Day10_3 Day10_3           7663
+#> Day10_4 Day10_4           7902
+#> Day10_5 Day10_5           7629
+#> Day10_6 Day10_6           7724
+#> Day14_1 Day14_1           7813
+#> Day14_2 Day14_2           7777
+#> Day14_3 Day14_3           7827
+#> Day14_4 Day14_4           7725
+#> Day14_5 Day14_5           7756
+#> Day14_6 Day14_6           7653
+#> Day21_1 Day21_1           7810
+#> Day21_2 Day21_2           7654
+#> Day21_3 Day21_3           7815
+#> Day21_4 Day21_4           7696
+#> Day21_5 Day21_5           7765
+#> Day21_6 Day21_6           7771
 
 # Plot the counts for each sample
-ProtPipe::plot_pg_counts(pd_obj)
-#> Warning: Use of `pgcounts$Protein_Groups` is discouraged.
-#> ℹ Use `Protein_Groups` instead.
-#> Ignoring unknown labels:
-#> • fill : ""
+ProtPipe::plot_pg_counts(se)
 ```
 
 ![](getting-started_files/figure-html/qc-plots-1.png)
@@ -199,9 +119,7 @@ ProtPipe::plot_pg_counts(pd_obj)
 ``` r
 
 # Plot the intensity distributions for each sample
-ProtPipe::plot_pg_intensities(pd_obj)
-#> Ignoring unknown labels:
-#> • fill : ""
+ProtPipe::plot_pg_intensities(se)
 ```
 
 ![](getting-started_files/figure-html/qc-plots-2.png) These plots help
@@ -214,15 +132,7 @@ correlation heatmap. Samples from the same condition should generally
 cluster together.
 
 ``` r
-ProtPipe::plot_correlation_heatmap(pd_obj, order_by = "group", label_by = "group")
-#> No numeric values detected in ordering variable. Applying alphanumeric sort.
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the ProtPipe package.
-#>   Please report the issue to the authors.
-#> This warning is displayed once per session.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
+ProtPipe::plot_correlation_heatmap(se)
 ```
 
 ![](getting-started_files/figure-html/correlation-heatmap-1.png)
@@ -238,12 +148,10 @@ Here, we apply median normalization to align the intensity distributions
 across all samples.
 
 ``` r
-pd_obj_normalized <- ProtPipe::median_normalize(pd_obj)
+se_normalized <- ProtPipe::median_normalize(se)
 
 # We can re-plot the intensities to see the effect of normalization
-ProtPipe::plot_pg_intensities(pd_obj_normalized)
-#> Ignoring unknown labels:
-#> • fill : ""
+ProtPipe::plot_pg_intensities(se_normalized)
 ```
 
 ![](getting-started_files/figure-html/normalization-1.png)
@@ -256,15 +164,14 @@ is a stochastic method, we set a seed for reproducibility.
 
 ``` r
 set.seed(123) # Set a seed for reproducible imputation
-pd_obj_imputed <- ProtPipe::impute_left_dist(pd_obj_normalized)
+se_imputed <- ProtPipe::impute_left_dist(se_normalized)
 
 # The object should no longer have missing values
-any(is.na(assay(pd_obj_imputed)))
+any(is.na(assay(se_imputed)))
 #> [1] FALSE
 
 # Create a preprocessing report 
-report <- generate_preprocessing_report(pd_obj_imputed)
-#> Preprocessing report written to: preprocessing_report.md
+report <- generate_preprocessing_report(se_imputed)
 ```
 
 ## Downstream Analysis and Visualization
@@ -272,24 +179,15 @@ report <- generate_preprocessing_report(pd_obj_imputed)
 With a clean, complete dataset, we can now explore the relationships
 between samples and proteins.
 
-### Hierarchial Clustering (PCA)
-
-``` r
-# The plot_pca function is a convenient wrapper that calculates and plots the results
-ProtPipe::plot_hierarchical_cluster(pd_obj_imputed) +
-  labs(title = "HC of Samples by Group")
-```
-
-![](getting-started_files/figure-html/hc-plot-1.png) \### Principal
-Component Analysis (PCA)
+### Principal Component Analysis (PCA)
 
 PCA is a powerful tool for visualizing the primary sources of variation
 in the data and assessing sample clustering.
 
 ``` r
 # The plot_pca function is a convenient wrapper that calculates and plots the results
-ProtPipe::plot_PCs(pd_obj_imputed, condition = "group") +
-  labs(title = "PCA of Samples by Group")
+ProtPipe::plot_PCs(se_imputed, condition = "differentiation_day") +
+  labs(title = "PCA by time point")
 ```
 
 ![](getting-started_files/figure-html/pca-plot-1.png)
@@ -300,36 +198,50 @@ Lets plot a UMAP.
 
 ``` r
 # The plot_pca function is a convenient wrapper that calculates and plots the results
-ProtPipe::plot_umap(pd_obj_imputed, condition = "group", neighbors = 4) +
-  labs(title = "UMAP of Samples by Group")
+ProtPipe::plot_umap(se_imputed, condition = "differentiation_day", neighbors = 6) +
+  labs(title = "UMAP by time point")
 ```
 
-![](getting-started_files/figure-html/umap-plot-1.png) \### Differential
-Expression
+![](getting-started_files/figure-html/umap-plot-1.png)
 
-Lets figure out which proteins are altered by the treatment.
+### Differential Expression
+
+To illustrate a simple two-group comparison, we compare Day 28 and Day 0
+directly with limma.
 
 ``` r
-DE <- ProtPipe::do_limma_binary(pd_obj_imputed, condition = "group", control_group = "Control", treatment_group = "Treatment")
+de <- ProtPipe::do_limma_binary(
+  se_imputed,
+  condition = "differentiation_day",
+  control_group = "Day0",
+  treatment_group = "Day28"
+)
 
-# Or, filter to a specific subset of genes of interest
 ProtPipe::plot_volcano(
-  DE, 
-  label_col = "Gene"
+  de,
+  label_col = "PG.Genes"
 )
 ```
 
-![](getting-started_files/figure-html/volcano%20plot-1.png) \### Protein
-Barchart
+![](getting-started_files/figure-html/volcano-plot-1.png)
 
-Lets take a closer look at some of the differentially expressed proteins
+### Pathway Analysis
+
+We can perform a simple Gene Ontology enrichment analysis on the
+differential expression results.
 
 ``` r
-# Plot a heatmap of all proteins, with columns ordered by clustering
-ProtPipe::compare_protein(pd_obj_imputed, prot = "GENE465", prot_meta_col = "Gene", condition = "group")
-```
+pathways <- ProtPipe::enrich_pathways(
+  de,
+  gene_col = "PG.Genes",
+  source = "go",
+  run_gsea = FALSE,
+  run_kegg = FALSE
+)
 
-![](getting-started_files/figure-html/barchart-1.png)
+pathways$plots$ora_up_dotplot
+#> NULL
+```
 
 ### Protein Expression Heatmap
 
@@ -338,27 +250,39 @@ our samples using a heatmap. The data is automatically Z-scored by row
 to highlight relative expression changes.
 
 ``` r
-# Plot a heatmap of all proteins, with columns ordered by clustering
-ProtPipe::plot_proteomics_heatmap(pd_obj_imputed, protmeta_col = "Gene")
+# Plot a heatmap of all proteins with row and column clustering
+ProtPipe::plot_proteomics_heatmap(
+  se_imputed,
+  protmeta_col = "PG.Genes",
+  condition = "differentiation_day",
+  cluster_rows = TRUE,
+  cluster_cols = TRUE
+)
+#> Condition provided. Summarizing replicates into means...
 ```
 
 ![](getting-started_files/figure-html/final-heatmap-1.png)
 
 ``` r
 
-# Or, filter to a specific subset of genes of interest
+top_genes <- unique(stats::na.omit(de$PG.Genes))[1:4]
+
 ProtPipe::plot_proteomics_heatmap(
-  pd_obj_imputed, 
-  protmeta_col = "Gene", 
-  genes = c("GENE1", "GENE2", "GENE3", "GENE4")
+  se_imputed,
+  protmeta_col = "PG.Genes",
+  condition = "differentiation_day",
+  genes = top_genes,
+  cluster_rows = TRUE,
+  cluster_cols = TRUE
 )
+#> Condition provided. Summarizing replicates into means...
 ```
 
 ![](getting-started_files/figure-html/final-heatmap-2.png)
 
 ## Conclusion
 
-This vignette demonstrated a complete analysis workflow using the
-`ProtPipe` package. By combining data and metadata into a `ProtData`
-object, we can apply a series of QC, pre-processing, and visualization
-steps in a clear and reproducible pipeline.
+This vignette demonstrated a complete ProtPipe workflow starting from a
+packaged `SummarizedExperiment`. The same pattern extends to
+user-supplied objects constructed with
+[`create_se()`](https://nih-card.github.io/ProtPipe2/docs/reference/create_se.md).
