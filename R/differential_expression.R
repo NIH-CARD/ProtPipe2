@@ -725,6 +725,27 @@ has_valid_gsea_ranking <- function(gene_list) {
   TRUE
 }
 
+sanitize_gsea_ranking <- function(gene_list) {
+  stats <- as.numeric(gene_list)
+  ids <- names(gene_list)
+
+  keep <- !is.na(stats) & is.finite(stats) & !is.na(ids) & nzchar(ids)
+  stats <- stats[keep]
+  ids <- ids[keep]
+
+  if (length(stats) == 0) {
+    return(stats::setNames(numeric(0), character(0)))
+  }
+
+  dedup <- !duplicated(ids)
+  stats <- stats[dedup]
+  ids <- ids[dedup]
+
+  out <- stats::setNames(stats, ids)
+  out <- sort(out, decreasing = TRUE)
+  out
+}
+
 has_enrichment_signal <- function(stats) {
   stats <- as.numeric(stats)
   stats <- stats[!is.na(stats)]
@@ -1094,7 +1115,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   df_ordered <- DT[order(DT$logFC, decreasing = TRUE), ]
   ordered_genes <- df_ordered$logFC
   names(ordered_genes) <- df_ordered$ENTREZID
-  ordered_genes_unique <- ordered_genes[!duplicated(names(ordered_genes))]
+  ordered_genes_unique <- sanitize_gsea_ranking(ordered_genes)
 
   if (run_gsea) {
     if (!has_valid_gsea_ranking(ordered_genes_unique)) {

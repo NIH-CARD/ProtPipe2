@@ -115,6 +115,13 @@ setMethod("compare_protein",
               }
               # --------------------------------------------------------
 
+              # Treat grouping variables as factors so ordering and group handling are explicit.
+              if (!is.null(selected_groups)) {
+                plotting_df[[condition]] <- factor(plotting_df[[condition]], levels = selected_groups)
+              } else {
+                plotting_df[[condition]] <- factor(plotting_df[[condition]])
+              }
+
               groups <- unique(na.omit(plotting_df[[condition]]))
 
               # Main plot call

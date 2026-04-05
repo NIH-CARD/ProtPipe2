@@ -26,6 +26,7 @@ The package is the primary source of analytical logic. The Shiny app should call
 
 - Keep the Shiny app as a thin wrapper around package functionality.
 - Put parsing, validation, and analysis logic in the package where practical.
+- Avoid adding display-only helper columns or other superfluous UI embellishments that were not explicitly requested.
 - Preserve the workflow structure:
   - Input
   - Quality Control
