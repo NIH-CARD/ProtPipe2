@@ -1,7 +1,7 @@
 library(shiny)
 
 source("shared.R")
-source("../global.R")
+source("global.R")
 source("../helpers.R")
 source("ui.R")
 source("server.R")
