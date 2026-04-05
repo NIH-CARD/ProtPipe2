@@ -1,4 +1,5 @@
 options(shiny.sanitize.errors = TRUE)
+options(shiny.maxRequestSize = 5000 * 1024^2)
 
 library(SummarizedExperiment)
 library(shiny)
