@@ -1,6 +1,8 @@
 options(shiny.sanitize.errors = TRUE)
 options(shiny.maxRequestSize = 5000 * 1024^2)
 
+source("helpers.R")
+
 library(SummarizedExperiment)
 library(shiny)
 library(ProtPipe)

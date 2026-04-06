@@ -10,7 +10,7 @@ appv2_page_layout <- function(param_ui, main_ui, show_main = TRUE) {
         class = "appv2-panel appv2-sidebar",
         div(
           class = "appv2-card appv2-params-card",
-          h3("Parameters"),
+          tags$p(class = "appv2-title", "Parameters"),
           div(class = "appv2-params-body", param_ui)
         )
       )
@@ -90,7 +90,12 @@ quality_control_main_ui <- div(
           selectInput(
             "quality_control_main_view_v2",
             "Select view",
-            choices = c("CV", "Protein Groups", "Protein Intensities", "Sample Correlations")
+            choices = c(
+              "Protein Groups",
+              "Protein Intensities",
+              "Sample Correlations",
+              "Coefficient of Variation"
+            )
           )
         ),
         div(
@@ -530,7 +535,6 @@ ui <- fluidPage(
         appv2_page_layout(
           param_ui = div(
             class = "appv2-params-stack",
-            tags$p(class = "appv2-subtitle", page_descriptions[[1]]),
             fileInput("intensity_matrix", "Upload proteomics data"),
             fileInput("sample_metadata", "Upload sample metadata"),
             downloadButton("download_example_proteomics_v2", "Example proteomics dataset"),

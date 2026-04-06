@@ -106,6 +106,18 @@ setMethod("get_CVs", "SummarizedExperiment",
 
             conds <- condition_file[[condition]]
             unique_conds <- (unique(conds))
+            group_sizes <- table(conds, useNA = "no")
+            undersized_groups <- names(group_sizes[group_sizes < min_samples])
+
+            if (length(undersized_groups) > 0) {
+              stop(
+                paste0(
+                  "Selected groups must each contain at least ", min_samples,
+                  " samples. Too few samples in: ",
+                  paste(undersized_groups, collapse = ", "), "."
+                )
+              )
+            }
 
             cv_list <- lapply(unique_conds, function(cond) {
               idx <- which(conds == cond)

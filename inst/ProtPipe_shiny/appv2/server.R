@@ -1,4 +1,5 @@
 source("shared.R")
+source("helpers.R")
 
 server <- function(input, output, session) {
   page_state <- reactiveVal(page_ids[[1]])
@@ -409,15 +410,10 @@ server <- function(input, output, session) {
       req(raw_prot_data())
 
       qc_choices <- names(SummarizedExperiment::colData(raw_prot_data()))
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
 
       switch(
         selected_view,
-        "CV" = div(
-          class = "appv2-params-stack",
-          selectInput("qc_condition_v2", "Group samples by", choices = qc_choices),
-          selectInput("cv_plot_type_v2", "Display style", choices = c("violin", "jitter"), selected = "violin")
-        ),
         "Protein Groups" = div(
           class = "appv2-params-stack",
           selectInput("qc_pg_condition_v2", "Group samples by", choices = qc_choices)
@@ -429,6 +425,11 @@ server <- function(input, output, session) {
         "Sample Correlations" = div(
           class = "appv2-params-stack",
           tags$p(class = "appv2-subtitle", "No additional parameters for this view.")
+        ),
+        "Coefficient of Variation" = div(
+          class = "appv2-params-stack",
+          selectInput("qc_condition_v2", "Group samples by", choices = qc_choices),
+          selectInput("cv_plot_type_v2", "Display style", choices = c("violin", "jitter"), selected = "violin")
         )
       )
     }, error = function(e) {
@@ -493,14 +494,14 @@ server <- function(input, output, session) {
   output$quality_control_plot_v2 <- renderPlot({
     tryCatch({
       req(raw_prot_data())
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
 
       p <- switch(
         selected_view,
-        "CV" = qc_cvs_reactive()$plot,
         "Protein Groups" = qc_protein_groups_reactive()$plot,
         "Protein Intensities" = qc_intensities_reactive()$plot,
-        "Sample Correlations" = qc_correlations_reactive()$plot
+        "Sample Correlations" = qc_correlations_reactive()$plot,
+        "Coefficient of Variation" = qc_cvs_reactive()$plot
       )
 
       print(p)
@@ -511,18 +512,18 @@ server <- function(input, output, session) {
 
   output$download_qc_plot_v2 <- downloadHandler(
     filename = function() {
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
       paste0(gsub(" ", "_", tolower(selected_view)), ".pdf")
     },
     content = function(file) {
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
       dims <- qc_plot_dimensions_v2()
       p <- switch(
         selected_view,
-        "CV" = qc_cvs_reactive()$plot,
         "Protein Groups" = qc_protein_groups_reactive()$plot,
         "Protein Intensities" = qc_intensities_reactive()$plot,
-        "Sample Correlations" = qc_correlations_reactive()$plot
+        "Sample Correlations" = qc_correlations_reactive()$plot,
+        "Coefficient of Variation" = qc_cvs_reactive()$plot
       )
       ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
     }
@@ -530,17 +531,17 @@ server <- function(input, output, session) {
 
   output$download_qc_table_v2 <- downloadHandler(
     filename = function() {
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
       paste0(gsub(" ", "_", tolower(selected_view)), ".tsv")
     },
     content = function(file) {
-      selected_view <- if (is.null(input$quality_control_main_view_v2)) "CV" else input$quality_control_main_view_v2
+      selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
       dat <- switch(
         selected_view,
-        "CV" = qc_cvs_reactive()$data,
         "Protein Groups" = qc_protein_groups_reactive()$data,
         "Protein Intensities" = qc_intensities_reactive()$data,
-        "Sample Correlations" = qc_correlations_reactive()$data
+        "Sample Correlations" = qc_correlations_reactive()$data,
+        "Coefficient of Variation" = qc_cvs_reactive()$data
       )
       write.table(dat, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
