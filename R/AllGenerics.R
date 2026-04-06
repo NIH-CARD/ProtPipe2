@@ -119,6 +119,9 @@ setGeneric("plot_CVs",
 #' @param object A \code{SummarizedExperiment} object.
 #' @param method The correlation method to use. Can be one of `"spearman"` (the
 #'   default), `"pearson"`, or `"kendall"`.
+#' @param num_features Optional. The number of most variable proteins to use for
+#'   the correlation calculation. If `NULL` (the default), all proteins are
+#'   used.
 #'
 #' @return A `data.table` with three columns: `SampleA`, `SampleB`, and a third
 #'   column named for the method used (e.g., `Spearman`), containing the
@@ -126,7 +129,12 @@ setGeneric("plot_CVs",
 #'
 #' @export
 #'
-setGeneric("get_sample_correlation", function(object, method = 'spearman') standardGeneric("get_sample_correlation"))
+setGeneric(
+  "get_sample_correlation",
+  function(object, method = "spearman", num_features = NULL) {
+    standardGeneric("get_sample_correlation")
+  }
+)
 
 #' Plot a Sample Correlation Heatmap
 #'
@@ -141,13 +149,16 @@ setGeneric("get_sample_correlation", function(object, method = 'spearman') stand
 #'   column contains numeric parts, a natural sort is applied.
 #' @param label_by Optional. A character string specifying a column in the
 #'   condition slot to use for relabeling the heatmap axes.
+#' @param num_features Optional. The number of most variable proteins to use for
+#'   the correlation calculation. If `NULL` (the default), all proteins are
+#'   used.
 #'
 #' @return A `ggplot` object representing the heatmap.
 #'
 #' @export
 #'
 setGeneric("plot_correlation_heatmap",
-           function(object, order_by = NULL, label_by = NULL) {
+           function(object, order_by = NULL, label_by = NULL, num_features = NULL) {
              standardGeneric("plot_correlation_heatmap")
            }
 )

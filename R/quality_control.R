@@ -177,11 +177,26 @@ setMethod("plot_CVs", "SummarizedExperiment",
 #' @rdname get_sample_correlation
 #' @export
 setMethod("get_sample_correlation", "SummarizedExperiment",
-          function(object, method = 'spearman') {
-            DT <- as.data.frame(assay(object))
+          function(object, method = 'spearman', num_features = NULL) {
+            dt.samples <- as.matrix(assay(object))
 
-            dt.samples <- DT[, sapply(DT, is.numeric)] #better way of getting just intensity columns
-            dt.corrs <- cor(as.matrix(dt.samples) + 1,
+            if (!is.numeric(dt.samples)) {
+              stop("The assay must contain only numeric values.")
+            }
+
+            if (!is.null(num_features)) {
+              if (!is.numeric(num_features) || length(num_features) != 1 || is.na(num_features) || num_features < 1) {
+                stop("num_features must be a single positive number.")
+              }
+
+              n_features <- min(as.integer(num_features), nrow(dt.samples))
+              row_variances <- matrixStats::rowVars(dt.samples, na.rm = TRUE)
+              row_variances[is.na(row_variances)] <- -Inf
+              selected_rows <- order(row_variances, decreasing = TRUE)[seq_len(n_features)]
+              dt.samples <- dt.samples[selected_rows, , drop = FALSE]
+            }
+
+            dt.corrs <- cor(dt.samples + 1,
                             method = method,
                             use = "pairwise.complete.obs")
 
@@ -198,10 +213,10 @@ setMethod("get_sample_correlation", "SummarizedExperiment",
 #' @rdname plot_correlation_heatmap
 #' @export
 setMethod("plot_correlation_heatmap", "SummarizedExperiment",
-          function(object, order_by = NULL, label_by = NULL) {
+          function(object, order_by = NULL, label_by = NULL, num_features = NULL) {
 
             # --- 1. Calculate Correlation Data ---
-            DT.corrs <- get_sample_correlation(object)
+            DT.corrs <- get_sample_correlation(object, num_features = num_features)
 
             # --- 2. Determine Sample Order ---
             metadata <- as.data.frame(colData(object))

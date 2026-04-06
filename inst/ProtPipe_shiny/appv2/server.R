@@ -424,7 +424,15 @@ server <- function(input, output, session) {
         ),
         "Sample Correlations" = div(
           class = "appv2-params-stack",
-          tags$p(class = "appv2-subtitle", "No additional parameters for this view.")
+          checkboxInput("qc_use_all_features_v2", "Use all proteins for correlation (slower)", value = FALSE),
+          conditionalPanel(
+            condition = "!input.qc_use_all_features_v2",
+            numericInput("qc_num_features_v2", "Number of proteins for correlation (n)", value = 1000, min = 1, step = 100)
+          ),
+          tags$p(
+            class = "appv2-subtitle",
+            "The top n most variable proteins in the dataset will be used to calculate spearman correlation. This will decrease analysis time, but may result in lower correlation values compared to using the full set of proteins."
+          )
         ),
         "Coefficient of Variation" = div(
           class = "appv2-params-stack",
@@ -467,9 +475,13 @@ server <- function(input, output, session) {
 
   qc_correlations_reactive <- reactive({
     req(raw_prot_data())
+    num_features <- if (isTRUE(input$qc_use_all_features_v2)) NULL else input$qc_num_features_v2
+    if (!isTRUE(input$qc_use_all_features_v2)) {
+      req(num_features)
+    }
     list(
-      data = ProtPipe::get_sample_correlation(raw_prot_data()),
-      plot = ProtPipe::plot_correlation_heatmap(raw_prot_data())
+      data = ProtPipe::get_sample_correlation(raw_prot_data(), num_features = num_features),
+      plot = ProtPipe::plot_correlation_heatmap(raw_prot_data(), num_features = num_features)
     )
   })
 
