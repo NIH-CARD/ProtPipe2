@@ -171,48 +171,63 @@ server <- function(input, output, session) {
     })
   })
 
-  raw_prot_data <- reactive({
-    req(intensity_file(), input$lower_col_v2, input$upper_col_v2)
-    df <- intensity_file()
-    cols <- names(df)
-    lower_idx <- match(input$lower_col_v2, cols)
-    upper_idx <- match(input$upper_col_v2, cols)
+  raw_prot_data_result <- reactive({
+    tryCatch({
+      req(intensity_file(), input$lower_col_v2, input$upper_col_v2)
+      df <- intensity_file()
+      cols <- names(df)
+      lower_idx <- match(input$lower_col_v2, cols)
+      upper_idx <- match(input$upper_col_v2, cols)
 
-    validate(
-      need(!is.na(lower_idx) && !is.na(upper_idx), "Selected columns were not found."),
-      need(lower_idx <= upper_idx, "The first intensity column must come before the last intensity column.")
-    )
-
-    if (data_type() == "Standard Matrix") {
-      ProtPipe::create_se(
-        dat = intensity_file(),
-        intensity_cols = c(lower_idx:upper_idx),
-        sample_metadata = condition_file()
+      validate(
+        need(!is.na(lower_idx) && !is.na(upper_idx), "Selected columns were not found."),
+        need(lower_idx <= upper_idx, "The first intensity column must come before the last intensity column.")
       )
-    } else {
-      if (is.null(condition_file())) {
-        condition <- rv$condition
-      } else if (is.null(rv$condition)) {
-        condition <- condition_file()
+
+      se_obj <- if (data_type() == "Standard Matrix") {
+        ProtPipe::create_se(
+          dat = intensity_file(),
+          intensity_cols = c(lower_idx:upper_idx),
+          sample_metadata = condition_file()
+        )
       } else {
-        condition <- dplyr::left_join(rv$condition, condition_file(), by = "SampleID")
+        if (is.null(condition_file())) {
+          condition <- rv$condition
+        } else if (is.null(rv$condition)) {
+          condition <- condition_file()
+        } else {
+          condition <- dplyr::left_join(rv$condition, condition_file(), by = "SampleID")
+        }
+        ProtPipe::create_se(
+          dat = intensity_file(),
+          intensity_cols = c(lower_idx:upper_idx),
+          sample_metadata = condition
+        )
       }
-      ProtPipe::create_se(
-        dat = intensity_file(),
-        intensity_cols = c(lower_idx:upper_idx),
-        sample_metadata = condition
-      )
-    }
+
+      list(data = se_obj, error = NULL)
+    }, error = function(e) {
+      list(data = NULL, error = e$message)
+    })
   })
+
+  raw_prot_data <- reactive(raw_prot_data_result()$data)
+  raw_prot_data_error <- reactive(raw_prot_data_result()$error)
+
+  validate_raw_prot_data <- function() {
+    validate(need(is.null(raw_prot_data_error()), raw_prot_data_error()))
+  }
 
   output$file_summary_v2 <- renderText({
     tryCatch({
-      se_obj <- tryCatch(raw_prot_data(), error = function(e) NULL)
+      se_obj <- raw_prot_data()
+      error_msg <- raw_prot_data_error()
       if (is.null(se_obj)) {
         paste(
           "Data type:", rv$type,
           "\nNumber of samples: 0",
-          "\nNumber of proteins: 0"
+          "\nNumber of proteins: 0",
+          if (!is.null(error_msg)) paste0("\n", error_msg) else ""
         )
       } else {
         paste(
@@ -228,6 +243,7 @@ server <- function(input, output, session) {
 
   output$input_preview_table <- renderTable({
     tryCatch({
+      validate_raw_prot_data()
       se_obj <- raw_prot_data()
       req(se_obj)
 
@@ -309,6 +325,7 @@ server <- function(input, output, session) {
 
   output$batch_correct_column_v2 <- renderUI({
     tryCatch({
+      validate_raw_prot_data()
       req(raw_prot_data())
       if (is.null(condition_file())) {
         tags$p(class = "appv2-subtitle", "Must upload sample condition file.")
@@ -323,6 +340,7 @@ server <- function(input, output, session) {
 
   output$batch_correct_section_v2 <- renderUI({
     tryCatch({
+      validate_raw_prot_data()
       req(raw_prot_data())
       if (is.null(condition_file())) {
         tags$p(class = "appv2-subtitle", "Must upload sample condition file.")
@@ -338,75 +356,88 @@ server <- function(input, output, session) {
     })
   })
 
-  prot_data <- reactive({
-    req(raw_prot_data())
-    PD <- raw_prot_data()
+  prot_data_result <- reactive({
+    tryCatch({
+      validate_raw_prot_data()
+      req(raw_prot_data())
+      PD <- raw_prot_data()
 
-    if (isTRUE(input$lod_filter_v2)) {
-      lod_col <- NULL
-      if (data_type() == "Olink") {
-        lod_col <- "LOD"
-      }
-      if (data_type() == "SomaScan") {
-        lod_col <- "Buffer"
-      }
-      if (!is.null(lod_col)) {
-        PD <- ProtPipe::lod_filter(PD, lod_col)
-      }
-    }
-
-    if (isTRUE(input$min_int_filter_v2)) {
-      PD <- ProtPipe::apply_min_intenisty(PD, input$min_int_filter_lod_v2)
-    }
-
-    if (isTRUE(input$remove_outliers_v2)) {
-      PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds_v2)
-    }
-    if (isTRUE(input$remove_sparse_proteins_v2)) {
-      PD <- ProtPipe::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent_v2)
-    }
-
-    if (isTRUE(input$log2_transform_v2)) {
-      tryCatch({
-        PD <- ProtPipe::log2_transform(PD)
-      }, error = function(e) {
-        message("Transformation failed: ", e$message)
-      })
-    }
-
-    if (isTRUE(input$normalize_v2)) {
-      tryCatch({
-        if (input$normalize_method_v2 == "mean") {
-          PD <- ProtPipe::mean_normalize(PD)
-        } else if (input$normalize_method_v2 == "median") {
-          PD <- ProtPipe::median_normalize(PD)
+      if (isTRUE(input$lod_filter_v2)) {
+        lod_col <- NULL
+        if (data_type() == "Olink") {
+          lod_col <- "LOD"
         }
-      }, error = function(e) {
-        message("Normalization failed: ", e$message)
-      })
-    }
-
-    if (isTRUE(input$impute_v2)) {
-      if (input$imputation_method_v2 == "fixed value") {
-        PD <- ProtPipe::impute(PD, input$impute_fixed_value_v2)
-      } else if (input$imputation_method_v2 == "minimum") {
-        PD <- ProtPipe::impute_min(PD, input$impute_min_value_v2)
-      } else if (input$imputation_method_v2 == "left-shifted distribution") {
-        PD <- ProtPipe::impute_left_dist(PD, input$impute_left_dist_shift_v2, input$impute_left_dist_scale_v2)
+        if (data_type() == "SomaScan") {
+          lod_col <- "Buffer"
+        }
+        if (!is.null(lod_col)) {
+          PD <- ProtPipe::lod_filter(PD, lod_col)
+        }
       }
-    }
 
-    if (!is.null(input$batch_correct_column_v2) && isTRUE(input$batch_correct_v2)) {
-      PD <- ProtPipe::batch_correct(PD, input$batch_correct_column_v2)
-    }
+      if (isTRUE(input$min_int_filter_v2)) {
+        PD <- ProtPipe::apply_min_intenisty(PD, input$min_int_filter_lod_v2)
+      }
 
-    PD
+      if (isTRUE(input$remove_outliers_v2)) {
+        PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds_v2)
+      }
+      if (isTRUE(input$remove_sparse_proteins_v2)) {
+        PD <- ProtPipe::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent_v2)
+      }
+
+      if (isTRUE(input$log2_transform_v2)) {
+        tryCatch({
+          PD <- ProtPipe::log2_transform(PD)
+        }, error = function(e) {
+          message("Transformation failed: ", e$message)
+        })
+      }
+
+      if (isTRUE(input$normalize_v2)) {
+        tryCatch({
+          if (input$normalize_method_v2 == "mean") {
+            PD <- ProtPipe::mean_normalize(PD)
+          } else if (input$normalize_method_v2 == "median") {
+            PD <- ProtPipe::median_normalize(PD)
+          }
+        }, error = function(e) {
+          message("Normalization failed: ", e$message)
+        })
+      }
+
+      if (isTRUE(input$impute_v2)) {
+        if (input$imputation_method_v2 == "fixed value") {
+          PD <- ProtPipe::impute(PD, input$impute_fixed_value_v2)
+        } else if (input$imputation_method_v2 == "minimum") {
+          PD <- ProtPipe::impute_min(PD, input$impute_min_value_v2)
+        } else if (input$imputation_method_v2 == "left-shifted distribution") {
+          PD <- ProtPipe::impute_left_dist(PD, input$impute_left_dist_shift_v2, input$impute_left_dist_scale_v2)
+        }
+      }
+
+      if (!is.null(input$batch_correct_column_v2) && isTRUE(input$batch_correct_v2)) {
+        PD <- ProtPipe::batch_correct(PD, input$batch_correct_column_v2)
+      }
+
+      list(data = PD, error = NULL)
+    }, error = function(e) {
+      list(data = NULL, error = e$message)
+    })
   })
+
+  prot_data <- reactive(prot_data_result()$data)
+  prot_data_error <- reactive(prot_data_result()$error)
+
+  validate_prot_data <- function() {
+    validate(need(is.null(prot_data_error()), prot_data_error()))
+  }
 
   # Quality Control -----------------------------------------------------------
 
   output$quality_control_params_v2 <- renderUI({
     tryCatch({
+      validate_raw_prot_data()
       req(raw_prot_data())
 
       qc_choices <- names(SummarizedExperiment::colData(raw_prot_data()))
@@ -505,6 +536,7 @@ server <- function(input, output, session) {
 
   output$quality_control_plot_v2 <- renderPlot({
     tryCatch({
+      validate_raw_prot_data()
       req(raw_prot_data())
       selected_view <- if (is.null(input$quality_control_main_view_v2)) "Protein Groups" else input$quality_control_main_view_v2
 
@@ -588,6 +620,7 @@ server <- function(input, output, session) {
 
   output$clustering_params_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data())
       selected_view <- if (is.null(input$clustering_main_view_v2)) "Hierarchical Clustering" else input$clustering_main_view_v2
       choices <- names(SummarizedExperiment::colData(prot_data()))
@@ -665,6 +698,7 @@ server <- function(input, output, session) {
 
   output$clustering_plot_v2 <- renderPlot({
     tryCatch({
+      validate_prot_data()
       req(prot_data())
       selected_view <- if (is.null(input$clustering_main_view_v2)) "Hierarchical Clustering" else input$clustering_main_view_v2
       p <- switch(
@@ -716,6 +750,7 @@ server <- function(input, output, session) {
 
   output$workflow_preview_table <- renderTable({
     tryCatch({
+      validate_prot_data()
       se_obj <- prot_data()
       req(se_obj)
 
@@ -738,6 +773,7 @@ server <- function(input, output, session) {
 
   output$workflow_main_body <- renderUI({
     tryCatch({
+      validate_prot_data()
       if (identical(selected_main_view(), "Plot")) {
         current_index <- get_page_index(page_state())
         return(
@@ -772,7 +808,9 @@ server <- function(input, output, session) {
   })
 
   observe({
-    req(prot_data())
+    if (!is.null(prot_data_error()) || is.null(prot_data())) {
+      return()
+    }
     col_choices <- names(SummarizedExperiment::colData(prot_data()))
     row_choices <- names(SummarizedExperiment::rowData(prot_data()))
     updateSelectInput(session, "de_condition_v2", choices = col_choices)
@@ -782,6 +820,7 @@ server <- function(input, output, session) {
 
   output$de_groups_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data(), input$de_condition_v2, input$de_mode_v2 == "binary")
       groups <- unique(SummarizedExperiment::colData(prot_data())[[input$de_condition_v2]])
       tagList(
@@ -795,6 +834,7 @@ server <- function(input, output, session) {
 
   output$de_covariates_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data(), input$de_mode_v2 == "binary")
       choices <- names(SummarizedExperiment::colData(prot_data()))
       selectInput("de_covariates_v2", "Covariates", choices = choices, multiple = TRUE, selected = NULL)
@@ -1212,6 +1252,7 @@ server <- function(input, output, session) {
 
   output$abundance_params_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data())
       row_choices <- names(SummarizedExperiment::rowData(prot_data()))
       col_choices <- names(SummarizedExperiment::colData(prot_data()))
@@ -1241,6 +1282,7 @@ server <- function(input, output, session) {
 
   output$pv_protein_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data(), input$pv_prot_meta_v2)
       choices <- SummarizedExperiment::rowData(prot_data())[[input$pv_prot_meta_v2]]
       selectInput("pv_protein_v2", "Select a protein", choices = choices)
@@ -1255,6 +1297,7 @@ server <- function(input, output, session) {
 
   output$barchart_selected_groups_v2 <- renderUI({
     tryCatch({
+      validate_prot_data()
       req(prot_data(), pv_selected_condition_v2())
       choices <- SummarizedExperiment::colData(prot_data())[[pv_selected_condition_v2()]]
       selectInput("barchart_selected_groups_v2", "Groups to display", choices = choices, multiple = TRUE, selected = NULL)
@@ -1315,6 +1358,7 @@ server <- function(input, output, session) {
 
   output$abundance_plot_v2 <- renderPlot({
     tryCatch({
+      validate_prot_data()
       req(prot_data())
       p <- switch(
         abundance_selected_view_v2(),

@@ -83,14 +83,28 @@ setMethod("do_limma_binary", "SummarizedExperiment",
               stop("Both treatment and control groups must exist in `condition`.")
             }
 
-            treatment_samples <- rownames(meta[meta[[condition]] == treatment_group, , drop = FALSE])
-            control_samples   <- rownames(meta[meta[[condition]] == control_group, , drop = FALSE])
+            treatment_samples <- rownames(meta)[which(!is.na(groups) & groups == treatment_group)]
+            control_samples <- rownames(meta)[which(!is.na(groups) & groups == control_group)]
+
+            if (length(treatment_samples) == 0 || length(control_samples) == 0) {
+              stop("Treatment or control group has no valid samples after removing missing metadata.")
+            }
 
             if (length(treatment_samples) < 2 || length(control_samples) < 2) {
               stop("Each group must contain at least 2 samples.")
             }
 
-            DT_limma <- DT[, c(treatment_samples, control_samples)]
+            missing_samples <- setdiff(c(treatment_samples, control_samples), colnames(DT))
+            if (length(missing_samples) > 0) {
+              stop(
+                paste(
+                  "These samples were found in colData but not in assay data:",
+                  paste(missing_samples, collapse = ", ")
+                )
+              )
+            }
+
+            DT_limma <- DT[, c(treatment_samples, control_samples), drop = FALSE]
 
             # -- build design matrix --
             group_list <- factor(c(rep("treatment", length(treatment_samples)),

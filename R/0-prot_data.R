@@ -98,11 +98,17 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
 
       # Drop rows of col_data that are not in data
       matching_rows <- intersect(rownames(col_data), colnames(assay_data))
+      dropped_rows <- setdiff(rownames(col_data), matching_rows)
       col_data <- col_data[matching_rows, ]
 
-      dropped_rows <- setdiff(rownames(col_data), matching_rows)
-      warning("Dropped rows:\n")
-      warning(dropped_rows)
+      if (length(dropped_rows) > 0) {
+        warning(
+          paste(
+            "Dropped metadata rows:",
+            paste(dropped_rows, collapse = ", ")
+          )
+        )
+      }
     }
     # add additional rows to col_data if they exist in data
     if (ncol(assay_data) > nrow(col_data)) {

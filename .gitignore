@@ -3,6 +3,7 @@
 
 # Ignore output of scripts
 src/pwiz_sandbox/
+local_tests/
 Clustering/
 QC/
 MHC_Prediction/
