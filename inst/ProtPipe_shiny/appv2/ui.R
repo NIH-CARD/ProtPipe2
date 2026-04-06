@@ -1,6 +1,6 @@
 source("shared.R")
 
-appv2_page_layout <- function(param_ui, main_ui, show_main = TRUE) {
+appv2_page_layout <- function(param_ui, main_ui, show_main = TRUE, param_card_class = NULL) {
   fluidRow(
     style = "height: 100%; margin-left: 0; margin-right: 0;",
     column(
@@ -9,7 +9,7 @@ appv2_page_layout <- function(param_ui, main_ui, show_main = TRUE) {
       div(
         class = "appv2-panel appv2-sidebar",
         div(
-          class = "appv2-card appv2-params-card",
+          class = paste("appv2-card appv2-params-card", param_card_class),
           tags$p(class = "appv2-title", "Parameters"),
           div(class = "appv2-params-body", param_ui)
         )
@@ -376,6 +376,9 @@ ui <- fluidPage(
       .appv2-params-card .shiny-input-container {
         margin-bottom: 12px;
       }
+      .appv2-params-card-tall {
+        min-height: 800px;
+      }
       .appv2-params-stack {
         display: flex;
         flex-direction: column;
@@ -549,7 +552,8 @@ ui <- fluidPage(
         condition = "input.current_page == 'quality_control'",
         appv2_page_layout(
           param_ui = uiOutput("quality_control_params_v2"),
-          main_ui = quality_control_main_ui
+          main_ui = quality_control_main_ui,
+          param_card_class = "appv2-params-card-tall"
         )
       ),
 
@@ -641,7 +645,8 @@ ui <- fluidPage(
         condition = "input.current_page == 'clustering'",
         appv2_page_layout(
           param_ui = uiOutput("clustering_params_v2"),
-          main_ui = clustering_main_ui
+          main_ui = clustering_main_ui,
+          param_card_class = "appv2-params-card-tall"
         )
       ),
 
@@ -659,7 +664,8 @@ ui <- fluidPage(
         condition = "input.current_page == 'abundance_profiling'",
         appv2_page_layout(
           param_ui = uiOutput("abundance_params_v2"),
-          main_ui = abundance_profiling_main_ui
+          main_ui = abundance_profiling_main_ui,
+          param_card_class = "appv2-params-card-tall"
         )
       ),
 
