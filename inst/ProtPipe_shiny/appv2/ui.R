@@ -679,7 +679,7 @@ ui <- fluidPage(
                   class = "appv2-main-body",
                   div(
                     class = "appv2-panel appv2-plot",
-                    includeMarkdown("../www/help.md")
+                    includeMarkdown("help.md")
                   )
                 )
               )
