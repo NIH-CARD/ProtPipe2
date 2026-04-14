@@ -269,7 +269,7 @@ server <- function(input, output, session) {
       "example_proteomics_dataset.csv"
     },
     content = function(file) {
-      file.copy(file.path("..", "www", "iPSC.csv"), file, overwrite = TRUE)
+      file.copy(file.path("www", "iPSC.csv"), file, overwrite = TRUE)
     }
   )
 
