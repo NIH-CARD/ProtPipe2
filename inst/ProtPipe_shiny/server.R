@@ -525,7 +525,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- cvs_reactive()$plot
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -569,7 +569,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- intensities_reactive()
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -612,7 +612,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- protein_group_counts_reactive()$plot
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -666,7 +666,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p<-correlation_heatmap_reactive()$plot
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -724,7 +724,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <-  hcluster_reactive()
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -776,7 +776,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- pca_reactive()
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -868,7 +868,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       req(intensity_file())  # Ensure file is uploaded
-      ggsave(file, plot=umap_results()$plot, device = "pdf")
+      ggplot2::ggsave(file, plot=umap_results()$plot, device = "pdf")
     }
   )
 
@@ -1031,7 +1031,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- volcano_reactive()
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 
@@ -1266,7 +1266,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- heatmap_reactive() # Retrieves the cached plot
-      ggsave(file, plot = p, device = "pdf")
+      ggplot2::ggsave(file, plot = p, device = "pdf")
     }
   )
 
@@ -1339,7 +1339,7 @@ server <- function(input, output, session) {
     },
     content = function(file){
       p <- protein_barchart_reactive()
-      ggsave(file, plot=p, device = "pdf")
+      ggplot2::ggsave(file, plot=p, device = "pdf")
     }
   )
 

@@ -34,7 +34,7 @@ fileUploadServer <- function(id, label = "Upload File") {
 
 add_zip_plot <- function(plot, plotname, subfolder, zip_workspace, zip_file){
   file_path <- file.path(zip_workspace, subfolder, plotname)
-  ggsave(file_path, plot=plot, device = "pdf")
+  ggplot2::ggsave(file_path, plot=plot, device = "pdf")
   # rel_path <- file.path(subfolder, plotname)
   # zip::zip_append(
   #   zipfile = file.path(zip_workspace, zip_file),
