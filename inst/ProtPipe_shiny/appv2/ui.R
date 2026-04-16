@@ -501,6 +501,41 @@ ui <- fluidPage(
         font-size: 15px;
         font-weight: 700;
       }
+      .appv2-cookie-banner {
+        position: fixed;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        background: rgba(31, 41, 51, 0.94);
+        color: #f8fafc;
+        box-shadow: 0 18px 42px rgba(31, 41, 51, 0.24);
+      }
+      .appv2-cookie-copy {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .appv2-cookie-copy a,
+      .appv2-cookie-copy a:hover {
+        color: #d9f3f5;
+        text-decoration: underline;
+      }
+      .appv2-cookie-close {
+        border: 0;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #1f2933;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 8px 14px;
+      }
       @media (max-width: 1180px) {
         .appv2-header {
           flex-direction: column;
@@ -515,7 +550,27 @@ ui <- fluidPage(
         .appv2-top-control {
           width: 100%;
         }
+        .appv2-cookie-banner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
       }
+    ")),
+    tags$script(HTML("
+      document.addEventListener('DOMContentLoaded', function() {
+        var banner = document.getElementById('appv2-cookie-banner');
+        var closeButton = document.getElementById('appv2-cookie-close');
+        if (!banner || !closeButton) return;
+
+        if (window.localStorage.getItem('appv2_cookie_notice_dismissed') !== 'true') {
+          banner.style.display = 'flex';
+        }
+
+        closeButton.addEventListener('click', function() {
+          window.localStorage.setItem('appv2_cookie_notice_dismissed', 'true');
+          banner.style.display = 'none';
+        });
+      });
     "))
   ),
   div(style = "display:none;", textInput("current_page", label = NULL, value = page_ids[[1]])),
@@ -702,6 +757,20 @@ ui <- fluidPage(
       class = "appv2-footer",
       actionButton("back_page", "Back", class = "btn-default appv2-navbtn"),
       actionButton("next_page", "Next", class = "btn-primary appv2-navbtn")
+    )
+  ),
+  div(
+    id = "appv2-cookie-banner",
+    class = "appv2-cookie-banner",
+    tags$p(
+      class = "appv2-cookie-copy",
+      "This app uses a necessary session cookie to maintain your session while the app is open. It is not used for advertising or cross-site tracking."
+    ),
+    tags$button(
+      id = "appv2-cookie-close",
+      type = "button",
+      class = "appv2-cookie-close",
+      "OK"
     )
   )
 )
