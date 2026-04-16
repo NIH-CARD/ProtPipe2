@@ -150,7 +150,7 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
   # filtering proteins should NOT be in a constructor. That is a downstream
   # *processing step*. This function should only build the object.
 
-  se <- SummarizedExperiment(
+  se <- SummarizedExperiment::SummarizedExperiment(
     # Assays must be in a named list. We'll call the primary data "intensities".
     assays = list(intensities = assay_data),
 

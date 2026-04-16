@@ -573,7 +573,7 @@ server <- function(input, output, session) {
         "Sample Correlations" = qc_correlations_reactive()$plot,
         "Coefficient of Variation" = qc_cvs_reactive()$plot
       )
-      ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+      ggplot2::ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
     }
   )
 
@@ -731,7 +731,7 @@ server <- function(input, output, session) {
         "PCA" = clustering_pca_plot_reactive(),
         "UMAP" = clustering_umap_results()$plot
       )
-      ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+      ggplot2::ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
     }
   )
 
@@ -1124,7 +1124,7 @@ server <- function(input, output, session) {
     filename = function() { "volcano.pdf" },
     content = function(file) {
       dims <- differential_plot_dimensions_v2()
-      ggsave(file, plot = volcano_plot_v2(), device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+      ggplot2::ggsave(file, plot = volcano_plot_v2(), device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
     }
   )
 
@@ -1391,7 +1391,7 @@ server <- function(input, output, session) {
         "Barplot" = abundance_barchart_reactive(),
         "Heatmap" = abundance_heatmap_reactive()
       )
-      ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+      ggplot2::ggsave(file, plot = p, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
     }
   )
 

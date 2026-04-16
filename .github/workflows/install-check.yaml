@@ -21,7 +21,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: local::.
-          dependencies: hard
+          dependencies: "hard"
 
       - name: Smoke test core install
         run: |
@@ -41,7 +41,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: local::.
-          dependencies: true
+          dependencies: "true"
 
       - name: Smoke test optional dependencies
         run: |

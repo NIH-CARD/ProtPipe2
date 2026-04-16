@@ -1146,14 +1146,14 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
 
       if(!is.null(gse_result)){
         datas$gsea <- gse_result@result
-        plots$gsea_dotplot <- enrichplot::dotplot(gse_result, showCategory=10, split=".sign") + facet_grid(.~.sign)
+        plots$gsea_dotplot <- enrichplot::dotplot(gse_result, showCategory=10, split=".sign") + ggplot2::facet_grid(.~.sign)
       }
 
       if (run_kegg) {
         gse_kegg <- ProtPipe::gse_kegg(ordered_genes_unique, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
         if(!is.null(gse_kegg)){
           datas$gse_kegg <- gse_kegg@result
-          plots$gse_kegg_dotplot <- enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + facet_grid(.~.sign)
+          plots$gse_kegg_dotplot <- enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + ggplot2::facet_grid(.~.sign)
         }
       }
     }
