@@ -19,7 +19,6 @@ setGeneric("compare_protein",
 setMethod("compare_protein",
           signature(object = "SummarizedExperiment"),
           function(object, prot, prot_meta_col = NULL, condition = NULL, selected_groups = NULL) {
-
             # --- Input Validation and Data Extraction ---
 
             if (length(prot) != 1 || !is.character(prot)) {
@@ -83,6 +82,8 @@ setMethod("compare_protein",
 
               # Case 2: Condition provided, plot grouped means with stats
             } else {
+              protpipe_require_packages("ggpubr", feature = "compare_protein() with statistical comparisons")
+
               if (!condition %in% names(colData(object))) { stop("'", condition, "' not found in colData slot.") }
 
               condition_df <- colData(object) %>%

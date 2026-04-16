@@ -528,10 +528,11 @@ plot_correlation_volcano <- function(DT.original, label_col = NULL, rho_threshol
 #'
 #' @export
 #'
-#' @importFrom clusterProfiler bitr
 #' @importFrom dplyr inner_join
 #'
 add_entrez <- function(DE, org = org.Hs.eg.db::org.Hs.eg.db, gene_col = "Genes") {
+  protpipe_require_packages("clusterProfiler", feature = "add_entrez()")
+
   DE[[gene_col]] <- sapply(strsplit(DE[[gene_col]], ";"), `[`, 1)
 
   # Remove NA or empty strings before mapping
@@ -662,6 +663,8 @@ read_ontology <- function(file) {
 #' @return An `enrichResult` object, or `NULL` if no terms are enriched.
 #' @export
 enrich_terms <- function(gene_id, all_gene_vector, term2gene, term2name = NULL, enrich_pvalue = 1) {
+  protpipe_require_packages("clusterProfiler", feature = "enrich_terms()")
+
   enrichment <- tryCatch({
     clusterProfiler::enricher(
       gene = gene_id,
@@ -700,6 +703,8 @@ enrich_terms <- function(gene_id, all_gene_vector, term2gene, term2name = NULL, 
 #' @return A `gseaResult` object, or `NULL` if no terms are enriched.
 #' @export
 gse_terms <- function(gene_list, term2gene, term2name = NULL, enrich_pvalue = 1) {
+  protpipe_require_packages("clusterProfiler", feature = "gse_terms()")
+
   enrichment <- tryCatch({
     clusterProfiler::GSEA(
       geneList = gene_list,
@@ -789,9 +794,9 @@ has_enrichment_signal <- function(stats) {
 #'
 #' @export
 #'
-#' @importFrom clusterProfiler enrichGO
-#'
 enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, ont = "BP") {
+  protpipe_require_packages("clusterProfiler", feature = "enrich_go()")
+
   cat("Processing GO\n")
 
   GO <- tryCatch({
@@ -836,10 +841,9 @@ enrich_go <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.
 #'
 #' @export
 #'
-#' @importFrom clusterProfiler enrichKEGG
-#' @importFrom DOSE setReadable
-#'
 enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, organism = 'hsa') {
+  protpipe_require_packages(c("clusterProfiler", "DOSE"), feature = "enrich_kegg()")
+
   cat("Processing KEGG\n")
 
   KEGG <- tryCatch({
@@ -881,10 +885,9 @@ enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.H
 #'
 #' @export
 #'
-#' @importFrom clusterProfiler gseGO
-#' @importFrom DOSE setReadable
-#'
 gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, ont = "BP") {
+  protpipe_require_packages(c("clusterProfiler", "DOSE"), feature = "gse_go()")
+
   cat("Processing GSEA GO\n")
 
   GO <- tryCatch({
@@ -928,10 +931,9 @@ gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.d
 #'
 #' @export
 #'
-#' @importFrom clusterProfiler gseKEGG
-#' @importFrom DOSE setReadable
-#'
 gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.db, organism = 'hsa') {
+  protpipe_require_packages(c("clusterProfiler", "DOSE"), feature = "gse_kegg()")
+
   cat("Processing GSEA KEGG\n")
 
   KEGG <- tryCatch({
@@ -1003,10 +1005,6 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
 #'
 #' @export
 #'
-#' @importFrom enrichplot dotplot pairwise_termsim
-#' @importFrom ggplot2 facet_grid ggtitle
-#' @importFrom clusterProfiler filter
-#'
 #' @examples
 #' # Create a sample DE results dataframe
 #' de_results <- data.frame(
@@ -1042,6 +1040,8 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
                            go_org = org.Hs.eg.db, kegg_org = 'hsa', gene_col = "Genes", adj = TRUE,
                            source = c("go", "custom"), go_ont = "BP", term2gene = NULL,
                            term2name = NULL, run_ora = TRUE, run_gsea = TRUE, run_kegg = FALSE){
+  protpipe_require_packages(c("clusterProfiler", "enrichplot"), feature = "enrich_pathways()")
+
   source <- match.arg(source)
   datas <- list()
   plots <- list()

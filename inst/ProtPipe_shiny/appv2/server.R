@@ -86,6 +86,7 @@ server <- function(input, output, session) {
       )
 
       if (ext == "adat") {
+        app_require_packages("SomaDataIO", feature = "SomaScan import")
         rv$type <- "SomaScan"
         out <- SomaDataIO::read_adat(file_info$datapath) |>
           ProtPipe::soma_all_output()
@@ -93,6 +94,7 @@ server <- function(input, output, session) {
         rv$condition <- out$condition
         rv$number_samples <- out$number_samples
       } else if (detect_olink_npx(file_info$datapath)) {
+        app_require_packages("OlinkAnalyze", feature = "Olink import")
         rv$type <- "Olink"
         out <- OlinkAnalyze::read_NPX(file_info$datapath) |>
           ProtPipe::olink_all_output()
@@ -104,6 +106,7 @@ server <- function(input, output, session) {
         if (ext %in% c("csv", "tsv")) {
           rv$data <- data.table::fread(file_info$datapath, data.table = FALSE)
         } else {
+          app_require_packages("readxl", feature = "Excel import")
           rv$data <- readxl::read_excel(file_info$datapath)
         }
         rv$condition <- NULL
@@ -132,6 +135,7 @@ server <- function(input, output, session) {
     if (ext %in% c("csv", "tsv")) {
       data.table::fread(file_info$datapath, data.table = FALSE)
     } else {
+      app_require_packages("readxl", feature = "Excel metadata import")
       readxl::read_excel(file_info$datapath)
     }
   })
@@ -929,7 +933,12 @@ server <- function(input, output, session) {
 
   selected_org_v2 <- reactive({
     req(input$organism_v2)
-    organism_map[[input$organism_v2]]
+    org_info <- organism_map[[input$organism_v2]]
+    app_require_packages(org_info$orgdb_package, feature = "Pathway enrichment in the ProtPipe Shiny app")
+    list(
+      OrgDb = getExportedValue(org_info$orgdb_package, org_info$orgdb_package),
+      kegg = org_info$kegg
+    )
   })
 
   selected_ontology_v2 <- reactive({

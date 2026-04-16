@@ -552,6 +552,7 @@ setMethod(
 
     # Row minima excluding NAs
     row_mins <- if (methods::is(m, "DelayedMatrix")) {
+      protpipe_require_packages("DelayedMatrixStats", feature = "impute_min() for DelayedMatrix assays")
       # Efficient for HDF5-backed/DelayedArray
       DelayedMatrixStats::rowMins(m, na.rm = TRUE)
     } else if (is.matrix(m)) {

@@ -56,9 +56,9 @@ add_zip_tabular <- function(data, filename, subfolder, zip_workspace, zip_file){
   # file.remove(file_path)
 }
 
-library(OlinkAnalyze)
-
 detect_olink_npx <- function(file_path) {
+  app_require_packages("OlinkAnalyze", feature = "Olink file detection")
+
   # Attempt to read the file using the official Olink loader
   # We suppress warnings to keep the output clean if the read fails
   tryCatch({

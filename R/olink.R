@@ -18,6 +18,8 @@
 #' @importFrom dplyr select everything
 #'
 create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
+  protpipe_require_packages("tidyr", feature = "create_se_from_olink()")
+
   npx <- as.data.frame(npx)
   dat <- olink_sample_out(npx, filter)
   if(!is.null(condition)){
@@ -38,6 +40,8 @@ create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
 #' @return A list containing `data`, `condition`, and `number_samples`.
 #' @export
 olink_all_output <- function(my_npx){
+  protpipe_require_packages("tidyr", feature = "olink_all_output()")
+
   npx_wide <- my_npx |>
     # dplyr::filter(AssayType == "assay") |>
     dplyr::select(SampleID, LOD, UniProt,Assay, OlinkID, NPX) |>
@@ -50,6 +54,8 @@ olink_all_output <- function(my_npx){
 }
 
 olink_sample_out=function(my_npx, filter = T){
+  protpipe_require_packages("tidyr", feature = "olink_sample_out()")
+
   if(filter){
     npx_wide <- my_npx |>
       dplyr::mutate(NPX = ifelse(NPX < LOD, NA, NPX)) |>

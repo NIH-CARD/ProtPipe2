@@ -42,9 +42,9 @@ add_zip_tabular <- function(data, filename, subfolder, zip_workspace, zip_file) 
   data.table::fwrite(data, file_path, sep = "\t")
 }
 
-library(OlinkAnalyze)
-
 detect_olink_npx <- function(file_path) {
+  app_require_packages("OlinkAnalyze", feature = "Olink file detection")
+
   tryCatch({
     data <- suppressWarnings(OlinkAnalyze::read_NPX(filename = file_path))
     is.data.frame(data) && nrow(data) > 0

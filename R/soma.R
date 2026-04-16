@@ -19,6 +19,7 @@
 #' @importFrom magrittr %>%
 #'
 create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
+  protpipe_require_packages("SomaDataIO", feature = "create_se_from_soma()")
 
   soma_out <- soma_all_output(adat)
   dat <- soma_out$data
@@ -82,6 +83,8 @@ create_se_from_soma <- function(adat, condition = NULL, filter = TRUE) {
 #' @return A list containing formatted `data` and `condition` data frames.
 #' @export
 soma_all_output <- function(DT){
+  protpipe_require_packages("SomaDataIO", feature = "soma_all_output()")
+
   anno=SomaDataIO::getAnalyteInfo(DT)
   DT=data.frame(DT)
   DT_dat=data.frame(DT)%>%
