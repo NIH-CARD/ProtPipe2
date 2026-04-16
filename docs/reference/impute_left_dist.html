@@ -107,13 +107,12 @@ values are imputed with 0.</p>
 <span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_se.html">create_se</a></span><span class="op">(</span><span class="va">raw_data</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`sample_metadata` not provided. Generating a basic version from column names.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># For reproducibility of the random imputation</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">imputed_obj</span> <span class="op">&lt;-</span> <span class="fu">impute_left_dist</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'impute_left_dist': object 'se' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metadata(object):</span> could not find function "metadata"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Data after imputation:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Data after imputation:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">imputed_obj</span><span class="op">)</span><span class="op">)</span></span></span>

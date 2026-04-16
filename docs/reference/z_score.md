@@ -51,7 +51,6 @@ sample_info <- data.frame(
 
 se <- create_se(df, sample_metadata = sample_info)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # Check the means of each protein (row) before scaling
 rowMeans(assay(se))
@@ -59,7 +58,7 @@ rowMeans(assay(se))
 
 # Apply the scaling method
 scaled_se <- z_score(se)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'z_score': object 'se' not found
+#> Error in metadata(object): could not find function "metadata"
 
 # The new data has row means near zero and row standard deviations of one
 print(assay(scaled_se))

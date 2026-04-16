@@ -59,13 +59,12 @@ raw_data <- data.frame(
 se <- create_se(raw_data)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # For reproducibility of the random imputation
 set.seed(123)
 
 imputed_obj <- impute_left_dist(se)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'impute_left_dist': object 'se' not found
+#> Error in metadata(object): could not find function "metadata"
 cat("Data after imputation:\n")
 #> Data after imputation:
 print(assay(imputed_obj))

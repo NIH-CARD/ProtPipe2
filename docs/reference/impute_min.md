@@ -45,7 +45,6 @@ raw_data <- data.frame(
 se <- create_se(raw_data)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 cat("Original Data:\n")
 #> Original Data:
 print(assay(se))
@@ -54,7 +53,7 @@ print(assay(se))
 # Impute using the row minimum (alpha = 1)
 # Row 1's NA becomes 100; Row 2's NA becomes 500.
 imputed_obj <- impute_min(se)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'impute_min': object 'se' not found
+#> Error in metadata(object): could not find function "metadata"
 cat("\nImputed with alpha = 1:\n")
 #> 
 #> Imputed with alpha = 1:
@@ -63,7 +62,7 @@ print(assay(imputed_obj))
 
 # Impute using 90% of the row minimum
 imputed_scaled <- impute_min(se, alpha = 0.9)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'impute_min': object 'se' not found
+#> Error in metadata(object): could not find function "metadata"
 cat("\nImputed with alpha = 0.9:\n")
 #> 
 #> Imputed with alpha = 0.9:

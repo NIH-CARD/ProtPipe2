@@ -98,7 +98,6 @@ have been replaced by their row-wise Z-scores.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_se.html">create_se</a></span><span class="op">(</span><span class="va">df</span>, sample_metadata <span class="op">=</span> <span class="va">sample_info</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check the means of each protein (row) before scaling</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -106,7 +105,7 @@ have been replaced by their row-wise Z-scores.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Apply the scaling method</span></span></span>
 <span class="r-in"><span><span class="va">scaled_se</span> <span class="op">&lt;-</span> <span class="fu">z_score</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'z_score': object 'se' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metadata(object):</span> could not find function "metadata"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The new data has row means near zero and row standard deviations of one</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">scaled_se</span><span class="op">)</span><span class="op">)</span></span></span>

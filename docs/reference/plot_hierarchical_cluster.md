@@ -72,18 +72,15 @@ raw_data <- data.frame(
 se <- create_se(raw_data)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # Run with default methods. We expect A/B and C/D to cluster together.
 p1 <- plot_hierarchical_cluster(se)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found
 if (interactive()) {
   print(p1)
 }
 
 # Run with different methods
 p2 <- plot_hierarchical_cluster(se, dist_method = "manhattan", hclust_method = "ward.D2")
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_hierarchical_cluster': object 'se' not found
 if (interactive()) {
   print(p2)
 }

@@ -67,11 +67,17 @@ se <- create_se(
   sample_metadata = sample_info
 )
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # --- Inspect the new object ---
 print(se)
-#> Error: object 'se' not found
+#> class: SummarizedExperiment 
+#> dim: 3 4 
+#> metadata(2): creation_method processing_log
+#> assays(1): intensities
+#> rownames: NULL
+#> rowData names(2): ProteinID Gene
+#> colnames(4): Sample_A_1 Sample_A_2 Sample_B_1 Sample_B_2
+#> colData names(1): Condition
 assayNames(se)
 #> Error in assayNames(se): could not find function "assayNames"
 head(rowData(se))

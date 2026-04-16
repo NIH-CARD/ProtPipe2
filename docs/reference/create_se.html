@@ -109,11 +109,17 @@ will attempt to autodetect them as all numeric columns.</p></dd>
 <span class="r-in"><span>  sample_metadata <span class="op">=</span> <span class="va">sample_info</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># --- Inspect the new object ---</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'se' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> class: SummarizedExperiment </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dim: 3 4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(2): creation_method processing_log</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): intensities</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rownames: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(2): ProteinID Gene</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> colnames(4): Sample_A_1 Sample_A_2 Sample_B_1 Sample_B_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> colData names(1): Condition</span>
 <span class="r-in"><span><span class="fu">assayNames</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in assayNames(se):</span> could not find function "assayNames"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>

@@ -88,7 +88,6 @@ imputation. Defaults to 1 (no scaling).</p></dd>
 <span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_se.html">create_se</a></span><span class="op">(</span><span class="va">raw_data</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`sample_metadata` not provided. Generating a basic version from column names.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Original Data:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Original Data:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -97,7 +96,7 @@ imputation. Defaults to 1 (no scaling).</p></dd>
 <span class="r-in"><span><span class="co"># Impute using the row minimum (alpha = 1)</span></span></span>
 <span class="r-in"><span><span class="co"># Row 1's NA becomes 100; Row 2's NA becomes 500.</span></span></span>
 <span class="r-in"><span><span class="va">imputed_obj</span> <span class="op">&lt;-</span> <span class="fu">impute_min</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'impute_min': object 'se' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metadata(object):</span> could not find function "metadata"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nImputed with alpha = 1:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Imputed with alpha = 1:</span>
@@ -106,7 +105,7 @@ imputation. Defaults to 1 (no scaling).</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Impute using 90% of the row minimum</span></span></span>
 <span class="r-in"><span><span class="va">imputed_scaled</span> <span class="op">&lt;-</span> <span class="fu">impute_min</span><span class="op">(</span><span class="va">se</span>, alpha <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'impute_min': object 'se' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metadata(object):</span> could not find function "metadata"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nImputed with alpha = 0.9:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Imputed with alpha = 0.9:</span>

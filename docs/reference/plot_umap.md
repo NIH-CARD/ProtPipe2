@@ -84,5 +84,4 @@ if (requireNamespace("umap", quietly = TRUE)) {
 }
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 ```

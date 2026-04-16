@@ -68,11 +68,10 @@ cond_df <- data.frame(
 )
 se <- create_se(raw_data, sample_metadata = cond_df)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
-#> Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())): could not find function "SummarizedExperiment"
 
 # Impute missing values before plotting
 se_imputed <- impute(se, value = 13.5)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'impute': object 'se' not found
+#> Error in metadata(object): could not find function "metadata"
 
 # Generate the plot of PC1 vs PC2
 p1 <- plot_PCs(se_imputed, condition = "group")

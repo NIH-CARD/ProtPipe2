@@ -80,11 +80,9 @@ log10-transformed intensity distribution.</p>
 <span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_se.html">create_se</a></span><span class="op">(</span><span class="va">raw_data</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `intensity_cols` not provided. Detecting numeric columns as intensity data.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`sample_metadata` not provided. Generating a basic version from column names.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(intensities = assay_data),     rowData = row_data, colData = col_data, metadata = list(creation_method = creation_method,         processing_log = list())):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate the boxplot of intensities</span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plot_pg_intensities</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'plot_pg_intensities': object 'se' not found</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
