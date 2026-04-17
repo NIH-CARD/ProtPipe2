@@ -58,7 +58,6 @@ rowMeans(assay(se))
 
 # Apply the scaling method
 scaled_se <- z_score(se)
-#> Error in metadata(object): could not find function "metadata"
 
 # The new data has row means near zero and row standard deviations of one
 print(assay(scaled_se))

@@ -64,7 +64,6 @@ se <- create_se(raw_data)
 set.seed(123)
 
 imputed_obj <- impute_left_dist(se)
-#> Error in metadata(object): could not find function "metadata"
 cat("Data after imputation:\n")
 #> Data after imputation:
 print(assay(imputed_obj))

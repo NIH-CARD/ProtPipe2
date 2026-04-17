@@ -44,7 +44,6 @@ se <- create_se(raw_data)
 
 # Impute the NA with 0
 imputed_obj <- impute(se, value = 0)
-#> Error in metadata(object): could not find function "metadata"
 
 # View the imputed assay data
 print(assay(imputed_obj))
