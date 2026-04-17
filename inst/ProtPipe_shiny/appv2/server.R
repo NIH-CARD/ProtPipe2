@@ -954,7 +954,10 @@ server <- function(input, output, session) {
   enrichment_message_v2 <- reactiveVal(NULL)
 
   observeEvent(input$run_enrichment_v2, {
-    showNotification("Running enrichment analysis, please wait...", duration = 8)
+    notification_id <- showNotification(
+      "Running enrichment analysis, please wait...",
+      duration = NULL
+    )
     tryCatch({
       req(dea_result_v2(), input$gene_col_v2, input$enrich_pval_v2)
       ontology <- selected_ontology_v2()
@@ -982,9 +985,11 @@ server <- function(input, output, session) {
       } else {
         enrichment_message_v2(NULL)
       }
+      removeNotification(notification_id)
     }, error = function(e) {
       enrichment_result_v2(NULL)
       enrichment_message_v2(paste("Pathway enrichment failed:", e$message))
+      removeNotification(notification_id)
     })
   })
 
@@ -1082,6 +1087,9 @@ server <- function(input, output, session) {
   })
 
   output$ora_up_enrich_v2 <- renderPlot({
+    if (is.null(enrichment_result_v2()) && is.null(enrichment_message_v2())) {
+      return(invisible(NULL))
+    }
     tryCatch({
       req(enrichment_result_v2())
       validate(need(is.null(enrichment_message_v2()), enrichment_message_v2()))
@@ -1093,6 +1101,9 @@ server <- function(input, output, session) {
   })
 
   output$ora_down_enrich_v2 <- renderPlot({
+    if (is.null(enrichment_result_v2()) && is.null(enrichment_message_v2())) {
+      return(invisible(NULL))
+    }
     tryCatch({
       req(enrichment_result_v2())
       validate(need(is.null(enrichment_message_v2()), enrichment_message_v2()))
@@ -1104,6 +1115,9 @@ server <- function(input, output, session) {
   })
 
   output$gsea_enrich_v2 <- renderPlot({
+    if (is.null(enrichment_result_v2()) && is.null(enrichment_message_v2())) {
+      return(invisible(NULL))
+    }
     tryCatch({
       req(enrichment_result_v2())
       validate(need(is.null(enrichment_message_v2()), enrichment_message_v2()))
@@ -1278,7 +1292,12 @@ server <- function(input, output, session) {
         "Heatmap" = div(
           class = "appv2-params-stack",
           selectInput("protein_label_v2", "Column used for protein labels", choices = row_choices),
-          fileInput("heatmap_labels_v2", "Upload heatmap labels"),
+          textAreaInput(
+            "heatmap_labels_text_v2",
+            "Paste one gene or protein per line",
+            rows = 8,
+            placeholder = "TP53\nEGFR\nBRCA1"
+          ),
           selectInput("heatmap_condition_v2", "Group samples by", choices = c("No grouping", col_choices)),
           checkboxInput("cluster_cols_heatmap_v2", "Cluster columns", value = TRUE),
           checkboxInput("cluster_rows_heatmap_v2", "Cluster rows", value = TRUE)
@@ -1316,15 +1335,19 @@ server <- function(input, output, session) {
   })
 
   heatmap_labels_v2 <- reactive({
-    file_info <- input$heatmap_labels_v2
-    if (is.null(file_info)) {
+    labels_text <- input$heatmap_labels_text_v2
+    if (is.null(labels_text) || !nzchar(trimws(labels_text))) {
       return(NULL)
     }
-    dat <- data.table::fread(file_info$datapath, data.table = FALSE)
-    if (!"Gene" %in% names(dat)) {
-      validate(need(FALSE, "The uploaded file must contain a column called Gene."))
+
+    labels <- trimws(unlist(strsplit(labels_text, "\n", fixed = TRUE)))
+    labels <- labels[nzchar(labels)]
+
+    if (length(labels) == 0) {
+      return(NULL)
     }
-    dat$Gene
+
+    unique(labels)
   })
 
   heatmap_condition_v2 <- reactive({
