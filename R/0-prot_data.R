@@ -206,10 +206,10 @@ detect_intensity_cols <- function(df) {
 #'
 #' @export
 has_step <- function(object, step_name) {
-  if (length(metadata(object)$processing_log) == 0) return(FALSE)
+  if (length(S4Vectors::metadata(object)$processing_log) == 0) return(FALSE)
 
   # Get the names of all steps performed so far
-  executed_steps <- sapply(metadata(object)$processing_log, function(x) x$name)
+  executed_steps <- sapply(S4Vectors::metadata(object)$processing_log, function(x) x$name)
 
   return(step_name %in% executed_steps)
 }

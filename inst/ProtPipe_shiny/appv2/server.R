@@ -495,7 +495,7 @@ server <- function(input, output, session) {
   qc_protein_groups_reactive <- reactive({
     req(raw_prot_data(), input$qc_pg_condition_v2)
     list(
-      data = get_pg_counts(prot_data()),
+      data = ProtPipe::get_pg_counts(raw_prot_data()),
       plot = ProtPipe::plot_pg_counts(raw_prot_data(), condition = input$qc_pg_condition_v2)
     )
   })

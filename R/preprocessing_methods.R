@@ -14,7 +14,10 @@
 #'
 #' @keywords internal
 add_processing_step <- function(object, log_entry) {
-  metadata(object)$processing_log <- append(metadata(object)$processing_log, list(log_entry))
+  S4Vectors::metadata(object)$processing_log <- append(
+    S4Vectors::metadata(object)$processing_log,
+    list(log_entry)
+  )
   return(object)
 }
 
@@ -35,7 +38,7 @@ generate_preprocessing_report <- function(object, output_file = "preprocessing_r
     stop("Input must be a SummarizedExperiment object.")
   }
 
-  log <- metadata(object)$processing_log
+  log <- S4Vectors::metadata(object)$processing_log
 
   if (is.null(log) || length(log) == 0) {
     warning("No processing log found in metadata(object)$processing_log.")

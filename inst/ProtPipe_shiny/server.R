@@ -582,7 +582,7 @@ server <- function(input, output, session) {
     req(intensity_file())
     pgcounts <- tryCatch({
       # This is the "try" block. R will attempt to run this code.
-      get_pg_counts(prot_data())
+      ProtPipe::get_pg_counts(raw_prot_data())
 
     }, error = function(e) {
       # This is the "catch" block. It only runs if an error occurs.
