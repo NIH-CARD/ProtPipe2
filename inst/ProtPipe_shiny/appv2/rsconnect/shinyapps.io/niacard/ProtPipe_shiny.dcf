@@ -5,7 +5,7 @@ account: niacard
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14915618
-bundleId: 11808025
+bundleId: 11867046
 url: https://niacard.shinyapps.io/ProtPipe_shiny/
 version: 1
 asMultiple: FALSE

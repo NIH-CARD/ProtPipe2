@@ -8,6 +8,11 @@ app_require_packages <- function(packages, feature = "This app feature") {
   ProtPipe:::protpipe_require_packages(packages, feature = feature)
 }
 
+app_require_packages(
+  c("shinyjs", "bslib", "markdown"),
+  feature = "The ProtPipe Shiny app"
+)
+
 organism_map <- list(
   "Human" = list(orgdb_package = "org.Hs.eg.db", kegg = "hsa"),
   "Mouse" = list(orgdb_package = "org.Mm.eg.db", kegg = "mmu"),

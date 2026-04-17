@@ -21,7 +21,8 @@ protpipe_require_app_packages <- function() {
     c(
       "shiny",
       "shinyjs",
-      "bslib"
+      "bslib",
+      "markdown"
     ),
     feature = "The ProtPipe Shiny app"
   )
