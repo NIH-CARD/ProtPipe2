@@ -262,7 +262,7 @@ setMethod("plot_correlation_heatmap", "SummarizedExperiment",
 
             # --- 5. Create the Plot (Single, clean ggplot call) ---
             g <- ggplot2::ggplot(DT.corrs, ggplot2::aes(x = SampleA, y = SampleB, fill = Spearman)) +
-              ggplot2::geom_tile(color = "white", size = 0.5) +
+              ggplot2::geom_tile(color = "white", linewidth = 0.5) +
               ggplot2::theme_classic() +
               ggplot2::scale_fill_gradient2(
                 low = "skyblue", high = "tomato1", mid = "white",

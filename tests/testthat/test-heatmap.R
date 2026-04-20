@@ -36,3 +36,24 @@ test_that("heatmap subset with condition and col and row clustering", {
                                cluster_rows = T)
   expect_s3_class(p, "ggplot")
 })
+
+test_that("summarized heatmap rejects missing or empty condition labels", {
+  sample_metadata <- data.frame(
+    SampleID = colnames(SummarizedExperiment::assay(dat_pro)),
+    differentiation_day = rep("day_0", ncol(SummarizedExperiment::assay(dat_pro))),
+    stringsAsFactors = FALSE
+  )
+  sample_metadata$differentiation_day[1] <- ""
+
+  se_bad <- create_se(dat, sample_metadata = sample_metadata)
+
+  expect_error(
+    plot_proteomics_heatmap(
+      se_bad,
+      protmeta_col = "PG.Genes",
+      genes = ipsc_genes,
+      condition = "differentiation_day"
+    ),
+    "'differentiation_day' contains missing or empty values"
+  )
+})

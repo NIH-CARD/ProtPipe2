@@ -8,23 +8,66 @@ ProtPipe2 provides reproducible workflows for downstream proteomics analysis thr
 
 ```r
 if (!requireNamespace("pak", quietly = TRUE)) {
-  install.packages("pak")
+  install.packages("pak", repos = "https://cran.rstudio.com")
 }
 pak::pak("NIH-CARD/ProtPipe2")
 library(ProtPipe)
 ```
 
-The package installs a minimal core dependency set by default. Some optional features require extra packages:
-
-- `ProtPipe::run_protpipe_shiny()` requires the Shiny app dependencies.
-- Pathway enrichment functions require Bioconductor annotation and enrichment packages.
-- SomaScan, Olink, and Excel import paths require their corresponding reader packages.
-
-If one of those optional dependencies is missing, ProtPipe now stops with a direct message naming the package to install.
-
 If the installation step fails on a Bioconductor dependency, install `BiocManager` and retry after installing the missing package:
 
 ```r
-install.packages("BiocManager")
+install.packages("BiocManager", repos = "https://cran.rstudio.com")
 BiocManager::install("<missing-package>")
 ```
+
+## Quick start with bundled example data
+
+```r
+library(ProtPipe)
+library(SummarizedExperiment)
+
+data("neuron_differentiation_intensities")
+data("neuron_differentiation_metadata")
+data("ipsc_stem_cell_genes")
+
+# 1. Create a SummarizedExperiment from the bundled tables
+
+se <- ProtPipe::create_se(
+  data = neuron_differentiation_intensities,
+  sample_metadata = neuron_differentiation_metadata,
+  creation_method = "bundled neuron differentiation example"
+)
+
+# 2. Plot protein group counts
+ProtPipe::plot_pg_counts(se, condition = "differentiation_day")
+
+# Prepare the object for PCA, limma, and heatmaps
+se_ready <- se |>
+  ProtPipe::median_normalize() |>
+  ProtPipe::impute_left_dist()
+
+# 3. Plot PCA
+ProtPipe::plot_PCs(se_ready, condition = "differentiation_day")
+
+# 4. Run limma differential expression (day 28 vs day 0)
+de_day0_vs_day28 <- ProtPipe::do_limma_binary(
+  se_ready,
+  condition = "differentiation_day",
+  control_group = "day_0",
+  treatment_group = "day_28"
+)
+ProtPipe::plot_volcano(de_day0_vs_day28, label_col = "PG.Genes")
+
+# 5. Plot a heatmap using bundled iPSC stem cell markers
+p<-ProtPipe::plot_proteomics_heatmap(
+  se_ready,
+  protmeta_col = "PG.Genes",
+  genes = ipsc_stem_cell_genes$Gene,
+  condition = "differentiation_day",
+  cluster_rows = TRUE,
+  cluster_cols = FALSE,
+  title = "Stem cell markers across differentiation"
+)
+```
+

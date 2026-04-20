@@ -112,23 +112,40 @@ setMethod("plot_proteomics_heatmap", "SummarizedExperiment",
               cat("Condition provided. Summarizing replicates into means...\n")
               if (!condition %in% names(colData(object))) { stop("'", condition, "' not found in the condition slot.") }
 
+              condition_values <- as.character(colData(object)[[condition]])
+              invalid_condition <- is.na(condition_values) | !nzchar(trimws(condition_values))
+              if (any(invalid_condition)) {
+                stop(
+                  "'",
+                  condition,
+                  "' contains missing or empty values. ",
+                  "Fill or remove those samples before plotting a summarized heatmap."
+                )
+              }
+
               # Use the summarize_replicates logic
               data_long <- intensities %>%
                 tibble::rownames_to_column(var = "ProteinID") %>%
                 tidyr::pivot_longer(cols = -ProteinID, names_to = "Sample", values_to = "Intensity")
 
-              condition_to_join <- colData(object) %>%
-                as.data.frame() %>%
-                tibble::rownames_to_column(var = "Sample")
+              condition_to_join <- data.frame(
+                Sample = rownames(colData(object)),
+                HeatmapCondition = condition_values,
+                stringsAsFactors = FALSE
+              )
 
               summarized_data <- data_long %>%
                 dplyr::left_join(condition_to_join, by = "Sample") %>%
-                dplyr::group_by(ProteinID, .data[[condition]]) %>%
+                dplyr::group_by(ProteinID, HeatmapCondition) %>%
                 dplyr::summarise(MeanIntensity = mean(Intensity, na.rm = TRUE)) %>%
                 dplyr::ungroup()
 
               data_to_plot <- summarized_data %>%
-                tidyr::pivot_wider(id_cols = ProteinID, names_from = .data[[condition]], values_from = MeanIntensity) %>%
+                tidyr::pivot_wider(
+                  id_cols = ProteinID,
+                  names_from = HeatmapCondition,
+                  values_from = MeanIntensity
+                ) %>%
                 tibble::column_to_rownames(var = "ProteinID")
 
             } else {
@@ -173,7 +190,7 @@ setMethod("plot_proteomics_heatmap", "SummarizedExperiment",
             max_val <- ceiling(max(heatmap_data$ZScore))
             min_val <- floor(min(heatmap_data$ZScore))
             g <- ggplot2::ggplot(heatmap_data, ggplot2::aes(x = Sample, y = Protein, fill = ZScore)) +
-              ggplot2::geom_tile(color = "black", size = 0.0) +
+              ggplot2::geom_tile(color = "black", linewidth = 0.0) +
               ggplot2::theme_classic() +
               ggplot2::scale_fill_gradient2(
                 low = "skyblue", high = "tomato1", mid = "beige",
