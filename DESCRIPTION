@@ -13,10 +13,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    clusterProfiler,
-    DOSE,
-    enrichplot,
-    ggpubr,
     shiny,
     shinyjs,
     bslib,
@@ -49,6 +45,10 @@ Imports:
     methods,
     rlang,
     magrittr,
-    grid
+    grid,
+    clusterProfiler,
+    DOSE,
+    enrichplot,
+    ggpubr
 URL: https://nih-card.github.io/ProtPipe2/
 VignetteBuilder: knitr

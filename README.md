@@ -10,7 +10,7 @@ ProtPipe2 provides reproducible workflows for downstream proteomics analysis thr
 if (!requireNamespace("pak", quietly = TRUE)) {
   install.packages("pak", repos = "https://cran.rstudio.com")
 }
-pak::pak("NIH-CARD/ProtPipe2")
+pak::pak("NIH-CARD/ProtPipe2", dependencies = TRUE)
 library(ProtPipe)
 ```
 
