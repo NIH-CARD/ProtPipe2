@@ -6,6 +6,9 @@ reference:
   - title: "Input"
     contents:
       - protpipe_example_se
+      - neuron_differentiation_intensities
+      - neuron_differentiation_metadata
+      - ipsc_stem_cell_genes
       - create_se
       - create_se_from_olink
       - create_se_from_soma

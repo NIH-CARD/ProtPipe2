@@ -9,4 +9,4 @@
 library(testthat)
 library(ProtPipe2)
 
-test_check("ProtPipe")
+test_check("ProtPipe2")

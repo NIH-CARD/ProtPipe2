@@ -184,6 +184,12 @@ This tab is best used after differential analysis has identified proteins of int
 
 ---
 
+## Data Privacy
+
+Uploaded data is processed in-memory on Posit's cloud servers (AWS) and is not retained after your session ends. Data is transmitted over HTTPS and is not shared across user sessions. Do not upload data subject to data use agreements, IRB restrictions, or HIPAA regulations. For analyses involving sensitive or restricted data, use the [ProtPipe2 R package](https://github.com/NIH-CARD/ProtPipe2) locally.
+
+---
+
 ## Common Issues
 
 - Sample names in the intensity matrix and metadata table must match exactly.
