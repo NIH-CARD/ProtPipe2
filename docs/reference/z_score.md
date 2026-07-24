@@ -58,6 +58,7 @@ rowMeans(assay(se))
 
 # Apply the scaling method
 scaled_se <- z_score(se)
+#> Error in assay(object): could not find function "assay"
 
 # The new data has row means near zero and row standard deviations of one
 print(assay(scaled_se))

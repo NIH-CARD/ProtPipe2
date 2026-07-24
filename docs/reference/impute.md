@@ -44,6 +44,7 @@ se <- create_se(raw_data)
 
 # Impute the NA with 0
 imputed_obj <- impute(se, value = 0)
+#> Error in assay(object): could not find function "assay"
 
 # View the imputed assay data
 print(assay(imputed_obj))

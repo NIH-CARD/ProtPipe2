@@ -5,10 +5,10 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>getting-started • ProtPipe</title>
+<title>getting-started • ProtPipe2</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="getting-started">
 </head>
@@ -18,7 +18,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">ProtPipe</a>
+    <a class="navbar-brand me-2" href="../index.html">ProtPipe2</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
 
@@ -77,7 +77,7 @@ dataset rather than reconstructing the object from raw files.</p>
 </h2>
 <p>First, we load the <code>ProtPipe</code> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/" class="external-link">ProtPipe</a></span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/" class="external-link">ProtPipe2</a></span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co"># For plot customization</span></span></code></pre></div>
 <p>Load the packaged example object with <code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code>. This
@@ -126,7 +126,7 @@ our data.</p>
 visualize the intensity distributions with boxplots.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get the number of identified proteins per sample</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/get_pg_counts.html">get_pg_counts</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/get_pg_counts.html">get_pg_counts</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Sample Protein_Groups</span></span>
 <span><span class="co">#&gt; Day0_1   Day0_1           8746</span></span>
 <span><span class="co">#&gt; Day0_2   Day0_2           8451</span></span>
@@ -172,12 +172,12 @@ visualize the intensity distributions with boxplots.</p>
 <span><span class="co">#&gt; Day21_6 Day21_6           7771</span></span>
 <span></span>
 <span><span class="co"># Plot the counts for each sample</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_counts.html">plot_pg_counts</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_counts.html">plot_pg_counts</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/qc-plots-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot the intensity distributions for each sample</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/qc-plots-2.png" class="r-plt" alt="" width="700">
 These plots help us identify any samples that behave as strong
 outliers.</p>
@@ -189,7 +189,7 @@ outliers.</p>
 plotting a correlation heatmap. Samples from the same condition should
 generally cluster together.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_correlation_heatmap.html">plot_correlation_heatmap</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_correlation_heatmap.html">plot_correlation_heatmap</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/correlation-heatmap-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
@@ -204,10 +204,10 @@ steps like normalization and imputation.</p>
 <p>Here, we apply median normalization to align the intensity
 distributions across all samples.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">se_normalized</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/median_normalize.html">median_normalize</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">se_normalized</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/median_normalize.html">median_normalize</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># We can re-plot the intensities to see the effect of normalization</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">se_normalized</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_pg_intensities.html">plot_pg_intensities</a></span><span class="op">(</span><span class="va">se_normalized</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/normalization-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
@@ -218,7 +218,7 @@ will use the “down-shifted normal” (Perseus-like) imputation method. As
 this is a stochastic method, we set a seed for reproducibility.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> <span class="co"># Set a seed for reproducible imputation</span></span>
-<span><span class="va">se_imputed</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/impute_left_dist.html">impute_left_dist</a></span><span class="op">(</span><span class="va">se_normalized</span><span class="op">)</span></span>
+<span><span class="va">se_imputed</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/impute_left_dist.html">impute_left_dist</a></span><span class="op">(</span><span class="va">se_normalized</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The object should no longer have missing values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_imputed</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -240,7 +240,7 @@ between samples and proteins.</p>
 variation in the data and assessing sample clustering.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_PCs.html">plot_PCs</a></span><span class="op">(</span><span class="va">se_imputed</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_PCs.html">plot_PCs</a></span><span class="op">(</span><span class="va">se_imputed</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"PCA by time point"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/pca-plot-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -250,7 +250,7 @@ variation in the data and assessing sample clustering.</p>
 <p>Lets plot a UMAP.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The plot_pca function is a convenient wrapper that calculates and plots the results</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_umap.html">plot_umap</a></span><span class="op">(</span><span class="va">se_imputed</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span>, neighbors <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_umap.html">plot_umap</a></span><span class="op">(</span><span class="va">se_imputed</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span>, neighbors <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"UMAP by time point"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/umap-plot-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -260,14 +260,14 @@ variation in the data and assessing sample clustering.</p>
 <p>To illustrate a simple two-group comparison, we compare Day 28 and
 Day 0 directly with limma.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">de</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/do_limma_binary.html">do_limma_binary</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">de</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/do_limma_binary.html">do_limma_binary</a></span><span class="op">(</span></span>
 <span>  <span class="va">se_imputed</span>,</span>
 <span>  condition <span class="op">=</span> <span class="st">"differentiation_day"</span>,</span>
 <span>  control_group <span class="op">=</span> <span class="st">"Day0"</span>,</span>
 <span>  treatment_group <span class="op">=</span> <span class="st">"Day28"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span></span>
 <span>  <span class="va">de</span>,</span>
 <span>  label_col <span class="op">=</span> <span class="st">"PG.Genes"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -279,7 +279,7 @@ Day 0 directly with limma.</p>
 <p>We can perform a simple Gene Ontology enrichment analysis on the
 differential expression results.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pathways</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/enrich_pathways.html">enrich_pathways</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">pathways</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/enrich_pathways.html">enrich_pathways</a></span><span class="op">(</span></span>
 <span>  <span class="va">de</span>,</span>
 <span>  gene_col <span class="op">=</span> <span class="st">"PG.Genes"</span>,</span>
 <span>  source <span class="op">=</span> <span class="st">"go"</span>,</span>
@@ -298,7 +298,7 @@ across our samples using a heatmap. The data is automatically Z-scored
 by row to highlight relative expression changes.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot a heatmap of all proteins with row and column clustering</span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">se_imputed</span>,</span>
 <span>  protmeta_col <span class="op">=</span> <span class="st">"PG.Genes"</span>,</span>
 <span>  condition <span class="op">=</span> <span class="st">"differentiation_day"</span>,</span>
@@ -311,7 +311,7 @@ by row to highlight relative expression changes.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">de</span><span class="op">$</span><span class="va">PG.Genes</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu">ProtPipe</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="../reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">se_imputed</span>,</span>
 <span>  protmeta_col <span class="op">=</span> <span class="st">"PG.Genes"</span>,</span>
 <span>  condition <span class="op">=</span> <span class="st">"differentiation_day"</span>,</span>
@@ -341,7 +341,7 @@ to user-supplied objects constructed with <code><a href="../reference/create_se.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

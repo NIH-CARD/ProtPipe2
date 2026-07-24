@@ -64,6 +64,7 @@ se <- create_se(raw_data)
 set.seed(123)
 
 imputed_obj <- impute_left_dist(se)
+#> Error in assay(object): could not find function "assay"
 cat("Data after imputation:\n")
 #> Data after imputation:
 print(assay(imputed_obj))

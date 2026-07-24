@@ -12,7 +12,8 @@ reconstructing the object from raw files.
 First, we load the `ProtPipe` package.
 
 ``` r
-suppressPackageStartupMessages(library(ProtPipe))
+
+suppressPackageStartupMessages(library(ProtPipe2))
 library(SummarizedExperiment)
 library(ggplot2) # For plot customization
 ```
@@ -24,6 +25,7 @@ sample metadata, so the only sample annotation present initially is
 `differentiation_day`.
 
 ``` r
+
 data("protpipe_example_se")
 se <- protpipe_example_se
 
@@ -64,8 +66,9 @@ We can check the number of proteins identified in each sample and
 visualize the intensity distributions with boxplots.
 
 ``` r
+
 # Get the number of identified proteins per sample
-ProtPipe::get_pg_counts(se)
+ProtPipe2::get_pg_counts(se)
 #>          Sample Protein_Groups
 #> Day0_1   Day0_1           8746
 #> Day0_2   Day0_2           8451
@@ -111,15 +114,16 @@ ProtPipe::get_pg_counts(se)
 #> Day21_6 Day21_6           7771
 
 # Plot the counts for each sample
-ProtPipe::plot_pg_counts(se)
+ProtPipe2::plot_pg_counts(se)
 ```
 
 ![](getting-started_files/figure-html/qc-plots-1.png)
 
 ``` r
 
+
 # Plot the intensity distributions for each sample
-ProtPipe::plot_pg_intensities(se)
+ProtPipe2::plot_pg_intensities(se)
 ```
 
 ![](getting-started_files/figure-html/qc-plots-2.png) These plots help
@@ -132,7 +136,8 @@ correlation heatmap. Samples from the same condition should generally
 cluster together.
 
 ``` r
-ProtPipe::plot_correlation_heatmap(se)
+
+ProtPipe2::plot_correlation_heatmap(se)
 ```
 
 ![](getting-started_files/figure-html/correlation-heatmap-1.png)
@@ -148,10 +153,11 @@ Here, we apply median normalization to align the intensity distributions
 across all samples.
 
 ``` r
-se_normalized <- ProtPipe::median_normalize(se)
+
+se_normalized <- ProtPipe2::median_normalize(se)
 
 # We can re-plot the intensities to see the effect of normalization
-ProtPipe::plot_pg_intensities(se_normalized)
+ProtPipe2::plot_pg_intensities(se_normalized)
 ```
 
 ![](getting-started_files/figure-html/normalization-1.png)
@@ -163,8 +169,9 @@ use the “down-shifted normal” (Perseus-like) imputation method. As this
 is a stochastic method, we set a seed for reproducibility.
 
 ``` r
+
 set.seed(123) # Set a seed for reproducible imputation
-se_imputed <- ProtPipe::impute_left_dist(se_normalized)
+se_imputed <- ProtPipe2::impute_left_dist(se_normalized)
 
 # The object should no longer have missing values
 any(is.na(assay(se_imputed)))
@@ -185,8 +192,9 @@ PCA is a powerful tool for visualizing the primary sources of variation
 in the data and assessing sample clustering.
 
 ``` r
+
 # The plot_pca function is a convenient wrapper that calculates and plots the results
-ProtPipe::plot_PCs(se_imputed, condition = "differentiation_day") +
+ProtPipe2::plot_PCs(se_imputed, condition = "differentiation_day") +
   labs(title = "PCA by time point")
 ```
 
@@ -197,8 +205,9 @@ ProtPipe::plot_PCs(se_imputed, condition = "differentiation_day") +
 Lets plot a UMAP.
 
 ``` r
+
 # The plot_pca function is a convenient wrapper that calculates and plots the results
-ProtPipe::plot_umap(se_imputed, condition = "differentiation_day", neighbors = 6) +
+ProtPipe2::plot_umap(se_imputed, condition = "differentiation_day", neighbors = 6) +
   labs(title = "UMAP by time point")
 ```
 
@@ -210,14 +219,15 @@ To illustrate a simple two-group comparison, we compare Day 28 and Day 0
 directly with limma.
 
 ``` r
-de <- ProtPipe::do_limma_binary(
+
+de <- ProtPipe2::do_limma_binary(
   se_imputed,
   condition = "differentiation_day",
   control_group = "Day0",
   treatment_group = "Day28"
 )
 
-ProtPipe::plot_volcano(
+ProtPipe2::plot_volcano(
   de,
   label_col = "PG.Genes"
 )
@@ -231,7 +241,8 @@ We can perform a simple Gene Ontology enrichment analysis on the
 differential expression results.
 
 ``` r
-pathways <- ProtPipe::enrich_pathways(
+
+pathways <- ProtPipe2::enrich_pathways(
   de,
   gene_col = "PG.Genes",
   source = "go",
@@ -250,8 +261,9 @@ our samples using a heatmap. The data is automatically Z-scored by row
 to highlight relative expression changes.
 
 ``` r
+
 # Plot a heatmap of all proteins with row and column clustering
-ProtPipe::plot_proteomics_heatmap(
+ProtPipe2::plot_proteomics_heatmap(
   se_imputed,
   protmeta_col = "PG.Genes",
   condition = "differentiation_day",
@@ -265,9 +277,10 @@ ProtPipe::plot_proteomics_heatmap(
 
 ``` r
 
+
 top_genes <- unique(stats::na.omit(de$PG.Genes))[1:4]
 
-ProtPipe::plot_proteomics_heatmap(
+ProtPipe2::plot_proteomics_heatmap(
   se_imputed,
   protmeta_col = "PG.Genes",
   condition = "differentiation_day",

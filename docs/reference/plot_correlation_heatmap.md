@@ -8,10 +8,20 @@ correctly order axes based on numeric parts of labels (e.g., "Day1",
 ## Usage
 
 ``` r
-plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
+plot_correlation_heatmap(
+  object,
+  order_by = NULL,
+  label_by = NULL,
+  num_features = NULL
+)
 
 # S4 method for class 'SummarizedExperiment'
-plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
+plot_correlation_heatmap(
+  object,
+  order_by = NULL,
+  label_by = NULL,
+  num_features = NULL
+)
 ```
 
 ## Arguments
@@ -30,6 +40,12 @@ plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
 
   Optional. A character string specifying a column in the condition slot
   to use for relabeling the heatmap axes.
+
+- num_features:
+
+  Optional. The number of most variable proteins to use for the
+  correlation calculation. If `NULL` (the default), all proteins are
+  used.
 
 ## Value
 

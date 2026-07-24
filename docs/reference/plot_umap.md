@@ -84,4 +84,5 @@ if (requireNamespace("umap", quietly = TRUE)) {
 }
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
+#> Error in assay(object): could not find function "assay"
 ```

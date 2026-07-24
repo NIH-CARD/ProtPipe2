@@ -7,39 +7,79 @@ analysis through the ProtPipe R package and a Shiny interface. The
 package supports data import into `SummarizedExperiment`, quality
 control, filtering, normalization, imputation, batch correction,
 dimensionality reduction, clustering, differential intensity analysis,
-and abundance profiling. It also includes visualization and pathway or
-gene set enrichment utilities for interpretation of protein-level
-results.
+pathway analysis, and abundance profiling. For a no-code interface, use
+our web application which you can launch from
+[here](https://nih-card.github.io/ProtPipe2/)
 
 ## Installation
 
 ``` r
+
 if (!requireNamespace("pak", quietly = TRUE)) {
-  install.packages("pak")
+  install.packages("pak", repos = "https://cran.rstudio.com")
 }
-pak::pak("NIH-CARD/ProtPipe2")
-library(ProtPipe)
+pak::pak("NIH-CARD/ProtPipe2", dependencies = TRUE)
+library(ProtPipe2)
 ```
-
-The package installs a minimal core dependency set by default. Some
-optional features require extra packages:
-
-- [`ProtPipe::run_protpipe_shiny()`](https://nih-card.github.io/ProtPipe2/docs/reference/run_protpipe_shiny.md)
-  requires the Shiny app dependencies.
-- Pathway enrichment functions require Bioconductor annotation and
-  enrichment packages.
-- SomaScan, Olink, and Excel import paths require their corresponding
-  reader packages.
-
-If one of those optional dependencies is missing, ProtPipe now stops
-with a direct message naming the package to install.
 
 If the installation step fails on a Bioconductor dependency, install
 `BiocManager` and retry after installing the missing package:
 
 ``` r
-install.packages("BiocManager")
+
+install.packages("BiocManager", repos = "https://cran.rstudio.com")
 BiocManager::install("<missing-package>")
+```
+
+## Quick start with bundled example data
+
+``` r
+
+library(ProtPipe2)
+library(SummarizedExperiment)
+
+data("neuron_differentiation_intensities")
+data("neuron_differentiation_metadata")
+data("ipsc_stem_cell_genes")
+
+# 1. Create a SummarizedExperiment from the bundled tables
+
+se <- ProtPipe2::create_se(
+  data = neuron_differentiation_intensities,
+  sample_metadata = neuron_differentiation_metadata,
+  creation_method = "bundled neuron differentiation example"
+)
+
+# 2. Plot protein group counts
+ProtPipe2::plot_pg_counts(se, condition = "differentiation_day")
+
+# Prepare the object for PCA, limma, and heatmaps
+se_ready <- se |>
+  ProtPipe2::median_normalize() |>
+  ProtPipe2::impute_left_dist()
+
+# 3. Plot PCA
+ProtPipe2::plot_PCs(se_ready, condition = "differentiation_day")
+
+# 4. Run limma differential expression (day 28 vs day 0)
+de_day0_vs_day28 <- ProtPipe2::do_limma_binary(
+  se_ready,
+  condition = "differentiation_day",
+  control_group = "day_0",
+  treatment_group = "day_28"
+)
+ProtPipe2::plot_volcano(de_day0_vs_day28, label_col = "PG.Genes")
+
+# 5. Plot a heatmap using bundled iPSC stem cell markers
+p<-ProtPipe2::plot_proteomics_heatmap(
+  se_ready,
+  protmeta_col = "PG.Genes",
+  genes = ipsc_stem_cell_genes$Gene,
+  condition = "differentiation_day",
+  cluster_rows = TRUE,
+  cluster_cols = FALSE,
+  title = "Stem cell markers across differentiation"
+)
 ```
 
 # Package index
@@ -48,6 +88,12 @@ BiocManager::install("<missing-package>")
 
 - [`protpipe_example_se`](https://nih-card.github.io/ProtPipe2/docs/reference/protpipe_example_se.md)
   : Example SummarizedExperiment for ProtPipe workflows
+- [`neuron_differentiation_intensities`](https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_intensities.md)
+  : Bundled intensity table for the neuron differentiation example
+- [`neuron_differentiation_metadata`](https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_metadata.md)
+  : Bundled sample metadata for the neuron differentiation example
+- [`ipsc_stem_cell_genes`](https://nih-card.github.io/ProtPipe2/docs/reference/ipsc_stem_cell_genes.md)
+  : Bundled iPSC stem cell marker genes
 - [`create_se()`](https://nih-card.github.io/ProtPipe2/docs/reference/create_se.md)
   : This function takes a data frame of proteomics data and its
   corresponding sample metadata to construct a SummarizedExperiment

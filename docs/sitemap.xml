@@ -1,6 +1,5 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/404.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/docs/AGENTS.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/LICENSE.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/articles/getting-started.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/articles/index.html</loc></url>
@@ -43,10 +42,13 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/impute_left_dist.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/impute_min.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/index.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/ipsc_stem_cell_genes.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/lod_filter.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/log2_transform.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/mean_normalize.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/median_normalize.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_intensities.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_metadata.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/olink_all_output.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/pipe.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/plot_CVs.html</loc></url>

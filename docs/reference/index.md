@@ -4,6 +4,12 @@
 
 - [`protpipe_example_se`](https://nih-card.github.io/ProtPipe2/docs/reference/protpipe_example_se.md)
   : Example SummarizedExperiment for ProtPipe workflows
+- [`neuron_differentiation_intensities`](https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_intensities.md)
+  : Bundled intensity table for the neuron differentiation example
+- [`neuron_differentiation_metadata`](https://nih-card.github.io/ProtPipe2/docs/reference/neuron_differentiation_metadata.md)
+  : Bundled sample metadata for the neuron differentiation example
+- [`ipsc_stem_cell_genes`](https://nih-card.github.io/ProtPipe2/docs/reference/ipsc_stem_cell_genes.md)
+  : Bundled iPSC stem cell marker genes
 - [`create_se()`](https://nih-card.github.io/ProtPipe2/docs/reference/create_se.md)
   : This function takes a data frame of proteomics data and its
   corresponding sample metadata to construct a SummarizedExperiment

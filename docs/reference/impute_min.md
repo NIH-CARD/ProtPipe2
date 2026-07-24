@@ -53,6 +53,7 @@ print(assay(se))
 # Impute using the row minimum (alpha = 1)
 # Row 1's NA becomes 100; Row 2's NA becomes 500.
 imputed_obj <- impute_min(se)
+#> Error in assay(object): could not find function "assay"
 cat("\nImputed with alpha = 1:\n")
 #> 
 #> Imputed with alpha = 1:
@@ -61,6 +62,7 @@ print(assay(imputed_obj))
 
 # Impute using 90% of the row minimum
 imputed_scaled <- impute_min(se, alpha = 0.9)
+#> Error in assay(object): could not find function "assay"
 cat("\nImputed with alpha = 0.9:\n")
 #> 
 #> Imputed with alpha = 0.9:

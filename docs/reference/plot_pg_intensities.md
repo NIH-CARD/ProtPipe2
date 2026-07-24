@@ -40,6 +40,7 @@ se <- create_se(raw_data)
 
 # Generate the boxplot of intensities
 p <- plot_pg_intensities(se)
+#> Error in assay(object): could not find function "assay"
 if (interactive()) {
   print(p)
 }

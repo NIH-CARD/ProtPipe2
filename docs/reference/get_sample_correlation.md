@@ -7,10 +7,10 @@ format data table.
 ## Usage
 
 ``` r
-get_sample_correlation(object, method = "spearman")
+get_sample_correlation(object, method = "spearman", num_features = NULL)
 
 # S4 method for class 'SummarizedExperiment'
-get_sample_correlation(object, method = "spearman")
+get_sample_correlation(object, method = "spearman", num_features = NULL)
 ```
 
 ## Arguments
@@ -23,6 +23,12 @@ get_sample_correlation(object, method = "spearman")
 
   The correlation method to use. Can be one of `"spearman"` (the
   default), `"pearson"`, or `"kendall"`.
+
+- num_features:
+
+  Optional. The number of most variable proteins to use for the
+  correlation calculation. If `NULL` (the default), all proteins are
+  used.
 
 ## Value
 

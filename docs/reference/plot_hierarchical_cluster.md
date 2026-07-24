@@ -75,12 +75,14 @@ se <- create_se(raw_data)
 
 # Run with default methods. We expect A/B and C/D to cluster together.
 p1 <- plot_hierarchical_cluster(se)
+#> Error in assay(object): could not find function "assay"
 if (interactive()) {
   print(p1)
 }
 
 # Run with different methods
 p2 <- plot_hierarchical_cluster(se, dist_method = "manhattan", hclust_method = "ward.D2")
+#> Error in assay(object): could not find function "assay"
 if (interactive()) {
   print(p2)
 }

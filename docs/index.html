@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>ProtPipe2: proteomics analysis tool • ProtPipe</title>
+<title>ProtPipe2: proteomics analysis tool • ProtPipe2</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="ProtPipe2: proteomics analysis tool">
-<meta name="description" content="What the package does (one paragraph).">
-<meta property="og:description" content="What the package does (one paragraph).">
+<meta name="description" content="ProtPipe2 provides reproducible workflows for downstream proteomics analysis through the ProtPipe R package and a Shiny interface. The package supports data import into SummarizedExperiment, quality control, filtering, normalization, imputation, batch correction, dimensionality reduction, clustering, differential intensity analysis, and abundance profiling. It also includes visualization and pathway or gene set enrichment utilities for interpretation of protein-level results.">
+<meta property="og:description" content="ProtPipe2 provides reproducible workflows for downstream proteomics analysis through the ProtPipe R package and a Shiny interface. The package supports data import into SummarizedExperiment, quality control, filtering, normalization, imputation, batch correction, dimensionality reduction, clustering, differential intensity analysis, and abundance profiling. It also includes visualization and pathway or gene set enrichment utilities for interpretation of protein-level results.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html">ProtPipe</a>
+    <a class="navbar-brand me-2" href="index.html">ProtPipe2</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
 
@@ -55,28 +55,70 @@
 <div class="page-header"><h1 id="protpipe2">ProtPipe2<a class="anchor" aria-label="anchor" href="#protpipe2"></a>
 </h1></div>
 <p><img src="reference/figures/graphical_abstract.png"></p>
-<p>ProtPipe2 provides reproducible workflows for downstream proteomics analysis through the ProtPipe R package and a Shiny interface. The package supports data import into <code>SummarizedExperiment</code>, quality control, filtering, normalization, imputation, batch correction, dimensionality reduction, clustering, differential intensity analysis, and abundance profiling. It also includes visualization and pathway or gene set enrichment utilities for interpretation of protein-level results.</p>
+<p>ProtPipe2 provides reproducible workflows for downstream proteomics analysis through the ProtPipe R package and a Shiny interface. The package supports data import into <code>SummarizedExperiment</code>, quality control, filtering, normalization, imputation, batch correction, dimensionality reduction, clustering, differential intensity analysis, pathway analysis, and abundance profiling. For a no-code interface, use our web application which you can launch from <a href="https://nih-card.github.io/ProtPipe2/" class="external-link">here</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span>, repos <span class="op">=</span> <span class="st">"https://cran.rstudio.com"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NIH-CARD/ProtPipe2"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/" class="external-link">ProtPipe</a></span><span class="op">)</span></span></code></pre></div>
-<p>The package installs a minimal core dependency set by default. Some optional features require extra packages:</p>
-<ul>
-<li>
-<code><a href="reference/run_protpipe_shiny.html">ProtPipe::run_protpipe_shiny()</a></code> requires the Shiny app dependencies.</li>
-<li>Pathway enrichment functions require Bioconductor annotation and enrichment packages.</li>
-<li>SomaScan, Olink, and Excel import paths require their corresponding reader packages.</li>
-</ul>
-<p>If one of those optional dependencies is missing, ProtPipe now stops with a direct message naming the package to install.</p>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NIH-CARD/ProtPipe2"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/" class="external-link">ProtPipe2</a></span><span class="op">)</span></span></code></pre></div>
 <p>If the installation step fails on a Bioconductor dependency, install <code>BiocManager</code> and retry after installing the missing package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, repos <span class="op">=</span> <span class="st">"https://cran.rstudio.com"</span><span class="op">)</span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="st">"&lt;missing-package&gt;"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start-with-bundled-example-data">Quick start with bundled example data<a class="anchor" aria-label="anchor" href="#quick-start-with-bundled-example-data"></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nih-card.github.io/ProtPipe2/" class="external-link">ProtPipe2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"neuron_differentiation_intensities"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"neuron_differentiation_metadata"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ipsc_stem_cell_genes"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1. Create a SummarizedExperiment from the bundled tables</span></span>
+<span></span>
+<span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/create_se.html">create_se</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">neuron_differentiation_intensities</span>,</span>
+<span>  sample_metadata <span class="op">=</span> <span class="va">neuron_differentiation_metadata</span>,</span>
+<span>  creation_method <span class="op">=</span> <span class="st">"bundled neuron differentiation example"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Plot protein group counts</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/plot_pg_counts.html">plot_pg_counts</a></span><span class="op">(</span><span class="va">se</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Prepare the object for PCA, limma, and heatmaps</span></span>
+<span><span class="va">se_ready</span> <span class="op">&lt;-</span> <span class="va">se</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/median_normalize.html">median_normalize</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/impute_left_dist.html">impute_left_dist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Plot PCA</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/plot_PCs.html">plot_PCs</a></span><span class="op">(</span><span class="va">se_ready</span>, condition <span class="op">=</span> <span class="st">"differentiation_day"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Run limma differential expression (day 28 vs day 0)</span></span>
+<span><span class="va">de_day0_vs_day28</span> <span class="op">&lt;-</span> <span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/do_limma_binary.html">do_limma_binary</a></span><span class="op">(</span></span>
+<span>  <span class="va">se_ready</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"differentiation_day"</span>,</span>
+<span>  control_group <span class="op">=</span> <span class="st">"day_0"</span>,</span>
+<span>  treatment_group <span class="op">=</span> <span class="st">"day_28"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span><span class="va">de_day0_vs_day28</span>, label_col <span class="op">=</span> <span class="st">"PG.Genes"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. Plot a heatmap using bundled iPSC stem cell markers</span></span>
+<span><span class="va">p</span><span class="op">&lt;-</span><span class="fu">ProtPipe2</span><span class="fu">::</span><span class="fu"><a href="reference/plot_proteomics_heatmap.html">plot_proteomics_heatmap</a></span><span class="op">(</span></span>
+<span>  <span class="va">se_ready</span>,</span>
+<span>  protmeta_col <span class="op">=</span> <span class="st">"PG.Genes"</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">ipsc_stem_cell_genes</span><span class="op">$</span><span class="va">Gene</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"differentiation_day"</span>,</span>
+<span>  cluster_rows <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cluster_cols <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">"Stem cell markers across differentiation"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
@@ -91,7 +133,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing ProtPipe</a></li>
+<li><a href="authors.html#citation">Citing ProtPipe2</a></li>
 </ul>
 </div>
 
@@ -113,7 +155,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
