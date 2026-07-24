@@ -10,7 +10,7 @@ run_protpipe_shiny <- function() {
   protpipe_require_app_packages()
 
   # Find the path to the 'protpipe_shiny' directory within the package
-  appDir <- system.file("ProtPipe_shiny", package = "ProtPipe")
+  appDir <- system.file("ProtPipe_shiny", "appv2", package = "ProtPipe2")
 
   if (appDir == "") {
     stop("Could not find the 'protpipe_shiny' directory. Try re-installing the protpipe package.")

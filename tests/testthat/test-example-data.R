@@ -29,7 +29,7 @@ test_that("bundled neuron differentiation tables reconstruct a SummarizedExperim
   data("neuron_differentiation_intensities", package = "ProtPipe")
   data("neuron_differentiation_metadata", package = "ProtPipe")
 
-  se <- ProtPipe::create_se(
+  se <- ProtPipe2::create_se(
     data = neuron_differentiation_intensities,
     sample_metadata = neuron_differentiation_metadata,
     creation_method = "bundled neuron differentiation example"

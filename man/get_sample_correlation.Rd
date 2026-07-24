@@ -5,15 +5,19 @@
 \alias{get_sample_correlation,SummarizedExperiment-method}
 \title{Calculate Pairwise Sample Correlations}
 \usage{
-get_sample_correlation(object, method = "spearman")
+get_sample_correlation(object, method = "spearman", num_features = NULL)
 
-\S4method{get_sample_correlation}{SummarizedExperiment}(object, method = "spearman")
+\S4method{get_sample_correlation}{SummarizedExperiment}(object, method = "spearman", num_features = NULL)
 }
 \arguments{
 \item{object}{A \code{SummarizedExperiment} object.}
 
 \item{method}{The correlation method to use. Can be one of \code{"spearman"} (the
 default), \code{"pearson"}, or \code{"kendall"}.}
+
+\item{num_features}{Optional. The number of most variable proteins to use for
+the correlation calculation. If \code{NULL} (the default), all proteins are
+used.}
 }
 \value{
 A \code{data.table} with three columns: \code{SampleA}, \code{SampleB}, and a third

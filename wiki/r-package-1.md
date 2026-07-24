@@ -32,7 +32,7 @@ After the installation is complete, you can load the package into your R
 session to start using it.
 
 ``` r
-library(ProtPipe)
+library(ProtPipe2)
 ```
 
 **Next Step: [Quick Start Example](./R-Package-Guide-2-Quick-Start)**

@@ -52,10 +52,10 @@ setMethod("do_limma_binary", "SummarizedExperiment",
           function(object, condition, treatment_group, control_group, covariates) {
             # -- prepare assay data --
             meta_cols <- names(rowData(object))
-            if (ProtPipe::has_step(object, "log2_transform")) {
+            if (ProtPipe2::has_step(object, "log2_transform")) {
               data <- assay(object) %>% as.data.frame()
             } else {
-              object <- ProtPipe::log2_transform(object)
+              object <- ProtPipe2::log2_transform(object)
               data <- assay(object) %>% as.data.frame()
             }
             if (anyNA(data)) stop("Missing values detected. Please impute before running limma.")
@@ -172,10 +172,10 @@ setGeneric("do_t_test_binary", function(object,
 setMethod("do_t_test_binary", "SummarizedExperiment",
           function(object, condition, treatment_group, control_group, covariates) {
             meta_cols <- names(rowData(object))
-            if (ProtPipe::has_step(object, "log2_transform")) {
+            if (ProtPipe2::has_step(object, "log2_transform")) {
               data <- assay(object) %>% as.data.frame()
             } else {
-              object <- ProtPipe::log2_transform(object)
+              object <- ProtPipe2::log2_transform(object)
               data <- assay(object) %>% as.data.frame()
             }
             if (anyNA(data)) stop("Missing values detected. Please impute before running t-tests.")
@@ -281,10 +281,10 @@ setMethod("do_comparison_continuous", "SummarizedExperiment",
 
             # -- Prepare assay data --
             meta_cols <- names(rowData(object))
-            if (ProtPipe::has_step(object, "log2_transform")) {
+            if (ProtPipe2::has_step(object, "log2_transform")) {
               data <- assay(object) %>% as.data.frame()
             } else {
-              object <- ProtPipe::log2_transform(object)
+              object <- ProtPipe2::log2_transform(object)
               data <- assay(object) %>% as.data.frame()
             }
 
@@ -1055,7 +1055,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
     plots$ora_up_dotplot <- plots$ora_down_dotplot <- plots$gsea_dotplot <- NULL
     return(list(results = datas, plots = plots))
   }
-  DT <- ProtPipe::add_entrez(DE, org = go_org, gene_col = gene_col)
+  DT <- ProtPipe2::add_entrez(DE, org = go_org, gene_col = gene_col)
 
   if("rho" %in% names(DT)){
     DT$logFC <- DT$rho
@@ -1085,9 +1085,9 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   # over representation enrichment for upregulated genes ###############################
   if (run_ora && nrow(up_genes) > 0){
     ora_up <- if (source == "go") {
-      ProtPipe::enrich_go(up_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+      ProtPipe2::enrich_go(up_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
     } else {
-      ProtPipe::enrich_terms(up_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
+      ProtPipe2::enrich_terms(up_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
     }
 
     if(!is.null(ora_up)){
@@ -1096,7 +1096,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
     }
 
     if (run_kegg) {
-      kegg_up <- ProtPipe::enrich_kegg(up_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+      kegg_up <- ProtPipe2::enrich_kegg(up_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
       if(!is.null(kegg_up)){
         datas$kegg_up <- kegg_up@result
         plots$kegg_up_dotplot <- enrichplot::dotplot(kegg_up, showCategory = 10)
@@ -1106,9 +1106,9 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
   # over representation enrichment for downregulated genes ###############################
   if (run_ora && nrow(down_genes) > 0){
     ora_down <- if (source == "go") {
-      ProtPipe::enrich_go(down_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+      ProtPipe2::enrich_go(down_genes$ENTREZID, DT$ENTREZID, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
     } else {
-      ProtPipe::enrich_terms(down_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
+      ProtPipe2::enrich_terms(down_genes$ENTREZID, DT$ENTREZID, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
     }
 
     if(!is.null(ora_down)){
@@ -1117,7 +1117,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
     }
 
     if (run_kegg) {
-      kegg_down <- ProtPipe::enrich_kegg(down_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+      kegg_down <- ProtPipe2::enrich_kegg(down_genes$ENTREZID, DT$ENTREZID, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
       if(!is.null(kegg_down)){
         datas$kegg_down <- kegg_down@result
         plots$kegg_down_dotplot <- enrichplot::dotplot(kegg_down, showCategory = 10)
@@ -1139,9 +1139,9 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
       )
     } else {
       gse_result <- if (source == "go") {
-        ProtPipe::gse_go(ordered_genes_unique, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
+        ProtPipe2::gse_go(ordered_genes_unique, org = go_org, enrich_pvalue = enrich_pvalue, ont = go_ont)
       } else {
-        ProtPipe::gse_terms(ordered_genes_unique, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
+        ProtPipe2::gse_terms(ordered_genes_unique, term2gene = term2gene, term2name = term2name, enrich_pvalue = enrich_pvalue)
       }
 
       if(!is.null(gse_result)){
@@ -1150,7 +1150,7 @@ enrich_pathways = function(DE, lfc_threshold=1, fdr_threshold=0.01, enrich_pvalu
       }
 
       if (run_kegg) {
-        gse_kegg <- ProtPipe::gse_kegg(ordered_genes_unique, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
+        gse_kegg <- ProtPipe2::gse_kegg(ordered_genes_unique, org = go_org, organism = kegg_org, enrich_pvalue = enrich_pvalue)
         if(!is.null(gse_kegg)){
           datas$gse_kegg <- gse_kegg@result
           plots$gse_kegg_dotplot <- enrichplot::dotplot(gse_kegg, showCategory=10, split=".sign") + ggplot2::facet_grid(.~.sign)

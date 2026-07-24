@@ -7,8 +7,8 @@ out <- olink_all_output(npx)
 
 test_that("correctly make a prot_data object from Olink without LOD filtering", {
   dat_pro <- create_se_from_olink(npx, meta, filter = T)
-  t <- ProtPipe::get_sample_correlation(dat_pro)
-  tt <- ProtPipe::plot_correlation_heatmap(dat_pro)
+  t <- ProtPipe2::get_sample_correlation(dat_pro)
+  tt <- ProtPipe2::plot_correlation_heatmap(dat_pro)
   expect_s4_class(dat_pro, "SummarizedExperiment")
   cols = ncol(SummarizedExperiment::assay(dat_pro))
   expect_equal(cols, 158)

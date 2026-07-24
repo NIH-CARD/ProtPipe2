@@ -11,9 +11,9 @@ load_basic_data <- function() {
 }
 
 load_basic_se <- function() {
-  ProtPipe::create_se(load_basic_data())
+  ProtPipe2::create_se(load_basic_data())
 }
 
 load_basic_imputed_se <- function() {
-  ProtPipe::impute_min(load_basic_se(), 0)
+  ProtPipe2::impute_min(load_basic_se(), 0)
 }

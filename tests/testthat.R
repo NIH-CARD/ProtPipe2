@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(ProtPipe)
+library(ProtPipe2)
 
 test_check("ProtPipe")

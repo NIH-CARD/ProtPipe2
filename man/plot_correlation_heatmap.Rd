@@ -5,9 +5,19 @@
 \alias{plot_correlation_heatmap,SummarizedExperiment-method}
 \title{Plot a Sample Correlation Heatmap}
 \usage{
-plot_correlation_heatmap(object, order_by = NULL, label_by = NULL)
+plot_correlation_heatmap(
+  object,
+  order_by = NULL,
+  label_by = NULL,
+  num_features = NULL
+)
 
-\S4method{plot_correlation_heatmap}{SummarizedExperiment}(object, order_by = NULL, label_by = NULL)
+\S4method{plot_correlation_heatmap}{SummarizedExperiment}(
+  object,
+  order_by = NULL,
+  label_by = NULL,
+  num_features = NULL
+)
 }
 \arguments{
 \item{object}{A \code{SummarizedExperiment} object.}
@@ -18,6 +28,10 @@ column contains numeric parts, a natural sort is applied.}
 
 \item{label_by}{Optional. A character string specifying a column in the
 condition slot to use for relabeling the heatmap axes.}
+
+\item{num_features}{Optional. The number of most variable proteins to use for
+the correlation calculation. If \code{NULL} (the default), all proteins are
+used.}
 }
 \value{
 A \code{ggplot} object representing the heatmap.
