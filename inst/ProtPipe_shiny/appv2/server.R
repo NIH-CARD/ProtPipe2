@@ -89,7 +89,7 @@ server <- function(input, output, session) {
         app_require_packages("SomaDataIO", feature = "SomaScan import")
         rv$type <- "SomaScan"
         out <- SomaDataIO::read_adat(file_info$datapath) |>
-          ProtPipe::soma_all_output()
+          ProtPipe2::soma_all_output()
         rv$data <- out$data
         rv$condition <- out$condition
         rv$number_samples <- out$number_samples
@@ -97,7 +97,7 @@ server <- function(input, output, session) {
         app_require_packages("OlinkAnalyze", feature = "Olink import")
         rv$type <- "Olink"
         out <- OlinkAnalyze::read_NPX(file_info$datapath) |>
-          ProtPipe::olink_all_output()
+          ProtPipe2::olink_all_output()
         rv$data <- out$data
         rv$condition <- out$condition
         rv$number_samples <- out$number_samples
@@ -147,11 +147,11 @@ server <- function(input, output, session) {
   output$column_range_ui_v2 <- renderUI({
     tryCatch({
       req(intensity_file())
-      df <- ProtPipe::convert_numeric_cols(intensity_file())
+      df <- ProtPipe2::convert_numeric_cols(intensity_file())
       choices <- names(df)
 
       if (data_type() == "Standard Matrix") {
-        intensity_cols <- ProtPipe::detect_intensity_cols(df)
+        intensity_cols <- ProtPipe2::detect_intensity_cols(df)
         if (length(intensity_cols) > 0) {
           first <- intensity_cols[[1]]
           last <- intensity_cols[[length(intensity_cols)]]
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
       )
 
       se_obj <- if (data_type() == "Standard Matrix") {
-        ProtPipe::create_se(
+        ProtPipe2::create_se(
           dat = intensity_file(),
           intensity_cols = c(lower_idx:upper_idx),
           sample_metadata = condition_file()
@@ -202,7 +202,7 @@ server <- function(input, output, session) {
         } else {
           condition <- dplyr::left_join(rv$condition, condition_file(), by = "SampleID")
         }
-        ProtPipe::create_se(
+        ProtPipe2::create_se(
           dat = intensity_file(),
           intensity_cols = c(lower_idx:upper_idx),
           sample_metadata = condition
@@ -375,24 +375,24 @@ server <- function(input, output, session) {
           lod_col <- "Buffer"
         }
         if (!is.null(lod_col)) {
-          PD <- ProtPipe::lod_filter(PD, lod_col)
+          PD <- ProtPipe2::lod_filter(PD, lod_col)
         }
       }
 
       if (isTRUE(input$min_int_filter_v2)) {
-        PD <- ProtPipe::apply_min_intenisty(PD, input$min_int_filter_lod_v2)
+        PD <- ProtPipe2::apply_min_intenisty(PD, input$min_int_filter_lod_v2)
       }
 
       if (isTRUE(input$remove_outliers_v2)) {
-        PD <- ProtPipe::filter_outlier_samples(PD, sds = input$outlier_sds_v2)
+        PD <- ProtPipe2::filter_outlier_samples(PD, sds = input$outlier_sds_v2)
       }
       if (isTRUE(input$remove_sparse_proteins_v2)) {
-        PD <- ProtPipe::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent_v2)
+        PD <- ProtPipe2::filter_proteins_by_percent(PD, percent = input$sparse_protein_percent_v2)
       }
 
       if (isTRUE(input$log2_transform_v2)) {
         tryCatch({
-          PD <- ProtPipe::log2_transform(PD)
+          PD <- ProtPipe2::log2_transform(PD)
         }, error = function(e) {
           message("Transformation failed: ", e$message)
         })
@@ -401,9 +401,9 @@ server <- function(input, output, session) {
       if (isTRUE(input$normalize_v2)) {
         tryCatch({
           if (input$normalize_method_v2 == "mean") {
-            PD <- ProtPipe::mean_normalize(PD)
+            PD <- ProtPipe2::mean_normalize(PD)
           } else if (input$normalize_method_v2 == "median") {
-            PD <- ProtPipe::median_normalize(PD)
+            PD <- ProtPipe2::median_normalize(PD)
           }
         }, error = function(e) {
           message("Normalization failed: ", e$message)
@@ -412,16 +412,16 @@ server <- function(input, output, session) {
 
       if (isTRUE(input$impute_v2)) {
         if (input$imputation_method_v2 == "fixed value") {
-          PD <- ProtPipe::impute(PD, input$impute_fixed_value_v2)
+          PD <- ProtPipe2::impute(PD, input$impute_fixed_value_v2)
         } else if (input$imputation_method_v2 == "minimum") {
-          PD <- ProtPipe::impute_min(PD, input$impute_min_value_v2)
+          PD <- ProtPipe2::impute_min(PD, input$impute_min_value_v2)
         } else if (input$imputation_method_v2 == "left-shifted distribution") {
-          PD <- ProtPipe::impute_left_dist(PD, input$impute_left_dist_shift_v2, input$impute_left_dist_scale_v2)
+          PD <- ProtPipe2::impute_left_dist(PD, input$impute_left_dist_shift_v2, input$impute_left_dist_scale_v2)
         }
       }
 
       if (!is.null(input$batch_correct_column_v2) && isTRUE(input$batch_correct_v2)) {
-        PD <- ProtPipe::batch_correct(PD, input$batch_correct_column_v2)
+        PD <- ProtPipe2::batch_correct(PD, input$batch_correct_column_v2)
       }
 
       list(data = PD, error = NULL)
@@ -483,8 +483,8 @@ server <- function(input, output, session) {
   qc_cvs_reactive <- reactive({
     req(raw_prot_data(), input$qc_condition_v2)
     list(
-      data = ProtPipe::get_CVs(raw_prot_data(), condition = input$qc_condition_v2),
-      plot = ProtPipe::plot_CVs(
+      data = ProtPipe2::get_CVs(raw_prot_data(), condition = input$qc_condition_v2),
+      plot = ProtPipe2::plot_CVs(
         raw_prot_data(),
         condition = input$qc_condition_v2,
         plot_type = input$cv_plot_type_v2
@@ -495,8 +495,8 @@ server <- function(input, output, session) {
   qc_protein_groups_reactive <- reactive({
     req(raw_prot_data(), input$qc_pg_condition_v2)
     list(
-      data = ProtPipe::get_pg_counts(raw_prot_data()),
-      plot = ProtPipe::plot_pg_counts(raw_prot_data(), condition = input$qc_pg_condition_v2)
+      data = ProtPipe2::get_pg_counts(raw_prot_data()),
+      plot = ProtPipe2::plot_pg_counts(raw_prot_data(), condition = input$qc_pg_condition_v2)
     )
   })
 
@@ -504,7 +504,7 @@ server <- function(input, output, session) {
     req(raw_prot_data())
     list(
       data = as.data.frame(SummarizedExperiment::assay(raw_prot_data())),
-      plot = ProtPipe::plot_pg_intensities(raw_prot_data())
+      plot = ProtPipe2::plot_pg_intensities(raw_prot_data())
     )
   })
 
@@ -515,8 +515,8 @@ server <- function(input, output, session) {
       req(num_features)
     }
     list(
-      data = ProtPipe::get_sample_correlation(raw_prot_data(), num_features = num_features),
-      plot = ProtPipe::plot_correlation_heatmap(raw_prot_data(), num_features = num_features)
+      data = ProtPipe2::get_sample_correlation(raw_prot_data(), num_features = num_features),
+      plot = ProtPipe2::plot_correlation_heatmap(raw_prot_data(), num_features = num_features)
     )
   })
 
@@ -613,7 +613,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       req(prot_data())
-      ProtPipe::generate_preprocessing_report(
+      ProtPipe2::generate_preprocessing_report(
         object = prot_data(),
         output_file = file
       )
@@ -652,7 +652,7 @@ server <- function(input, output, session) {
 
   clustering_hcluster_reactive <- reactive({
     req(prot_data())
-    ProtPipe::plot_hierarchical_cluster(prot_data())
+    ProtPipe2::plot_hierarchical_cluster(prot_data())
   })
 
   clustering_pca_data_reactive <- reactive({
@@ -662,19 +662,19 @@ server <- function(input, output, session) {
 
   clustering_pca_plot_reactive <- reactive({
     req(prot_data(), input$cluster_condition_v2)
-    ProtPipe::plot_PCs(prot_data(), condition = input$cluster_condition_v2)
+    ProtPipe2::plot_PCs(prot_data(), condition = input$cluster_condition_v2)
   })
 
   clustering_umap_results <- reactive({
     req(prot_data(), input$neighbors_v2, input$cluster_condition_umap_v2)
     set.seed(123)
     list(
-      table = ProtPipe::get_umap(
+      table = ProtPipe2::get_umap(
         prot_data(),
         neighbors = input$neighbors_v2,
         condition = input$cluster_condition_umap_v2
       ),
-      plot = ProtPipe::plot_umap(
+      plot = ProtPipe2::plot_umap(
         prot_data(),
         neighbors = input$neighbors_v2,
         condition = input$cluster_condition_umap_v2
@@ -886,9 +886,9 @@ server <- function(input, output, session) {
     req(prot_data(), input$de_condition_v2)
     result <- tryCatch({
       if (input$de_mode_v2 == "continuous") {
-        ProtPipe::do_comparison_continuous(prot_data(), condition = input$de_condition_v2)
+        ProtPipe2::do_comparison_continuous(prot_data(), condition = input$de_condition_v2)
       } else {
-        ProtPipe::do_limma_binary(
+        ProtPipe2::do_limma_binary(
           prot_data(),
           condition = input$de_condition_v2,
           control_group = input$control_condition_v2,
@@ -908,7 +908,7 @@ server <- function(input, output, session) {
     req(dea_v2(), input$label_col_v2, input$pvalue_v2, input$logfc_v2)
     tryCatch({
       if (input$de_mode_v2 == "continuous") {
-        ProtPipe::plot_correlation_volcano(
+        ProtPipe2::plot_correlation_volcano(
           dea_v2(),
           label_col = input$label_col_v2,
           labelgene = gene_labels_v2(),
@@ -917,7 +917,7 @@ server <- function(input, output, session) {
           adj = input$use_adj_pval_v2
         )
       } else {
-        ProtPipe::plot_volcano(
+        ProtPipe2::plot_volcano(
           dea_v2(),
           label_col = input$label_col_v2,
           labelgene = gene_labels_v2(),
@@ -947,7 +947,7 @@ server <- function(input, output, session) {
       return(NULL)
     }
     req(input$ontology_file_v2)
-    ProtPipe::read_ontology(input$ontology_file_v2$datapath)
+    ProtPipe2::read_ontology(input$ontology_file_v2$datapath)
   })
 
   enrichment_result_v2 <- reactiveVal(NULL)
@@ -961,7 +961,7 @@ server <- function(input, output, session) {
     tryCatch({
       req(dea_result_v2(), input$gene_col_v2, input$enrich_pval_v2)
       ontology <- selected_ontology_v2()
-      result <- ProtPipe::enrich_pathways(
+      result <- ProtPipe2::enrich_pathways(
         dea_result_v2(),
         lfc_threshold = input$logfc_v2,
         fdr_threshold = input$pvalue_v2,
@@ -1356,7 +1356,7 @@ server <- function(input, output, session) {
 
   abundance_barchart_reactive <- reactive({
     req(prot_data(), input$pv_protein_v2, input$pv_prot_meta_v2)
-    ProtPipe::compare_protein(
+    ProtPipe2::compare_protein(
       prot_data(),
       prot = input$pv_protein_v2,
       prot_meta_col = input$pv_prot_meta_v2,
@@ -1367,7 +1367,7 @@ server <- function(input, output, session) {
 
   abundance_heatmap_reactive <- reactive({
     req(prot_data(), input$protein_label_v2)
-    ProtPipe::plot_proteomics_heatmap(
+    ProtPipe2::plot_proteomics_heatmap(
       object = prot_data(),
       protmeta_col = input$protein_label_v2,
       genes = heatmap_labels_v2(),

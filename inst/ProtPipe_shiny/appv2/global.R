@@ -5,7 +5,7 @@ source("helpers.R")
 
 library(shiny)
 app_require_packages <- function(packages, feature = "This app feature") {
-  ProtPipe:::protpipe_require_packages(packages, feature = feature)
+  ProtPipe2:::protpipe_require_packages(packages, feature = feature)
 }
 
 app_require_packages(
