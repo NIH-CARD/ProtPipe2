@@ -1,8 +1,10 @@
-file <- package_path("EXAMPLES", "olink", "npx_data1.csv")
-metafile <- package_path("EXAMPLES", "olink", "manifest.tsv")
+testthat::skip_if_not_installed("OlinkAnalyze")
 
-npx <- OlinkAnalyze::read_NPX(file)
-meta <- read.delim(metafile, sep = "\t")
+# OlinkAnalyze ships npx_data1 itself; it is identical to the NPX export the
+# suite used to read from EXAMPLES/olink/npx_data1.csv. The manifest is
+# ProtPipe-specific, so it lives in inst/extdata.
+npx <- OlinkAnalyze::npx_data1
+meta <- read.delim(extdata_path("manifest.tsv"), sep = "\t")
 out <- olink_all_output(npx)
 
 test_that("correctly make a prot_data object from Olink without LOD filtering", {

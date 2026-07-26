@@ -44,6 +44,9 @@ used for GO analysis and mapping gene IDs.}
 \item{gene_col}{A character string indicating the name of the column in the \code{DE}
 data frame that contains the gene symbols/identifiers. Defaults to \code{"Genes"}.}
 
+\item{adj}{Logical; when \code{TRUE} (the default) select significant genes using
+the adjusted p-value column, otherwise use the raw p-value.}
+
 \item{source}{Pathway source. Use \code{"go"} for Gene Ontology or \code{"custom"} for
 user-supplied ontologies.}
 

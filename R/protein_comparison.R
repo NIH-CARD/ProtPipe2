@@ -1,21 +1,6 @@
-#' Creates a ggplot bar chart comparing the intensity of a single protein
-#' either across all samples or grouped by a condition.
-#'
-#' @param object The `SummarizedExperiment` object.
-#' @param prot A string specifying the name of the protein to plot.
-#' @param prot_meta_col A string naming the column in the `rowData` slot to search for the protein. Defaults to the first column.
-#' @param condition (Optional) A string naming the column in the `colData` slot to group samples by.
-#' @param selected_groups (Optional) A character vector of group names to filter by. Only used if 'condition' is provided.
-#' @return A ggplot object.
-#' @export
-setGeneric("compare_protein",
-           def = function(object, prot, prot_meta_col = NULL, condition = NULL, selected_groups = NULL) {
-             standardGeneric("compare_protein")
-           }
-)
-
 # --- 3. S4 Method Implementation ---
 #' @describeIn compare_protein Method for SummarizedExperiment objects.
+#' @export
 setMethod("compare_protein",
           signature(object = "SummarizedExperiment"),
           function(object, prot, prot_meta_col = NULL, condition = NULL, selected_groups = NULL) {

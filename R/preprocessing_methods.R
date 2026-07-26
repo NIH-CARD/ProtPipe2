@@ -569,7 +569,7 @@ setMethod(
     # Scale by alpha; rows that were all-NA have +Inf — don't impute those
     impute_vals <- alpha * row_mins
     bad_rows <- !is.finite(impute_vals)  # Inf (all-NA rows) or NA
-    if (any(bad_rows)) impute_vals[bad_rows] <- NA_real_
+    if (any(bad_rows)) impute_vals[bad_rows] <- 0
 
     # Replace NA/NaN per row without changing dimnames
     miss_idx <- which(is.na(m), arr.ind = TRUE)
@@ -662,6 +662,17 @@ setMethod("batch_correct",
             }
 
             batch_vector <- col_data[[batch_variable]]
+
+            if (any(is.na(batch_vector))) {
+              na_samples <- colnames(object)[is.na(batch_vector)]
+              stop(
+                "The batch variable '", batch_variable, "' contains NA values for ",
+                length(na_samples), " sample(s): ",
+                paste(head(na_samples, 5), collapse = ", "),
+                if (length(na_samples) > 5) paste0(" ... and ", length(na_samples) - 5, " more.") else ".",
+                "\nEnsure all samples have a batch assignment before running batch correction."
+              )
+            }
 
             # --- 2. Perform Batch Correction (using limma) ---
 

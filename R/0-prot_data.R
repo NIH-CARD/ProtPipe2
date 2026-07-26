@@ -41,10 +41,10 @@
 #'
 #' # --- Inspect the new object ---
 #' print(se)
-#' assayNames(se)
-#' head(rowData(se))
-#' colData(se)
-#' metadata(se)
+#' SummarizedExperiment::assayNames(se)
+#' head(SummarizedExperiment::rowData(se))
+#' SummarizedExperiment::colData(se)
+#' S4Vectors::metadata(se)
 #'
 create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creation_method = "Unknown") {
 
@@ -234,11 +234,11 @@ standardize_format <- function(DT.original) {
     data.table::setnames(DT, 'PG.Genes', 'Genes')
     DT=as.data.frame(DT)
     # Use only Protein_Group and Genes
-    dplyr::select=c('Peptide_Sequence','Genes',grep('raw',colnames(DT),value = T))
-    DT=DT[, dplyr::select]
+    selected_cols=c('Peptide_Sequence','Genes',grep('raw',colnames(DT),value = T))
+    DT=DT[, selected_cols]
     #as number
     DT[,grep('raw',colnames(DT))]=as.data.frame(apply(DT[,grep('raw',colnames(DT))],2,as.numeric))
-    DT=data.table(DT)
+    DT=data.table::data.table(DT)
   }
   else if('PG.ProteinGroups' %in% colnames(DT)) {
     print("Spectronaut input")
@@ -246,11 +246,11 @@ standardize_format <- function(DT.original) {
     data.table::setnames(DT, 'PG.Genes', 'Genes')
     DT=as.data.frame(DT)
     # Use only Protein_Group and Genes
-    dplyr::select=c('Protein_Group','Genes',grep('PG.Quantity',colnames(DT),value = T))
-    DT=DT[, dplyr::select]
+    selected_cols=c('Protein_Group','Genes',grep('PG.Quantity',colnames(DT),value = T))
+    DT=DT[, selected_cols]
     #as number
     DT[,grep('PG.Quantity',colnames(DT))]=as.data.frame(apply(DT[,grep('PG.Quantity',colnames(DT))],2,as.numeric))
-    DT=data.table(DT)
+    DT=data.table::data.table(DT)
   }
   else if('Peptide Sequence' %in% colnames(DT)) {
     print("FragPipe input")
@@ -258,9 +258,9 @@ standardize_format <- function(DT.original) {
     colnames(DT)=gsub("\\s", "_",colnames(DT))
     # Use only Protein_Group and Genes
     DT=as.data.frame(DT)
-    dplyr::select=c('Peptide_Sequence','Genes',grep('[0-9]_Intensity',colnames(DT),value = T))
-    DT=DT[, dplyr::select]
-    DT=data.table(DT)
+    selected_cols=c('Peptide_Sequence','Genes',grep('[0-9]_Intensity',colnames(DT),value = T))
+    DT=DT[, selected_cols]
+    DT=data.table::data.table(DT)
   }
 
   # Remove leading directories for sample names

@@ -40,7 +40,7 @@ sample_info <- data.frame(
   Batch = rep(c("Batch1", "Batch2"), times = 3)
 )
 
-se <- SummarizedExperiment(assays = list(log_intensities = counts),
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
                            colData = sample_info)
 
 # --- Run batch correction, preserving the "Condition" variable ---
@@ -49,6 +49,6 @@ corrected_se <- batch_correct(se,
                               bio_variables = "Condition")
 
 # --- Inspect the result ---
-assayNames(corrected_se) # Now includes "corrected"
+SummarizedExperiment::assayNames(corrected_se) # Now includes "corrected"
 
 }

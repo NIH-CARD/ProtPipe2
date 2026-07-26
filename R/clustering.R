@@ -32,7 +32,7 @@ setMethod("get_PCs", "SummarizedExperiment",
             pca_summary$percent <- round(pca_summary$percent * 100, digits = 2)
 
             # Format the principal components data frame
-            pca_df <- as.data.frame(pca$x)[, 1:5]
+            pca_df <- as.data.frame(pca$x)[, seq_len(min(5, ncol(pca$x))), drop = FALSE]
             pca_df$Sample <- rownames(pca_df)
 
             # Add the condition information

@@ -45,6 +45,22 @@ test_that("binary t-tests match limma-style output columns", {
   )
 })
 
+test_that("ANOVA runs across multiple groups and rejects 2-group conditions", {
+  se <- load_basic_imputed_se()
+
+  de <- ProtPipe2::do_anova(se, condition = "base_condition", covariates = NULL)
+
+  expect_true(all(c("F", "P.Value", "adj.P.Val") %in% names(de)))
+
+  two_group_keep <- SummarizedExperiment::colData(se)$base_condition %in% c("Day0", "Day28")
+  se_two_groups <- se[, two_group_keep]
+
+  expect_error(
+    ProtPipe2::do_anova(se_two_groups, condition = "base_condition"),
+    "do_limma_binary"
+  )
+})
+
 test_that("continuous comparison works with bundled base-condition metadata", {
   se <- load_basic_imputed_se()
   SummarizedExperiment::colData(se)$day_num <- as.numeric(

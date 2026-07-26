@@ -12,6 +12,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
+    umap,
     shiny,
     shinyjs,
     bslib,
@@ -32,7 +33,6 @@ Imports:
     S4Vectors,
     ggplot2,
     data.table,
-    umap,
     ggdendro,
     ggrepel,
     reshape2,
@@ -42,13 +42,14 @@ Imports:
     matrixStats,
     stats,
     methods,
+    utils,
     rlang,
     magrittr,
     grid,
     clusterProfiler,
-    DOSE,
     enrichplot,
-    ggpubr
+    ggpubr,
+    tibble
 URL: https://nih-card.github.io/ProtPipe2/
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0

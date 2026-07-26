@@ -37,6 +37,6 @@ se <- create_se(raw_data)
 imputed_obj <- impute(se, value = 0)
 
 # View the imputed assay data
-print(assay(imputed_obj))
+print(SummarizedExperiment::assay(imputed_obj))
 
 }

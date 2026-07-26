@@ -1,5 +1,5 @@
 test_that("protpipe_example_se loads as a SummarizedExperiment", {
-  data("protpipe_example_se", package = "ProtPipe")
+  data("protpipe_example_se", package = "ProtPipe2")
 
   expect_s4_class(protpipe_example_se, "SummarizedExperiment")
   expect_true("differentiation_day" %in% colnames(as.data.frame(SummarizedExperiment::colData(protpipe_example_se))))
@@ -7,9 +7,9 @@ test_that("protpipe_example_se loads as a SummarizedExperiment", {
 })
 
 test_that("bundled neuron differentiation tables load with expected structure", {
-  data("neuron_differentiation_intensities", package = "ProtPipe")
-  data("neuron_differentiation_metadata", package = "ProtPipe")
-  data("ipsc_stem_cell_genes", package = "ProtPipe")
+  data("neuron_differentiation_intensities", package = "ProtPipe2")
+  data("neuron_differentiation_metadata", package = "ProtPipe2")
+  data("ipsc_stem_cell_genes", package = "ProtPipe2")
 
   expect_s3_class(neuron_differentiation_intensities, "data.frame")
   expect_s3_class(neuron_differentiation_metadata, "data.frame")
@@ -26,8 +26,8 @@ test_that("bundled neuron differentiation tables load with expected structure", 
 })
 
 test_that("bundled neuron differentiation tables reconstruct a SummarizedExperiment", {
-  data("neuron_differentiation_intensities", package = "ProtPipe")
-  data("neuron_differentiation_metadata", package = "ProtPipe")
+  data("neuron_differentiation_intensities", package = "ProtPipe2")
+  data("neuron_differentiation_metadata", package = "ProtPipe2")
 
   se <- ProtPipe2::create_se(
     data = neuron_differentiation_intensities,

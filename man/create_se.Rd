@@ -59,9 +59,9 @@ se <- create_se(
 
 # --- Inspect the new object ---
 print(se)
-assayNames(se)
-head(rowData(se))
-colData(se)
-metadata(se)
+SummarizedExperiment::assayNames(se)
+head(SummarizedExperiment::rowData(se))
+SummarizedExperiment::colData(se)
+S4Vectors::metadata(se)
 
 }

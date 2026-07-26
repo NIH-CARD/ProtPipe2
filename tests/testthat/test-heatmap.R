@@ -1,6 +1,6 @@
-dat <- data.table::fread(basic_example_path("iPSC.csv"))
-ipsc_genes <- data.table::fread(basic_example_path("stem_cell_gene.csv"))$Gene
-neuron_genes <- data.table::fread(basic_example_path("neuron_gene.csv"))$Gene
+dat <- load_basic_data()
+ipsc_genes <- get_package_data("ipsc_stem_cell_genes")$Gene
+neuron_genes <- data.table::fread(extdata_path("neuron_gene.csv"))$Gene
 dat_pro <- create_se(dat)
 
 test_that("basic heatmap", {

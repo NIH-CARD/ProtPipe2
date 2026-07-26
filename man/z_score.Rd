@@ -42,17 +42,17 @@ sample_info <- data.frame(
 se <- create_se(df, sample_metadata = sample_info)
 
 # Check the means of each protein (row) before scaling
-rowMeans(assay(se))
+rowMeans(SummarizedExperiment::assay(se))
 
 # Apply the scaling method
 scaled_se <- z_score(se)
 
 # The new data has row means near zero and row standard deviations of one
-print(assay(scaled_se))
+print(SummarizedExperiment::assay(scaled_se))
 cat("Row means after scaling:\n")
-print(rowMeans(assay(scaled_se)))
+print(rowMeans(SummarizedExperiment::assay(scaled_se)))
 cat("\nRow standard deviations after scaling:\n")
-print(apply(assay(scaled_se), 1, sd))
+print(apply(SummarizedExperiment::assay(scaled_se), 1, sd))
 
 }
 \seealso{

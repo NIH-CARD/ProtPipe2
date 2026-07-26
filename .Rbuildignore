@@ -10,3 +10,9 @@
 ^index\.html$
 ^data-raw$
 ^local_tests$
+^EXAMPLES$
+^benchmarks$
+^wiki$
+^\.git$
+^\.claude$
+^setup\.R$

@@ -42,14 +42,24 @@ create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
 olink_all_output <- function(my_npx){
   protpipe_require_packages("tidyr", feature = "olink_all_output()")
 
+  # Compute per-protein max LOD across plates before pivoting to avoid duplicate rows
+  lod_per_protein <- my_npx |>
+    dplyr::group_by(UniProt, Assay, OlinkID) |>
+    dplyr::summarise(LOD = max(LOD, na.rm = TRUE), .groups = "drop")
+
   npx_wide <- my_npx |>
-    # dplyr::filter(AssayType == "assay") |>
-    dplyr::select(SampleID, LOD, UniProt,Assay, OlinkID, NPX) |>
-    tidyr::pivot_wider(names_from = SampleID, values_from = NPX,values_fn = mean) |>
-    dplyr::rename(Protein_Group = UniProt, Genes = Assay) %>%
+    dplyr::select(SampleID, UniProt, Assay, OlinkID, NPX) |>
+    tidyr::pivot_wider(names_from = SampleID, values_from = NPX, values_fn = mean) |>
+    dplyr::rename(Protein_Group = UniProt, Genes = Assay) |>
+    dplyr::left_join(
+      lod_per_protein |> dplyr::rename(Protein_Group = UniProt, Genes = Assay),
+      by = c("Protein_Group", "Genes", "OlinkID")
+    ) |>
+    dplyr::select(Protein_Group, Genes, OlinkID, LOD, dplyr::everything()) |>
     as.data.frame()
-  number_samples <- ncol(npx_wide)-4
-  condition = NULL
+
+  number_samples <- ncol(npx_wide) - 4
+  condition <- NULL
   return(list(data = npx_wide, condition = condition, number_samples = number_samples))
 }
 

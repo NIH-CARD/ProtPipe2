@@ -53,6 +53,6 @@ set.seed(123)
 
 imputed_obj <- impute_left_dist(se)
 cat("Data after imputation:\n")
-print(assay(imputed_obj))
+print(SummarizedExperiment::assay(imputed_obj))
 
 }

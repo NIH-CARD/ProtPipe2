@@ -240,7 +240,7 @@ differential_intensity_main_ui <- div(
 
 differential_params_ui <- div(
   class = "appv2-params-stack",
-  radioButtons("de_mode_v2", "Outcome type", choices = c("Categorical" = "binary", "Continuous" = "continuous"), selected = "binary", inline = TRUE),
+  radioButtons("de_mode_v2", "Outcome type", choices = c("Two-Group Comparison" = "binary", "Continuous Correlation" = "continuous", "Multi-Group (ANOVA)" = "anova"), selected = "binary", inline = TRUE),
   selectInput("de_condition_v2", "Compare groups using", choices = character(0)),
   uiOutput("de_groups_v2"),
   uiOutput("de_covariates_v2"),

@@ -1,4 +1,8 @@
-dat <- SomaDataIO::read_adat(package_path("EXAMPLES", "soma", "example_data_v5.0_plasma.adat"))
+testthat::skip_if_not_installed("SomaDataIO")
+
+# SomaDataIO ships its own example soma_adat, which exercises the same code
+# paths as the 24 MB .adat the suite used to read from EXAMPLES/soma/.
+dat <- SomaDataIO::example_data
 data1 <- soma_all_output(dat)
 
 

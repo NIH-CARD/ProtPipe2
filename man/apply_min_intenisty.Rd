@@ -27,9 +27,9 @@ Filters assay data by converting values below a specified Limit of Detection
 \examples{
 # Create a mock SummarizedExperiment
 counts <- matrix(c(10, 5, 2, 8, 1, 15), nrow = 3, ncol = 2)
-se <- SummarizedExperiment(assays = list(counts = counts))
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(counts = counts))
 
 # Apply LOD of 6
-se_filtered <- applyLOD(se, lod = 6)
-assay(se_filtered)
+se_filtered <- apply_min_intenisty(se, lod = 6)
+SummarizedExperiment::assay(se_filtered)
 }

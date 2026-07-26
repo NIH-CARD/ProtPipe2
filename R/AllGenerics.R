@@ -204,11 +204,11 @@ setGeneric("lod_filter", function(se, lod_col = "Buffer") {
 #' @examples
 #' # Create a mock SummarizedExperiment
 #' counts <- matrix(c(10, 5, 2, 8, 1, 15), nrow = 3, ncol = 2)
-#' se <- SummarizedExperiment(assays = list(counts = counts))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays = list(counts = counts))
 #'
 #' # Apply LOD of 6
-#' se_filtered <- applyLOD(se, lod = 6)
-#' assay(se_filtered)
+#' se_filtered <- apply_min_intenisty(se, lod = 6)
+#' SummarizedExperiment::assay(se_filtered)
 setGeneric("apply_min_intenisty", function(object, lod) {
   standardGeneric("apply_min_intenisty")
 })
@@ -319,17 +319,17 @@ setGeneric("filter_overlap",
 #' se <- create_se(df, sample_metadata = sample_info)
 #'
 #' # Check the means of each protein (row) before scaling
-#' rowMeans(assay(se))
+#' rowMeans(SummarizedExperiment::assay(se))
 #'
 #' # Apply the scaling method
 #' scaled_se <- z_score(se)
 #'
 #' # The new data has row means near zero and row standard deviations of one
-#' print(assay(scaled_se))
+#' print(SummarizedExperiment::assay(scaled_se))
 #' cat("Row means after scaling:\n")
-#' print(rowMeans(assay(scaled_se)))
+#' print(rowMeans(SummarizedExperiment::assay(scaled_se)))
 #' cat("\nRow standard deviations after scaling:\n")
-#' print(apply(assay(scaled_se), 1, sd))
+#' print(apply(SummarizedExperiment::assay(scaled_se), 1, sd))
 #'
 setGeneric("z_score", function(object) standardGeneric("z_score"))
 
@@ -419,7 +419,7 @@ setGeneric("log2_transform", function(object) standardGeneric("log2_transform"))
 #' imputed_obj <- impute(se, value = 0)
 #'
 #' # View the imputed assay data
-#' print(assay(imputed_obj))
+#' print(SummarizedExperiment::assay(imputed_obj))
 #'
 setGeneric("impute", function(object, value) standardGeneric("impute"))
 
@@ -431,6 +431,10 @@ setGeneric("impute", function(object, value) standardGeneric("impute"))
 #' same row.
 #'
 #' The imputation value can be scaled by a multiplicative factor `alpha`.
+#'
+#' Negative values are treated as missing and converted to `NA` before
+#' imputation. Proteins with no observed values in any sample (all-NA rows)
+#' are imputed with `0`.
 #'
 #' @param object A \code{SummarizedExperiment} object containing data with missing values.
 #' @param alpha A numeric scaling factor to multiply the row minimum by before
@@ -450,18 +454,18 @@ setGeneric("impute", function(object, value) standardGeneric("impute"))
 #'
 #' se <- create_se(raw_data)
 #' cat("Original Data:\n")
-#' print(assay(se))
+#' print(SummarizedExperiment::assay(se))
 #'
 #' # Impute using the row minimum (alpha = 1)
 #' # Row 1's NA becomes 100; Row 2's NA becomes 500.
 #' imputed_obj <- impute_min(se)
 #' cat("\nImputed with alpha = 1:\n")
-#' print(assay(imputed_obj))
+#' print(SummarizedExperiment::assay(imputed_obj))
 #'
 #' # Impute using 90% of the row minimum
 #' imputed_scaled <- impute_min(se, alpha = 0.9)
 #' cat("\nImputed with alpha = 0.9:\n")
-#' print(assay(imputed_scaled))
+#' print(SummarizedExperiment::assay(imputed_scaled))
 #'
 setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min"))
 
@@ -508,7 +512,7 @@ setGeneric("impute_min", function(object, alpha=1) standardGeneric("impute_min")
 #'
 #' imputed_obj <- impute_left_dist(se)
 #' cat("Data after imputation:\n")
-#' print(assay(imputed_obj))
+#' print(SummarizedExperiment::assay(imputed_obj))
 #'
 setGeneric("impute_left_dist", function(object, shift = 1.8, scale = 0.3) standardGeneric("impute_left_dist"))
 
@@ -541,7 +545,7 @@ setGeneric("impute_left_dist", function(object, shift = 1.8, scale = 0.3) standa
 #'   Batch = rep(c("Batch1", "Batch2"), times = 3)
 #' )
 #'
-#' se <- SummarizedExperiment(assays = list(log_intensities = counts),
+#' se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
 #'                            colData = sample_info)
 #'
 #' # --- Run batch correction, preserving the "Condition" variable ---
@@ -550,7 +554,7 @@ setGeneric("impute_left_dist", function(object, shift = 1.8, scale = 0.3) standa
 #'                               bio_variables = "Condition")
 #'
 #' # --- Inspect the result ---
-#' assayNames(corrected_se) # Now includes "corrected"
+#' SummarizedExperiment::assayNames(corrected_se) # Now includes "corrected"
 #'
 setGeneric("batch_correct", function(object, batch_variable, bio_variables = NULL) {
   standardGeneric("batch_correct")
@@ -595,7 +599,7 @@ setGeneric("batch_correct", function(object, batch_variable, bio_variables = NUL
 #'   row.names = colnames(counts),
 #'   Group = rep(c("A", "B"), each = 3)
 #' )
-#' se <- SummarizedExperiment(assays = list(log_intensities = counts),
+#' se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
 #'                            colData = sample_info)
 #'
 #' # --- Run PCA, specifying the group variable ---
@@ -820,6 +824,91 @@ setGeneric("plot_umap",
 
 ## Differential Expression ###############################################
 
+#' Perform limma differential expression on a SummarizedExperiment
+#'
+#' This function takes a `SummarizedExperiment` object and uses group labels in
+#' `colData(object)` to perform differential expression between a treatment group
+#' and a control group. Covariates can be included in the model design.
+#'
+#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
+#' @param condition String: column name in `colData(object)` that holds group labels.
+#' @param treatment_group String: name of treatment group in `condition`.
+#' @param control_group String: name of control group in `condition`.
+#' @param covariates Optional character vector: column names in `colData(object)` to use as covariates.
+#'
+#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @export
+#'
+setGeneric("do_limma_binary", function(object,
+                                condition,
+                                treatment_group,
+                                control_group,
+                                covariates = NULL) {
+  standardGeneric("do_limma_binary")
+})
+
+#' Perform t-test differential expression on a SummarizedExperiment
+#'
+#' This function takes a `SummarizedExperiment` object and uses group labels in
+#' `colData(object)` to perform differential expression between a treatment group
+#' and a control group using per-protein t-tests. Optional covariates can be
+#' regressed out before testing.
+#'
+#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
+#' @param condition String: column name in `colData(object)` that holds group labels.
+#' @param treatment_group String: name of treatment group in `condition`.
+#' @param control_group String: name of control group in `condition`.
+#' @param covariates Optional character vector: column names in `colData(object)` to regress out before testing.
+#'
+#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @export
+#'
+setGeneric("do_t_test_binary", function(object,
+                                       condition,
+                                       treatment_group,
+                                       control_group,
+                                       covariates = NULL) {
+  standardGeneric("do_t_test_binary")
+})
+
+#' Perform limma differential expression for a continuous outcome
+#'
+#' This function takes a SummarizedExperiment object, a numeric condition column,
+#' and optional covariates, and performs limma-based differential expression.
+#'
+#' @param object A SummarizedExperiment object
+#' @param condition Column name in colData(object) used as the continuous predictor
+#'
+#' @return A data frame with metadata, intensities, logFC, p-values
+#' @export
+#'
+setGeneric("do_comparison_continuous",
+           function(object, condition) standardGeneric("do_comparison_continuous"))
+
+#' Perform ANOVA-style differential expression across multiple groups
+#'
+#' @description
+#' This function takes a `SummarizedExperiment` object and uses group labels in
+#' `colData(object)` to test, for each protein, whether mean abundance differs
+#' across *all* levels of `condition` at once. It uses limma's moderated F-test
+#' (empirical Bayes-shrunk variance, as in `do_limma_binary`) rather than a
+#' classical per-protein `aov()`, which is more robust when group sizes are
+#' small. `condition` must have at least 3 groups; for exactly 2 groups, use
+#' `do_limma_binary` instead.
+#'
+#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
+#' @param condition String: column name in `colData(object)` that holds group labels (>= 3 groups).
+#' @param covariates Optional character vector: column names in `colData(object)` to use as covariates.
+#'
+#' @return A data frame with metadata, intensities, one log fold change column per
+#'   non-reference group (versus an arbitrary baseline group), the omnibus `F`
+#'   statistic, `P.Value`, and `adj.P.Val`.
+#' @export
+#'
+setGeneric("do_anova", function(object, condition, covariates = NULL) {
+  standardGeneric("do_anova")
+})
+
 ## Heatmap ############################################################
 
 #' Plot a Proteomics Heatmap
@@ -861,3 +950,19 @@ setGeneric("plot_proteomics_heatmap",
 )
 
 ## Protein Comparison ############################################################
+
+#' Creates a ggplot bar chart comparing the intensity of a single protein
+#' either across all samples or grouped by a condition.
+#'
+#' @param object The `SummarizedExperiment` object.
+#' @param prot A string specifying the name of the protein to plot.
+#' @param prot_meta_col A string naming the column in the `rowData` slot to search for the protein. Defaults to the first column.
+#' @param condition (Optional) A string naming the column in the `colData` slot to group samples by.
+#' @param selected_groups (Optional) A character vector of group names to filter by. Only used if 'condition' is provided.
+#' @return A ggplot object.
+#' @export
+setGeneric("compare_protein",
+           def = function(object, prot, prot_meta_col = NULL, condition = NULL, selected_groups = NULL) {
+             standardGeneric("compare_protein")
+           }
+)

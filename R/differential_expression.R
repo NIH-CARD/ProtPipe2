@@ -1,4 +1,14 @@
 #' Helper function to filter out sparse proteins
+#'
+#' @param DT_limma Matrix or data frame of intensities with samples as columns.
+#' @param control_samples Character vector of control sample column names.
+#' @param treatment_samples Character vector of treatment sample column names.
+#' @param alpha Minimum fraction of non-missing values required within a group.
+#'
+#' @return A logical vector marking the rows that pass the sparsity filter.
+#'
+#' @keywords internal
+#' @noRd
 filter_features <- function(DT_limma, control_samples, treatment_samples, alpha){
   n_treatment <- length(treatment_samples)
   n_control <- length(control_samples)
@@ -25,29 +35,8 @@ filter_features <- function(DT_limma, control_samples, treatment_samples, alpha)
 
 }
 
-#' Perform limma differential expression on a SummarizedExperiment
-#'
-#' This function takes a `SummarizedExperiment` object and uses group labels in
-#' `colData(object)` to perform differential expression between a treatment group
-#' and a control group. Covariates can be included in the model design.
-#'
-#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
-#' @param condition String: column name in `colData(object)` that holds group labels.
-#' @param treatment_group String: name of treatment group in `condition`.
-#' @param control_group String: name of control group in `condition`.
-#' @param covariates Optional character vector: column names in `colData(object)` to use as covariates.
-#'
-#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @describeIn do_limma_binary Method for SummarizedExperiment objects.
 #' @export
-#'
-setGeneric("do_limma_binary", function(object,
-                                condition,
-                                treatment_group,
-                                control_group,
-                                covariates = NULL) {
-  standardGeneric("do_limma_binary")
-})
-
 setMethod("do_limma_binary", "SummarizedExperiment",
           function(object, condition, treatment_group, control_group, covariates) {
             # -- prepare assay data --
@@ -145,30 +134,8 @@ setMethod("do_limma_binary", "SummarizedExperiment",
             return(result_limma_sorted)
           })
 
-#' Perform t-test differential expression on a SummarizedExperiment
-#'
-#' This function takes a `SummarizedExperiment` object and uses group labels in
-#' `colData(object)` to perform differential expression between a treatment group
-#' and a control group using per-protein t-tests. Optional covariates can be
-#' regressed out before testing.
-#'
-#' @param object A `SummarizedExperiment` object containing protein intensities and metadata.
-#' @param condition String: column name in `colData(object)` that holds group labels.
-#' @param treatment_group String: name of treatment group in `condition`.
-#' @param control_group String: name of control group in `condition`.
-#' @param covariates Optional character vector: column names in `colData(object)` to regress out before testing.
-#'
-#' @return A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.
+#' @describeIn do_t_test_binary Method for SummarizedExperiment objects.
 #' @export
-#'
-setGeneric("do_t_test_binary", function(object,
-                                       condition,
-                                       treatment_group,
-                                       control_group,
-                                       covariates = NULL) {
-  standardGeneric("do_t_test_binary")
-})
-
 setMethod("do_t_test_binary", "SummarizedExperiment",
           function(object, condition, treatment_group, control_group, covariates) {
             meta_cols <- names(rowData(object))
@@ -262,20 +229,119 @@ setMethod("do_t_test_binary", "SummarizedExperiment",
             return(result_ttest_sorted)
           })
 
-
-#' Perform limma differential expression for a continuous outcome
-#'
-#' This function takes a SummarizedExperiment object, a numeric condition column,
-#' and optional covariates, and performs limma-based differential expression.
-#'
-#' @param object A SummarizedExperiment object
-#' @param condition Column name in colData(object) used as the continuous predictor
-#'
-#' @return A data frame with metadata, intensities, logFC, p-values
+#' @describeIn do_anova Method for SummarizedExperiment objects.
 #' @export
-#'
-setGeneric("do_comparison_continuous",
-           function(object, condition) standardGeneric("do_comparison_continuous"))
+setMethod("do_anova", "SummarizedExperiment",
+          function(object, condition, covariates = NULL) {
+            # -- prepare assay data --
+            meta_cols <- names(rowData(object))
+            if (ProtPipe2::has_step(object, "log2_transform")) {
+              data <- assay(object) %>% as.data.frame()
+            } else {
+              object <- ProtPipe2::log2_transform(object)
+              data <- assay(object) %>% as.data.frame()
+            }
+            if (anyNA(data)) stop("Missing values detected. Please impute before running ANOVA.")
+
+            DT <- cbind(rowData(object), data) %>% as.data.frame()
+            meta <- colData(object) %>% as.data.frame()
+
+            # -- check condition column --
+            if (!(condition %in% colnames(meta))) {
+              stop("`condition` must be a column name in colData(object).")
+            }
+
+            # -- covariate checks --
+            if (!is.null(covariates) && condition %in% covariates) {
+              stop("Covariates cannot include the grouping variable used for `condition`.")
+            }
+            if (!is.null(covariates)) {
+              for (cov in covariates) {
+                if (!(cov %in% colnames(meta))) {
+                  stop(paste("Covariate", cov, "not found in colData(object)."))
+                }
+              }
+            }
+
+            # -- extract samples with a non-missing group label --
+            groups_raw <- meta[[condition]]
+            keep <- !is.na(groups_raw)
+            samples <- rownames(meta)[keep]
+            groups <- factor(as.character(groups_raw[keep]))
+
+            n_groups <- nlevels(groups)
+            if (n_groups == 2) {
+              stop(
+                "`condition` has exactly 2 groups. Use `do_limma_binary()` for two-group comparisons instead of `do_anova()`."
+              )
+            }
+            if (n_groups < 3) {
+              stop("`condition` must have at least 3 distinct groups to run an ANOVA.")
+            }
+
+            group_counts <- table(groups)
+            if (any(group_counts < 2)) {
+              stop(
+                paste(
+                  "Each group must contain at least 2 samples. Too few samples in:",
+                  paste(names(group_counts)[group_counts < 2], collapse = ", ")
+                )
+              )
+            }
+
+            missing_samples <- setdiff(samples, colnames(DT))
+            if (length(missing_samples) > 0) {
+              stop(
+                paste(
+                  "These samples were found in colData but not in assay data:",
+                  paste(missing_samples, collapse = ", ")
+                )
+              )
+            }
+
+            DT_anova <- DT[, samples, drop = FALSE]
+
+            # -- build cell-means design matrix (one coefficient per group) --
+            design_df <- data.frame(group = groups)
+            rownames(design_df) <- samples
+
+            if (!is.null(covariates)) {
+              for (cov in covariates) {
+                design_df[[cov]] <- meta[samples, cov]
+              }
+            }
+
+            limma_design <- model.matrix(~ 0 + ., data = design_df)
+            colnames(limma_design) <- make.names(colnames(limma_design))
+
+            # -- contrasts: every non-reference group vs. the first (alphabetical) level --
+            # This tests the same omnibus null (all group means equal) regardless of
+            # which level is used as the reference; the choice only affects which
+            # per-group logFC columns are reported, not the F-statistic or p-value.
+            group_coefs <- make.names(paste0("group", levels(groups)))
+            reference_coef <- group_coefs[1]
+            contrast_strings <- paste0(group_coefs[-1], "-", reference_coef)
+            names(contrast_strings) <- paste0(levels(groups)[-1], " - ", levels(groups)[1])
+
+            cont.matrix <- limma::makeContrasts(contrasts = contrast_strings, levels = limma_design)
+            colnames(cont.matrix) <- names(contrast_strings)
+
+            # -- limma pipeline: moderated F-test across all group contrasts --
+            fit <- limma::lmFit(DT_anova, limma_design)
+            fit2 <- limma::contrasts.fit(fit, cont.matrix)
+            fit2 <- limma::eBayes(fit2, trend = TRUE)
+
+            result_anova <- limma::topTable(fit2, coef = seq_len(ncol(cont.matrix)), n = Inf)
+            result_anova <- merge(DT[, c(meta_cols, samples)], result_anova, by.x = 0, by.y = 0)
+            result_anova$Row.names <- NULL
+
+            # sort by adjusted p-value then omnibus F-statistic
+            result_anova_sorted <- result_anova[order(result_anova$adj.P.Val, -result_anova$F), ]
+            return(result_anova_sorted)
+          })
+
+#' @describeIn do_comparison_continuous Method for SummarizedExperiment objects.
+#' @export
 setMethod("do_comparison_continuous", "SummarizedExperiment",
           function(object, condition) {
 
@@ -860,7 +926,7 @@ enrich_kegg <- function(gene_id, all_gene_vector, enrich_pvalue = 1, org = org.H
   })
 
   if (!is.null(KEGG)) {
-    KEGG <- DOSE::setReadable(KEGG, OrgDb = org, keyType = "ENTREZID")
+    KEGG <- clusterProfiler::setReadable(KEGG, OrgDb = org, keyType = "ENTREZID")
     if (!is.null(KEGG@result) && nrow(KEGG@result) > 0) {
       return(KEGG)
     }
@@ -905,7 +971,7 @@ gse_go <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg.d
   })
 
   if (!is.null(GO)) {
-    GO <- DOSE::setReadable(GO, OrgDb = org, keyType = "ENTREZID")
+    GO <- clusterProfiler::setReadable(GO, OrgDb = org, keyType = "ENTREZID")
     if (!is.null(GO@result) && nrow(GO@result) > 0) {
       return(GO)
     }
@@ -949,7 +1015,7 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
   })
 
   if (!is.null(KEGG)) {
-    KEGG <- DOSE::setReadable(KEGG, OrgDb = org, keyType = "ENTREZID")
+    KEGG <- clusterProfiler::setReadable(KEGG, OrgDb = org, keyType = "ENTREZID")
     if (!is.null(KEGG@result) && nrow(KEGG@result) > 0) {
       return(KEGG)
     }
@@ -993,6 +1059,8 @@ gse_kegg <- function(gene_list, enrich_pvalue = 1, org = org.Hs.eg.db::org.Hs.eg
 #' @param run_ora Logical; run over-representation analysis.
 #' @param run_gsea Logical; run gene set enrichment analysis.
 #' @param run_kegg Logical; also run KEGG analyses. Defaults to `FALSE`.
+#' @param adj Logical; when `TRUE` (the default) select significant genes using
+#'   the adjusted p-value column, otherwise use the raw p-value.
 #'
 #' @return
 #' A list containing two named elements:

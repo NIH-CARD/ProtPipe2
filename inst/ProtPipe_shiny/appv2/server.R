@@ -822,6 +822,15 @@ server <- function(input, output, session) {
     updateSelectInput(session, "gene_col_v2", choices = row_choices)
   })
 
+  observeEvent(input$de_mode_v2, {
+    main_view_choices <- if (identical(input$de_mode_v2, "anova")) {
+      c("Heatmap", "Pathway Enrichment")
+    } else {
+      c("Volcano Plot", "Pathway Enrichment")
+    }
+    updateSelectInput(session, "differential_main_view_v2", choices = main_view_choices)
+  })
+
   output$de_groups_v2 <- renderUI({
     tryCatch({
       validate_prot_data()
@@ -839,7 +848,7 @@ server <- function(input, output, session) {
   output$de_covariates_v2 <- renderUI({
     tryCatch({
       validate_prot_data()
-      req(prot_data(), input$de_mode_v2 == "binary")
+      req(prot_data(), input$de_mode_v2 %in% c("binary", "anova"))
       choices <- names(SummarizedExperiment::colData(prot_data()))
       selectInput("de_covariates_v2", "Covariates", choices = choices, multiple = TRUE, selected = NULL)
     }, error = function(e) {
@@ -851,6 +860,8 @@ server <- function(input, output, session) {
     tryCatch({
       if (input$de_mode_v2 == "continuous") {
         numericInput("logfc_v2", "Spearman rho cutoff", value = 0.35)
+      } else if (input$de_mode_v2 == "anova") {
+        NULL
       } else {
         numericInput("logfc_v2", "Log2 fold-change cutoff", value = 1)
       }
@@ -887,6 +898,12 @@ server <- function(input, output, session) {
     result <- tryCatch({
       if (input$de_mode_v2 == "continuous") {
         ProtPipe2::do_comparison_continuous(prot_data(), condition = input$de_condition_v2)
+      } else if (input$de_mode_v2 == "anova") {
+        ProtPipe2::do_anova(
+          prot_data(),
+          condition = input$de_condition_v2,
+          covariates = input$de_covariates_v2
+        )
       } else {
         ProtPipe2::do_limma_binary(
           prot_data(),
@@ -931,6 +948,31 @@ server <- function(input, output, session) {
     })
   })
 
+  anova_significant_v2 <- reactive({
+    req(dea_v2(), input$pvalue_v2)
+    p_col <- if (isTRUE(input$use_adj_pval_v2)) "adj.P.Val" else "P.Value"
+    dea <- dea_v2()
+    dea[!is.na(dea[[p_col]]) & dea[[p_col]] <= input$pvalue_v2, , drop = FALSE]
+  })
+
+  output$anova_heatmap_v2 <- renderPlot({
+    tryCatch({
+      req(input$label_col_v2, input$de_condition_v2)
+      sig <- anova_significant_v2()
+      validate(need(nrow(sig) > 0, "No proteins passed the significance threshold."))
+      print(
+        ProtPipe2::plot_proteomics_heatmap(
+          prot_data(),
+          protmeta_col = input$label_col_v2,
+          genes = sig[[input$label_col_v2]],
+          condition = input$de_condition_v2
+        )
+      )
+    }, error = function(e) {
+      validate(need(FALSE, paste("Rendering heatmap failed:", e$message)))
+    })
+  })
+
   selected_org_v2 <- reactive({
     req(input$organism_v2)
     org_info <- organism_map[[input$organism_v2]]
@@ -960,30 +1002,80 @@ server <- function(input, output, session) {
     )
     tryCatch({
       req(dea_result_v2(), input$gene_col_v2, input$enrich_pval_v2)
-      ontology <- selected_ontology_v2()
-      result <- ProtPipe2::enrich_pathways(
-        dea_result_v2(),
-        lfc_threshold = input$logfc_v2,
-        fdr_threshold = input$pvalue_v2,
-        enrich_pvalue = input$enrich_pval_v2,
-        go_org = selected_org_v2()$OrgDb,
-        kegg_org = selected_org_v2()$kegg,
-        gene_col = input$gene_col_v2,
-        adj = input$use_adj_pval_v2,
-        source = if (identical(input$pathway_source_v2, "GO")) "go" else "custom",
-        go_ont = input$go_ontology_v2,
-        term2gene = if (is.null(ontology)) NULL else ontology$term2gene,
-        term2name = if (is.null(ontology)) NULL else ontology$term2name,
-        run_ora = TRUE,
-        run_gsea = TRUE
-      )
-      enrichment_result_v2(result)
-      if (is.null(result)) {
-        enrichment_message_v2("No genes were mapped to Entrez IDs.")
-      } else if ("message" %in% names(result$results)) {
-        enrichment_message_v2(result$results$message$message[[1]])
+
+      if (identical(input$de_mode_v2, "anova")) {
+        # ANOVA has no signed effect size, so Up/Down splitting and GSEA ranking
+        # don't apply -- run ORA (GO or custom, plus KEGG) on the full
+        # significant-protein set instead.
+        p_col <- if (isTRUE(input$use_adj_pval_v2)) "adj.P.Val" else "P.Value"
+        mapped <- ProtPipe2::add_entrez(dea_result_v2(), org = selected_org_v2()$OrgDb, gene_col = input$gene_col_v2)
+
+        if (is.null(mapped)) {
+          enrichment_result_v2(NULL)
+          enrichment_message_v2("No genes were mapped to Entrez IDs.")
+        } else {
+          sig_genes <- mapped[!is.na(mapped[[p_col]]) & mapped[[p_col]] <= input$pvalue_v2, ]
+
+          if (nrow(sig_genes) == 0) {
+            enrichment_result_v2(NULL)
+            enrichment_message_v2("No proteins passed the significance threshold for pathway enrichment.")
+          } else {
+            ontology <- selected_ontology_v2()
+            ora_result <- if (identical(input$pathway_source_v2, "GO")) {
+              ProtPipe2::enrich_go(
+                sig_genes$ENTREZID, mapped$ENTREZID,
+                org = selected_org_v2()$OrgDb, enrich_pvalue = input$enrich_pval_v2, ont = input$go_ontology_v2
+              )
+            } else {
+              ProtPipe2::enrich_terms(
+                sig_genes$ENTREZID, mapped$ENTREZID,
+                term2gene = ontology$term2gene, term2name = ontology$term2name, enrich_pvalue = input$enrich_pval_v2
+              )
+            }
+            kegg_result <- ProtPipe2::enrich_kegg(
+              sig_genes$ENTREZID, mapped$ENTREZID,
+              org = selected_org_v2()$OrgDb, organism = selected_org_v2()$kegg, enrich_pvalue = input$enrich_pval_v2
+            )
+
+            enrichment_result_v2(list(
+              results = list(
+                ora = if (!is.null(ora_result)) ora_result@result else NULL,
+                kegg = if (!is.null(kegg_result)) kegg_result@result else NULL
+              ),
+              plots = list(
+                ora_dotplot = if (!is.null(ora_result)) enrichplot::dotplot(ora_result, showCategory = 10) else NULL,
+                kegg_dotplot = if (!is.null(kegg_result)) enrichplot::dotplot(kegg_result, showCategory = 10) else NULL
+              )
+            ))
+            enrichment_message_v2(NULL)
+          }
+        }
       } else {
-        enrichment_message_v2(NULL)
+        ontology <- selected_ontology_v2()
+        result <- ProtPipe2::enrich_pathways(
+          dea_result_v2(),
+          lfc_threshold = input$logfc_v2,
+          fdr_threshold = input$pvalue_v2,
+          enrich_pvalue = input$enrich_pval_v2,
+          go_org = selected_org_v2()$OrgDb,
+          kegg_org = selected_org_v2()$kegg,
+          gene_col = input$gene_col_v2,
+          adj = input$use_adj_pval_v2,
+          source = if (identical(input$pathway_source_v2, "GO")) "go" else "custom",
+          go_ont = input$go_ontology_v2,
+          term2gene = if (is.null(ontology)) NULL else ontology$term2gene,
+          term2name = if (is.null(ontology)) NULL else ontology$term2name,
+          run_ora = TRUE,
+          run_gsea = TRUE
+        )
+        enrichment_result_v2(result)
+        if (is.null(result)) {
+          enrichment_message_v2("No genes were mapped to Entrez IDs.")
+        } else if ("message" %in% names(result$results)) {
+          enrichment_message_v2(result$results$message$message[[1]])
+        } else {
+          enrichment_message_v2(NULL)
+        }
       }
       removeNotification(notification_id)
     }, error = function(e) {
@@ -995,52 +1087,75 @@ server <- function(input, output, session) {
 
   output$differential_main_body_v2 <- renderUI({
     tryCatch({
-      if (identical(differential_selected_view_v2(), "Volcano Plot")) {
+      if (!identical(differential_selected_view_v2(), "Pathway Enrichment")) {
         dims <- differential_plot_dimensions_v2()
         width_px <- round(dims$width_in * 96)
         height_px <- round(dims$height_in * 96)
+        is_anova <- identical(input$de_mode_v2, "anova")
         return(
           div(
             class = "appv2-panel appv2-plot",
             div(
               style = paste0("width:", width_px, "px;"),
-              plotOutput("volcano_plot_v2", height = paste0(height_px, "px"))
+              plotOutput(if (is_anova) "anova_heatmap_v2" else "volcano_plot_v2", height = paste0(height_px, "px"))
             ),
             div(
               class = "appv2-download-row",
-              downloadButton("download_volcano_v2", "Download PDF"),
+              if (!is_anova) downloadButton("download_volcano_v2", "Download PDF"),
               downloadButton("download_de_table_v2", "Download TSV")
             )
           )
         )
       }
 
-      div(
-        class = "appv2-panel appv2-plot",
-        actionButton("run_enrichment_v2", "Run pathway enrichment", class = "appv2-actionbtn"),
-        verbatimTextOutput("enrichment_message_v2", placeholder = TRUE),
-        tags$p(class = "appv2-subsection-title", "GO Up"),
-        uiOutput("ora_up_enrich_ui_v2"),
+      if (identical(input$de_mode_v2, "anova")) {
         div(
-          class = "appv2-download-row",
-          downloadButton("download_ora_up_plot_v2", "GO Up PDF"),
-          downloadButton("download_ora_up_table_v2", "GO Up TSV")
-        ),
-        tags$p(class = "appv2-subsection-title", "GO Down"),
-        uiOutput("ora_down_enrich_ui_v2"),
+          class = "appv2-panel appv2-plot",
+          actionButton("run_enrichment_v2", "Run pathway enrichment", class = "appv2-actionbtn"),
+          verbatimTextOutput("enrichment_message_v2", placeholder = TRUE),
+          tags$p(class = "appv2-subsection-title", "ORA"),
+          uiOutput("anova_ora_enrich_ui_v2"),
+          div(
+            class = "appv2-download-row",
+            downloadButton("download_anova_ora_plot_v2", "ORA PDF"),
+            downloadButton("download_anova_ora_table_v2", "ORA TSV")
+          ),
+          tags$p(class = "appv2-subsection-title", "KEGG ORA"),
+          uiOutput("anova_kegg_enrich_ui_v2"),
+          div(
+            class = "appv2-download-row",
+            downloadButton("download_anova_kegg_plot_v2", "KEGG ORA PDF"),
+            downloadButton("download_anova_kegg_table_v2", "KEGG ORA TSV")
+          )
+        )
+      } else {
         div(
-          class = "appv2-download-row",
-          downloadButton("download_ora_down_plot_v2", "GO Down PDF"),
-          downloadButton("download_ora_down_table_v2", "GO Down TSV")
-        ),
-        tags$p(class = "appv2-subsection-title", "GSEA"),
-        uiOutput("gsea_enrich_ui_v2"),
-        div(
-          class = "appv2-download-row",
-          downloadButton("download_gsea_plot_v2", "GSEA PDF"),
-          downloadButton("download_gsea_table_v2", "GSEA TSV")
-        ),
-      )
+          class = "appv2-panel appv2-plot",
+          actionButton("run_enrichment_v2", "Run pathway enrichment", class = "appv2-actionbtn"),
+          verbatimTextOutput("enrichment_message_v2", placeholder = TRUE),
+          tags$p(class = "appv2-subsection-title", "GO Up"),
+          uiOutput("ora_up_enrich_ui_v2"),
+          div(
+            class = "appv2-download-row",
+            downloadButton("download_ora_up_plot_v2", "GO Up PDF"),
+            downloadButton("download_ora_up_table_v2", "GO Up TSV")
+          ),
+          tags$p(class = "appv2-subsection-title", "GO Down"),
+          uiOutput("ora_down_enrich_ui_v2"),
+          div(
+            class = "appv2-download-row",
+            downloadButton("download_ora_down_plot_v2", "GO Down PDF"),
+            downloadButton("download_ora_down_table_v2", "GO Down TSV")
+          ),
+          tags$p(class = "appv2-subsection-title", "GSEA"),
+          uiOutput("gsea_enrich_ui_v2"),
+          div(
+            class = "appv2-download-row",
+            downloadButton("download_gsea_plot_v2", "GSEA PDF"),
+            downloadButton("download_gsea_table_v2", "GSEA TSV")
+          ),
+        )
+      }
     }, error = function(e) {
       validate(need(FALSE, paste("Preparing differential intensity view failed:", e$message)))
     })
@@ -1084,6 +1199,50 @@ server <- function(input, output, session) {
       style = paste0("width:", round(dims$width_in * 96), "px;"),
       plotOutput("gsea_enrich_v2", height = paste0(round(dims$height_in * 96), "px"))
     )
+  })
+
+  output$anova_ora_enrich_ui_v2 <- renderUI({
+    dims <- differential_plot_dimensions_v2()
+    div(
+      style = paste0("width:", round(dims$width_in * 96), "px;"),
+      plotOutput("anova_ora_enrich_v2", height = paste0(round(dims$height_in * 96), "px"))
+    )
+  })
+
+  output$anova_kegg_enrich_ui_v2 <- renderUI({
+    dims <- differential_plot_dimensions_v2()
+    div(
+      style = paste0("width:", round(dims$width_in * 96), "px;"),
+      plotOutput("anova_kegg_enrich_v2", height = paste0(round(dims$height_in * 96), "px"))
+    )
+  })
+
+  output$anova_ora_enrich_v2 <- renderPlot({
+    if (is.null(enrichment_result_v2()) && is.null(enrichment_message_v2())) {
+      return(invisible(NULL))
+    }
+    tryCatch({
+      req(enrichment_result_v2())
+      validate(need(is.null(enrichment_message_v2()), enrichment_message_v2()))
+      validate(need(!is.null(enrichment_result_v2()$plots$ora_dotplot), "No ORA terms were enriched."))
+      enrichment_result_v2()$plots$ora_dotplot
+    }, error = function(e) {
+      validate(need(FALSE, paste("Rendering ORA plot failed:", e$message)))
+    })
+  })
+
+  output$anova_kegg_enrich_v2 <- renderPlot({
+    if (is.null(enrichment_result_v2()) && is.null(enrichment_message_v2())) {
+      return(invisible(NULL))
+    }
+    tryCatch({
+      req(enrichment_result_v2())
+      validate(need(is.null(enrichment_message_v2()), enrichment_message_v2()))
+      validate(need(!is.null(enrichment_result_v2()$plots$kegg_dotplot), "No KEGG terms were enriched."))
+      enrichment_result_v2()$plots$kegg_dotplot
+    }, error = function(e) {
+      validate(need(FALSE, paste("Rendering KEGG ORA plot failed:", e$message)))
+    })
   })
 
   output$ora_up_enrich_v2 <- renderPlot({
@@ -1256,6 +1415,42 @@ server <- function(input, output, session) {
     content = function(file) {
       req(enrichment_result_v2())
       dat <- enrichment_result_v2()$results$gsea
+      utils::write.table(dat, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
+    }
+  )
+
+  output$download_anova_ora_plot_v2 <- downloadHandler(
+    filename = function() { "anova_ora_dotplot.pdf" },
+    content = function(file) {
+      req(enrichment_result_v2())
+      dims <- differential_plot_dimensions_v2()
+      ggplot2::ggsave(file, plot = enrichment_result_v2()$plots$ora_dotplot, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+    }
+  )
+
+  output$download_anova_ora_table_v2 <- downloadHandler(
+    filename = function() { "anova_ora.tsv" },
+    content = function(file) {
+      req(enrichment_result_v2())
+      dat <- enrichment_result_v2()$results$ora
+      utils::write.table(dat, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
+    }
+  )
+
+  output$download_anova_kegg_plot_v2 <- downloadHandler(
+    filename = function() { "anova_kegg_dotplot.pdf" },
+    content = function(file) {
+      req(enrichment_result_v2())
+      dims <- differential_plot_dimensions_v2()
+      ggplot2::ggsave(file, plot = enrichment_result_v2()$plots$kegg_dotplot, device = "pdf", width = dims$width_in, height = dims$height_in, units = "in")
+    }
+  )
+
+  output$download_anova_kegg_table_v2 <- downloadHandler(
+    filename = function() { "anova_kegg.tsv" },
+    content = function(file) {
+      req(enrichment_result_v2())
+      dat <- enrichment_result_v2()$results$kegg
       utils::write.table(dat, file = file, sep = "\t", quote = FALSE, row.names = FALSE)
     }
   )

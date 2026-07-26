@@ -24,6 +24,10 @@ missing values (\code{NA}, \code{NaN}) with the minimum observed value found in 
 same row.
 
 The imputation value can be scaled by a multiplicative factor \code{alpha}.
+
+Negative values are treated as missing and converted to \code{NA} before
+imputation. Proteins with no observed values in any sample (all-NA rows)
+are imputed with \code{0}.
 }
 \examples{
 # Create data with different minimums and NAs in each row
@@ -36,17 +40,17 @@ raw_data <- data.frame(
 
 se <- create_se(raw_data)
 cat("Original Data:\n")
-print(assay(se))
+print(SummarizedExperiment::assay(se))
 
 # Impute using the row minimum (alpha = 1)
 # Row 1's NA becomes 100; Row 2's NA becomes 500.
 imputed_obj <- impute_min(se)
 cat("\nImputed with alpha = 1:\n")
-print(assay(imputed_obj))
+print(SummarizedExperiment::assay(imputed_obj))
 
 # Impute using 90\% of the row minimum
 imputed_scaled <- impute_min(se, alpha = 0.9)
 cat("\nImputed with alpha = 0.9:\n")
-print(assay(imputed_scaled))
+print(SummarizedExperiment::assay(imputed_scaled))
 
 }

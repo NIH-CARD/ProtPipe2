@@ -50,7 +50,7 @@ sample_info <- data.frame(
   row.names = colnames(counts),
   Group = rep(c("A", "B"), each = 3)
 )
-se <- SummarizedExperiment(assays = list(log_intensities = counts),
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
                            colData = sample_info)
 
 # --- Run PCA, specifying the group variable ---
