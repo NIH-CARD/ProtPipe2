@@ -45,7 +45,10 @@ and optional covariates, and performs limma-based differential expression.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">do_comparison_continuous</span><span class="op">(</span><span class="va">object</span>, <span class="va">condition</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">do_comparison_continuous</span><span class="op">(</span><span class="va">object</span>, <span class="va">condition</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SummarizedExperiment'</span></span>
+<span><span class="fu">do_comparison_continuous</span><span class="op">(</span><span class="va">object</span>, <span class="va">condition</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,6 +67,11 @@ and optional covariates, and performs limma-based differential expression.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame with metadata, intensities, logFC, p-values</p>
     </div>
+    <div class="section level2">
+    <h2 id="methods-by-class-">Methods (by class)<a class="anchor" aria-label="anchor" href="#methods-by-class-"></a></h2>
+
+<ul><li><p><code>do_comparison_continuous(SummarizedExperiment)</code>: Method for SummarizedExperiment objects.</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

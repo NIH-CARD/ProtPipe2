@@ -49,17 +49,17 @@ sample_info <- data.frame(
   Batch = rep(c("Batch1", "Batch2"), times = 3)
 )
 
-se <- SummarizedExperiment(assays = list(log_intensities = counts),
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
                            colData = sample_info)
-#> Error in SummarizedExperiment(assays = list(log_intensities = counts),     colData = sample_info): could not find function "SummarizedExperiment"
 
 # --- Run batch correction, preserving the "Condition" variable ---
 corrected_se <- batch_correct(se,
                               batch_variable = "Batch",
                               bio_variables = "Condition")
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'batch_correct': object 'se' not found
+#> Starting batch correction...
+#>   - Preserving biological variables: Condition
 
 # --- Inspect the result ---
-assayNames(corrected_se) # Now includes "corrected"
-#> Error in assayNames(corrected_se): could not find function "assayNames"
+SummarizedExperiment::assayNames(corrected_se) # Now includes "corrected"
+#> [1] "log_intensities"
 ```

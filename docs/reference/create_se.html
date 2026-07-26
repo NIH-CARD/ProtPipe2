@@ -120,14 +120,30 @@ will attempt to autodetect them as all numeric columns.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(2): ProteinID Gene</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colnames(4): Sample_A_1 Sample_A_2 Sample_B_1 Sample_B_2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colData names(1): Condition</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assayNames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in assayNames(se):</span> could not find function "assayNames"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in rowData(se):</span> could not find function "rowData"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in colData(se):</span> could not find function "colData"</span>
-<span class="r-in"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metadata(se):</span> could not find function "metadata"</span>
+<span class="r-in"><span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assayNames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "intensities"</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 3 rows and 2 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ProteinID        Gene</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;character&gt; &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      P02768         ALB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      P01023         A2M</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      P10636       CALM1</span>
+<span class="r-in"><span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 4 rows and 1 column</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Condition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_1           A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_2           A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_1           B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_2           B</span>
+<span class="r-in"><span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $creation_method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Unknown"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $processing_log</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

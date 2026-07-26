@@ -8,6 +8,9 @@ expression.
 
 ``` r
 do_comparison_continuous(object, condition)
+
+# S4 method for class 'SummarizedExperiment'
+do_comparison_continuous(object, condition)
 ```
 
 ## Arguments
@@ -23,3 +26,8 @@ do_comparison_continuous(object, condition)
 ## Value
 
 A data frame with metadata, intensities, logFC, p-values
+
+## Methods (by class)
+
+- `do_comparison_continuous(SummarizedExperiment)`: Method for
+  SummarizedExperiment objects.

@@ -115,12 +115,12 @@
 
 ## Differential Expression
 
-- [`filter_features()`](https://nih-card.github.io/ProtPipe2/docs/reference/filter_features.md)
-  : Helper function to filter out sparse proteins
 - [`do_limma_binary()`](https://nih-card.github.io/ProtPipe2/docs/reference/do_limma_binary.md)
   : Perform limma differential expression on a SummarizedExperiment
 - [`do_t_test_binary()`](https://nih-card.github.io/ProtPipe2/docs/reference/do_t_test_binary.md)
   : Perform t-test differential expression on a SummarizedExperiment
+- [`do_anova()`](https://nih-card.github.io/ProtPipe2/docs/reference/do_anova.md)
+  : Perform ANOVA-style differential expression across multiple groups
 - [`do_comparison_continuous()`](https://nih-card.github.io/ProtPipe2/docs/reference/do_comparison_continuous.md)
   : Perform limma differential expression for a continuous outcome
 - [`plot_volcano()`](https://nih-card.github.io/ProtPipe2/docs/reference/plot_volcano.md)

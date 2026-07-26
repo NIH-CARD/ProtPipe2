@@ -54,6 +54,15 @@ and a control group. Covariates can be included in the model design.</p>
 <span>  <span class="va">treatment_group</span>,</span>
 <span>  <span class="va">control_group</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SummarizedExperiment'</span></span>
+<span><span class="fu">do_limma_binary</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">condition</span>,</span>
+<span>  <span class="va">treatment_group</span>,</span>
+<span>  <span class="va">control_group</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +94,11 @@ and a control group. Covariates can be included in the model design.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame with metadata, intensities, log fold change, p-values, and adjusted p-values.</p>
     </div>
+    <div class="section level2">
+    <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>
+
+<ul><li><p><code>do_limma_binary(SummarizedExperiment)</code>: Method for SummarizedExperiment objects.</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

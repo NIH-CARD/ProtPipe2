@@ -53,23 +53,29 @@ se <- create_se(df, sample_metadata = sample_info)
 #> `intensity_cols` not provided. Detecting numeric columns as intensity data.
 
 # Check the means of each protein (row) before scaling
-rowMeans(assay(se))
-#> Error in assay(se): could not find function "assay"
+rowMeans(SummarizedExperiment::assay(se))
+#> [1] 110 225  75
 
 # Apply the scaling method
 scaled_se <- z_score(se)
-#> Error in assay(object): could not find function "assay"
 
 # The new data has row means near zero and row standard deviations of one
-print(assay(scaled_se))
-#> Error in assay(scaled_se): could not find function "assay"
+print(SummarizedExperiment::assay(scaled_se))
+#>      SampleA SampleB SampleC
+#> [1,]      -1       1       0
+#> [2,]       1      -1       0
+#> [3,]      -1       1       0
+#> attr(,"scaled:center")
+#> [1] 110 225  75
+#> attr(,"scaled:scale")
+#> [1] 10 25 25
 cat("Row means after scaling:\n")
 #> Row means after scaling:
-print(rowMeans(assay(scaled_se)))
-#> Error in assay(scaled_se): could not find function "assay"
+print(rowMeans(SummarizedExperiment::assay(scaled_se)))
+#> [1] 0 0 0
 cat("\nRow standard deviations after scaling:\n")
 #> 
 #> Row standard deviations after scaling:
-print(apply(assay(scaled_se), 1, sd))
-#> Error in assay(scaled_se): could not find function "assay"
+print(apply(SummarizedExperiment::assay(scaled_se), 1, sd))
+#> [1] 1 1 1
 ```

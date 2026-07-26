@@ -33,12 +33,13 @@ values where intensities were below the `lod`.
 ``` r
 # Create a mock SummarizedExperiment
 counts <- matrix(c(10, 5, 2, 8, 1, 15), nrow = 3, ncol = 2)
-se <- SummarizedExperiment(assays = list(counts = counts))
-#> Error in SummarizedExperiment(assays = list(counts = counts)): could not find function "SummarizedExperiment"
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(counts = counts))
 
 # Apply LOD of 6
-se_filtered <- applyLOD(se, lod = 6)
-#> Error in applyLOD(se, lod = 6): could not find function "applyLOD"
-assay(se_filtered)
-#> Error in assay(se_filtered): could not find function "assay"
+se_filtered <- apply_min_intenisty(se, lod = 6)
+SummarizedExperiment::assay(se_filtered)
+#>      [,1] [,2]
+#> [1,]   10    8
+#> [2,]   NA   NA
+#> [3,]   NA   15
 ```

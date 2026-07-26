@@ -78,12 +78,28 @@ print(se)
 #> rowData names(2): ProteinID Gene
 #> colnames(4): Sample_A_1 Sample_A_2 Sample_B_1 Sample_B_2
 #> colData names(1): Condition
-assayNames(se)
-#> Error in assayNames(se): could not find function "assayNames"
-head(rowData(se))
-#> Error in rowData(se): could not find function "rowData"
-colData(se)
-#> Error in colData(se): could not find function "colData"
-metadata(se)
-#> Error in metadata(se): could not find function "metadata"
+SummarizedExperiment::assayNames(se)
+#> [1] "intensities"
+head(SummarizedExperiment::rowData(se))
+#> DataFrame with 3 rows and 2 columns
+#>     ProteinID        Gene
+#>   <character> <character>
+#> 1      P02768         ALB
+#> 2      P01023         A2M
+#> 3      P10636       CALM1
+SummarizedExperiment::colData(se)
+#> DataFrame with 4 rows and 1 column
+#>              Condition
+#>            <character>
+#> Sample_A_1           A
+#> Sample_A_2           A
+#> Sample_B_1           B
+#> Sample_B_2           B
+S4Vectors::metadata(se)
+#> $creation_method
+#> [1] "Unknown"
+#> 
+#> $processing_log
+#> list()
+#> 
 ```

@@ -101,15 +101,26 @@ across samples before running the analysis.</p>
 <span class="r-in"><span>  row.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>log_intensities <span class="op">=</span> <span class="va">counts</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>log_intensities <span class="op">=</span> <span class="va">counts</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                           colData <span class="op">=</span> <span class="va">sample_info</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in SummarizedExperiment(assays = list(log_intensities = counts),     colData = sample_info):</span> could not find function "SummarizedExperiment"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># --- Run PCA, specifying the group variable ---</span></span></span>
 <span class="r-in"><span><span class="va">pca_results</span> <span class="op">&lt;-</span> <span class="fu">get_PCs</span><span class="op">(</span><span class="va">se</span>, condition <span class="op">=</span> <span class="st">"Group"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'get_PCs': object 'se' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pca_results</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pca_results' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   PC1        PC2        PC3        PC4        PC5     Sample</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_1 -0.5406994 -6.9038248  1.0758652 -5.7618855  1.0603314 Sample_A_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_2  0.2890845 -3.8033696  0.7192578  7.2782128  2.9474868 Sample_A_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_3  2.3225423  1.7361782 -8.7966929 -0.7086532  0.1850881 Sample_A_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_1 -9.4317852  2.7544166  0.3131402  0.1892512 -1.6532474 Sample_B_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_2  3.0444035  5.9119874  4.0189782 -1.9767836  4.1974578 Sample_B_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_3  4.3164542  0.3046121  2.6694515  0.9798583 -6.7371168 Sample_B_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Condition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_1         A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_2         A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_A_3         A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_1         B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_2         B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample_B_3         B</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

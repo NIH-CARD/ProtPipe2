@@ -1,11 +1,14 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/404.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/CLAUDE.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/LICENSE-text.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/LICENSE.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/articles/getting-started.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/articles/index.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/articles/running-shiny-locally.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/authors.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/index.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/ProtPipe2-package.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/add_entrez.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/add_processing_step.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/apply_min_intenisty.html</loc></url>
@@ -16,6 +19,7 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/create_se_from_olink.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/create_se_from_soma.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/detect_intensity_cols.html</loc></url>
+<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/do_anova.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/do_comparison_continuous.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/do_limma_binary.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/do_t_test_binary.html</loc></url>
@@ -23,7 +27,6 @@
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/enrich_kegg.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/enrich_pathways.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/enrich_terms.html</loc></url>
-<url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/filter_features.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/filter_outlier_samples.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/filter_overlap.html</loc></url>
 <url><loc>https://nih-card.github.io/ProtPipe2/docs/reference/filter_proteins_by_percent.html</loc></url>

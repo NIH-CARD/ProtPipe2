@@ -64,9 +64,10 @@ se <- create_se(raw_data)
 set.seed(123)
 
 imputed_obj <- impute_left_dist(se)
-#> Error in assay(object): could not find function "assay"
 cat("Data after imputation:\n")
 #> Data after imputation:
-print(assay(imputed_obj))
-#> Error in assay(imputed_obj): could not find function "assay"
+print(SummarizedExperiment::assay(imputed_obj))
+#>      SampleA SampleB
+#> [1,]    25.1    25.5
+#> [2,]    28.5    28.9
 ```

@@ -71,18 +71,15 @@ se <- create_se(raw_data, sample_metadata = cond_df)
 
 # Impute missing values before plotting
 se_imputed <- impute(se, value = 13.5)
-#> Error in assay(object): could not find function "assay"
 
 # Generate the plot of PC1 vs PC2
 p1 <- plot_PCs(se_imputed, condition = "group")
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_PCs': object 'se_imputed' not found
 if (interactive()) {
   print(p1)
 }
 
 # Generate a plot of PC1 vs PC3
 p2 <- plot_PCs(se_imputed, condition = "group", pc_x = "PC1", pc_y = "PC3")
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'plot_PCs': object 'se_imputed' not found
 if (interactive()) {
   print(p2)
 }

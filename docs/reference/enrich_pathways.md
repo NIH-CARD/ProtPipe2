@@ -67,6 +67,11 @@ enrich_pathways(
   frame that contains the gene symbols/identifiers. Defaults to
   `"Genes"`.
 
+- adj:
+
+  Logical; when `TRUE` (the default) select significant genes using the
+  adjusted p-value column, otherwise use the raw p-value.
+
 - source:
 
   Pathway source. Use `"go"` for Gene Ontology or `"custom"` for

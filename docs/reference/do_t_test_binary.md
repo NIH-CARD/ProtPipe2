@@ -15,6 +15,15 @@ do_t_test_binary(
   control_group,
   covariates = NULL
 )
+
+# S4 method for class 'SummarizedExperiment'
+do_t_test_binary(
+  object,
+  condition,
+  treatment_group,
+  control_group,
+  covariates = NULL
+)
 ```
 
 ## Arguments
@@ -45,3 +54,8 @@ do_t_test_binary(
 
 A data frame with metadata, intensities, log fold change, p-values, and
 adjusted p-values.
+
+## Functions
+
+- `do_t_test_binary(SummarizedExperiment)`: Method for
+  SummarizedExperiment objects.

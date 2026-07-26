@@ -44,9 +44,11 @@ se <- create_se(raw_data)
 
 # Impute the NA with 0
 imputed_obj <- impute(se, value = 0)
-#> Error in assay(object): could not find function "assay"
 
 # View the imputed assay data
-print(assay(imputed_obj))
-#> Error in assay(imputed_obj): could not find function "assay"
+print(SummarizedExperiment::assay(imputed_obj))
+#>      Sample_A Sample_B
+#> [1,]  1200000  1400000
+#> [2,]  2300000  2600000
+#> [3,]        0  4800000
 ```

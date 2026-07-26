@@ -15,6 +15,15 @@ do_limma_binary(
   control_group,
   covariates = NULL
 )
+
+# S4 method for class 'SummarizedExperiment'
+do_limma_binary(
+  object,
+  condition,
+  treatment_group,
+  control_group,
+  covariates = NULL
+)
 ```
 
 ## Arguments
@@ -45,3 +54,8 @@ do_limma_binary(
 
 A data frame with metadata, intensities, log fold change, p-values, and
 adjusted p-values.
+
+## Functions
+
+- `do_limma_binary(SummarizedExperiment)`: Method for
+  SummarizedExperiment objects.

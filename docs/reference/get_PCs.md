@@ -62,13 +62,24 @@ sample_info <- data.frame(
   row.names = colnames(counts),
   Group = rep(c("A", "B"), each = 3)
 )
-se <- SummarizedExperiment(assays = list(log_intensities = counts),
+se <- SummarizedExperiment::SummarizedExperiment(assays = list(log_intensities = counts),
                            colData = sample_info)
-#> Error in SummarizedExperiment(assays = list(log_intensities = counts),     colData = sample_info): could not find function "SummarizedExperiment"
 
 # --- Run PCA, specifying the group variable ---
 pca_results <- get_PCs(se, condition = "Group")
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'object' in selecting a method for function 'get_PCs': object 'se' not found
 head(pca_results$components)
-#> Error: object 'pca_results' not found
+#>                   PC1        PC2        PC3        PC4        PC5     Sample
+#> Sample_A_1 -0.5406994 -6.9038248  1.0758652 -5.7618855  1.0603314 Sample_A_1
+#> Sample_A_2  0.2890845 -3.8033696  0.7192578  7.2782128  2.9474868 Sample_A_2
+#> Sample_A_3  2.3225423  1.7361782 -8.7966929 -0.7086532  0.1850881 Sample_A_3
+#> Sample_B_1 -9.4317852  2.7544166  0.3131402  0.1892512 -1.6532474 Sample_B_1
+#> Sample_B_2  3.0444035  5.9119874  4.0189782 -1.9767836  4.1974578 Sample_B_2
+#> Sample_B_3  4.3164542  0.3046121  2.6694515  0.9798583 -6.7371168 Sample_B_3
+#>            Condition
+#> Sample_A_1         A
+#> Sample_A_2         A
+#> Sample_A_3         A
+#> Sample_B_1         B
+#> Sample_B_2         B
+#> Sample_B_3         B
 ```

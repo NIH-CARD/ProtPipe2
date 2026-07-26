@@ -6,6 +6,10 @@ found in that same row.
 
 The imputation value can be scaled by a multiplicative factor `alpha`.
 
+Negative values are treated as missing and converted to `NA` before
+imputation. Proteins with no observed values in any sample (all-NA rows)
+are imputed with `0`.
+
 ## Usage
 
 ``` r
@@ -47,25 +51,29 @@ se <- create_se(raw_data)
 #> Warning: `sample_metadata` not provided. Generating a basic version from column names.
 cat("Original Data:\n")
 #> Original Data:
-print(assay(se))
-#> Error in assay(se): could not find function "assay"
+print(SummarizedExperiment::assay(se))
+#>      SampleA SampleB
+#> [1,]     100     200
+#> [2,]     500     600
 
 # Impute using the row minimum (alpha = 1)
 # Row 1's NA becomes 100; Row 2's NA becomes 500.
 imputed_obj <- impute_min(se)
-#> Error in assay(object): could not find function "assay"
 cat("\nImputed with alpha = 1:\n")
 #> 
 #> Imputed with alpha = 1:
-print(assay(imputed_obj))
-#> Error in assay(imputed_obj): could not find function "assay"
+print(SummarizedExperiment::assay(imputed_obj))
+#>      SampleA SampleB
+#> [1,]     100     200
+#> [2,]     500     600
 
 # Impute using 90% of the row minimum
 imputed_scaled <- impute_min(se, alpha = 0.9)
-#> Error in assay(object): could not find function "assay"
 cat("\nImputed with alpha = 0.9:\n")
 #> 
 #> Imputed with alpha = 0.9:
-print(assay(imputed_scaled))
-#> Error in assay(imputed_scaled): could not find function "assay"
+print(SummarizedExperiment::assay(imputed_scaled))
+#>      SampleA SampleB
+#> [1,]     100     200
+#> [2,]     500     600
 ```
