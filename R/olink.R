@@ -28,6 +28,7 @@ create_se_from_olink <- function(npx, condition = NULL, filter = TRUE) {
     }
     condition <- dplyr::select(condition, SampleID, dplyr::everything())
   }
+  # create_se() marks Olink objects as already log2 scaled via creation_method.
   return(create_se(data = dat, intensity_cols = c(4:length(colnames(dat))),
                    sample_metadata = condition, creation_method = "Olink"))
 }

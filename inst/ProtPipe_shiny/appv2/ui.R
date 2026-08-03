@@ -271,6 +271,7 @@ differential_params_ui <- div(
 )
 
 ui <- fluidPage(
+  shinyjs::useShinyjs(),
   tags$head(
     tags$title("ProtPipe2 App V2"),
     tags$style(HTML("
@@ -641,7 +642,8 @@ ui <- fluidPage(
             div(
               class = "appv2-subsection",
               div(class = "appv2-subsection-title", "3. Transformation"),
-              checkboxInput("log2_transform_v2", "Log2 transform", value = FALSE)
+              checkboxInput("log2_transform_v2", "Log2 transform", value = FALSE),
+              uiOutput("log2_transform_note_v2")
             ),
             div(
               class = "appv2-subsection",

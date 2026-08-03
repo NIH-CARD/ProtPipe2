@@ -167,7 +167,34 @@ create_se <- function(data, sample_metadata = NULL, intensity_cols = NULL, creat
     )
   )
 
+  # Some platforms report intensities that are already on the log2 scale. Olink
+  # NPX is one: it is a relative log2 measure and routinely negative, so a
+  # further log2() would both distort the values and produce NaN wherever
+  # NPX <= -1. Recording the step here means every downstream function that
+  # gates on has_step(object, "log2_transform") leaves the data alone, no
+  # matter which import path built the object.
+  if (isTRUE(creation_method %in% log2_scale_platforms())) {
+    se <- add_processing_step(se, list(
+      name = "log2_transform",
+      details = paste0(
+        creation_method,
+        " intensities are already on the log2 scale; no transform applied."
+      )
+    ))
+  }
+
   return(se)
+}
+
+#' Platforms whose intensities are already log2 scaled
+#'
+#' @return A character vector of `creation_method` values that must not be
+#'   log2 transformed again.
+#'
+#' @keywords internal
+#' @noRd
+log2_scale_platforms <- function() {
+  "Olink"
 }
 
 #' Identify Numeric Columns by Index

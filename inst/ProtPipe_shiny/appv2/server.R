@@ -190,9 +190,10 @@ server <- function(input, output, session) {
 
       se_obj <- if (data_type() == "Standard Matrix") {
         ProtPipe2::create_se(
-          dat = intensity_file(),
+          data = intensity_file(),
           intensity_cols = c(lower_idx:upper_idx),
-          sample_metadata = condition_file()
+          sample_metadata = condition_file(),
+          creation_method = data_type()
         )
       } else {
         if (is.null(condition_file())) {
@@ -202,10 +203,13 @@ server <- function(input, output, session) {
         } else {
           condition <- dplyr::left_join(rv$condition, condition_file(), by = "SampleID")
         }
+        # creation_method carries the platform ("Olink" / "SomaScan") through to
+        # create_se(), which uses it to flag Olink NPX as already log2 scaled.
         ProtPipe2::create_se(
-          dat = intensity_file(),
+          data = intensity_file(),
           intensity_cols = c(lower_idx:upper_idx),
-          sample_metadata = condition
+          sample_metadata = condition,
+          creation_method = data_type()
         )
       }
 
@@ -221,6 +225,39 @@ server <- function(input, output, session) {
   validate_raw_prot_data <- function() {
     validate(need(is.null(raw_prot_data_error()), raw_prot_data_error()))
   }
+
+  # Data that already arrives on the log2 scale (Olink NPX) records a
+  # log2_transform step at import. Offering the transform again would distort
+  # the values, so lock the control off for those inputs.
+  already_log2 <- reactive({
+    se_obj <- raw_prot_data()
+    !is.null(se_obj) && isTRUE(ProtPipe2::has_step(se_obj, "log2_transform"))
+  })
+
+  observe({
+    if (already_log2()) {
+      updateCheckboxInput(session, "log2_transform_v2", value = FALSE)
+      shinyjs::disable("log2_transform_v2")
+    } else {
+      shinyjs::enable("log2_transform_v2")
+    }
+  })
+
+  # Explain why the control above is greyed out.
+  output$log2_transform_note_v2 <- renderUI({
+    if (!already_log2()) {
+      return(NULL)
+    }
+    platform <- S4Vectors::metadata(raw_prot_data())$creation_method
+    div(
+      class = "appv2-help-note",
+      style = "font-size: 12px; color: #52606d; margin-top: -6px;",
+      sprintf(
+        "%s data is already on the log2 scale, so no further transformation is applied.",
+        if (is.null(platform) || !nzchar(platform)) "This" else platform
+      )
+    )
+  })
 
   output$file_summary_v2 <- renderText({
     tryCatch({
@@ -841,6 +878,11 @@ server <- function(input, output, session) {
         selectInput("treatment_condition_v2", "Treatment group", choices = groups)
       )
     }, error = function(e) {
+      # req()/validate() signal shiny.silent.error to stop rendering quietly --
+      # e.g. when the selected comparison method does not need this input. Let
+      # those through so the control simply does not appear, and report only
+      # genuine failures.
+      if (inherits(e, "shiny.silent.error")) stop(e)
       validate(need(FALSE, paste("Preparing group selectors failed:", e$message)))
     })
   })
@@ -852,6 +894,7 @@ server <- function(input, output, session) {
       choices <- names(SummarizedExperiment::colData(prot_data()))
       selectInput("de_covariates_v2", "Covariates", choices = choices, multiple = TRUE, selected = NULL)
     }, error = function(e) {
+      if (inherits(e, "shiny.silent.error")) stop(e)
       validate(need(FALSE, paste("Preparing covariate selector failed:", e$message)))
     })
   })
